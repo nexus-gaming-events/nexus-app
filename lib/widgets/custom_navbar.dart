@@ -15,21 +15,23 @@ class CustomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: AppConstants.primaryColor,
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: EdgeInsets.symmetric(
+        vertical: AppConstants.paddingSmall(context),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildNavItem(0, 'Profile', 'assets/icons/Neil.png'),
-          _buildNavItem(1, 'Chat', 'assets/icons/chat.png'),
-          _buildNavItem(2, 'Home', 'assets/icons/House.png'),
-          _buildNavItem(3, 'Friends', 'assets/icons/Friends.png'),
-          _buildNavItem(4, 'Expeditions', 'assets/icons/Space ship.png'),
+          _buildNavItem(0, 'Profile', 'assets/icons/Neil.png', context),
+          _buildNavItem(1, 'Chat', 'assets/icons/chat.png', context),
+          _buildNavItem(2, 'Home', 'assets/icons/House.png', context),
+          _buildNavItem(3, 'Friends', 'assets/icons/Friends.png', context),
+          _buildNavItem(4, 'Expeditions', 'assets/icons/Space ship.png', context),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(int index, String label, String iconPath) {
+  Widget _buildNavItem(int index, String label, String iconPath, BuildContext context) {
     final isSelected = selectedIndex == index;
     return GestureDetector(
       onTap: () => onTap(index),
@@ -37,26 +39,28 @@ class CustomNavBar extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(12.0),
+            padding: EdgeInsets.all(AppConstants.paddingMedium(context)),
             decoration: BoxDecoration(
               gradient: isSelected
                   ? AppConstants.selectionBackgroundGradient
                   : LinearGradient(
                       colors: [Colors.transparent, Colors.transparent],
                     ),
-              borderRadius: BorderRadius.circular(12.0),
+              borderRadius: BorderRadius.circular(
+                AppConstants.borderRadiusSmall(context),
+              ),
             ),
             child: Image.asset(
               iconPath,
               width: isSelected
-                  ? AppConstants.iconSize + 40
-                  : AppConstants.iconSize,
+                  ? AppConstants.navbarIconSizeSelected(context)
+                  : AppConstants.navbarIconSize(context),
               height: isSelected
-                  ? AppConstants.iconSize + 40
-                  : AppConstants.iconSize,
+                  ? AppConstants.navbarIconSizeSelected(context)
+                  : AppConstants.navbarIconSize(context),
             ),
           ),
-          const SizedBox(height: 4.0),
+          SizedBox(height: AppConstants.paddingSmall(context) - 4),
           /*Text(
                 label,
                 style: TextStyle(

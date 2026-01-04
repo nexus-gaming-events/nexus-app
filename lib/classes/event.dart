@@ -5,20 +5,20 @@ import '../constants.dart';
 import 'user.dart';
 import 'application_object.dart';
 
-class Event extends ApplicationObject{
-  final String id;
+class Event extends ApplicationObject {
+  final int id;
   final String title;
-  final String author;
+  final User author;
   final String description;
   final DateTime date;
   final int maxPlayers;
   final int maxSpectators;
   final List<User>? players;
   final List<User>? spectators;
-  final List<VisualLink>? games;
-  final List<VisualLink>? links;
+  final List<String>? games;
+  final List<String>? links;
 
-  Event ({
+  Event({
     required this.id,
     required this.title,
     required this.author,
@@ -33,544 +33,810 @@ class Event extends ApplicationObject{
   });
 }
 
-class VisualizeEventScreen{
+class VisualizeEventScreen {
   static bool _showingEventDetails = false;
   static User? _activeUser;
 
-  static Widget buildFullDetails(Event event) {
+  static Widget buildFullDetails(
+    Event event,
+    BuildContext context,
+    String returnScreenTitle,
+  ) {
     return _showingEventDetails && _activeUser != null
         ? VisualizeUserScreen.buildFullDetails(_activeUser!)
-        : Container(
-            width: 600,
-            height: 600,
-            //padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: AppConstants.primaryColor,
-              borderRadius: BorderRadius.circular(16.0),
+        : Padding(
+            padding: EdgeInsets.only(
+              left: AppConstants.paddingSmall(context),
+              right: AppConstants.paddingSmall(context),
+              bottom: 0.0,
+              top: AppConstants.paddingMedium(context),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  width: 600,
-                  height: 80,
-                  padding: EdgeInsets.only(top: 5.0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16.0),
-                      topRight: Radius.circular(16.0),
+            child: Container(
+              width: AppConstants.mainContainerWidth(context),
+              height: AppConstants.mainContainerHeight(context),
+              //padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: AppConstants.primaryColor,
+                borderRadius: BorderRadius.circular(
+                  AppConstants.borderRadiusMedium(context),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: AppConstants.mainContainerWidth(context),
+                    height: AppConstants.headerHeight(context),
+                    padding: EdgeInsets.only(
+                      top: AppConstants.paddingSmall(context) - 3,
                     ),
-                    color: AppConstants.secondaryColor,
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          Icons.arrow_back,
-                          color: AppConstants.textColor,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(
+                          AppConstants.borderRadiusMedium(context),
                         ),
-                        onPressed: () {
-                          NexusAppState().updateState('Calendar');
-                        },
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${event.author}\'s',
-                              style: TextStyle(
-                                color: AppConstants.semitransparentTextColor,
-                                fontSize: 11,
-                              ),
-                            ),
-                            Text(
-                              event.title,
-                              style: TextStyle(
-                                color: AppConstants.textColor,
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              '${event.date.year}/${event.date.month}/${event.date.day} ${event.date.hour}:${event.date.minute.toString().padLeft(2, '0')}',
-                              style: TextStyle(color: AppConstants.textColor),
-                            ),
-                          ],
+                        topRight: Radius.circular(
+                          AppConstants.borderRadiusMedium(context),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                //const SizedBox(height: 12),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 450,
-                        height: 130,
-                        //padding: const EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: AppConstants.descriptionPrimaryColor,
-                          borderRadius: BorderRadius.circular(16.0),
+                      color: AppConstants.secondaryColor,
+                    ),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            Icons.arrow_back,
+                            color: AppConstants.textColor,
+                          ),
+                          onPressed: () {
+                            debugPrint('Returning to $returnScreenTitle screen');
+                            NexusAppState().updateState(returnScreenTitle);
+                          },
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              alignment: Alignment.topLeft,
-                              width: 450,
-                              height: 30,
-                              padding: EdgeInsets.only(top: 3.0, left: 12.0),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(16.0),
-                                  topRight: Radius.circular(16.0),
+                        SizedBox(
+                          width:
+                              AppConstants.mainContainerWidth(context) * 0.01,
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${event.author.username}\'s',
+                                style: TextStyle(
+                                  color: AppConstants.semitransparentTextColor,
+                                  fontSize:
+                                      AppConstants.fontSizeSmallResponsive(
+                                        context,
+                                      ) -
+                                      1,
                                 ),
-                                color: AppConstants.descriptionSecondaryColor,
                               ),
-                              child: Text(
-                                'Description',
+                              Text(
+                                event.title,
                                 style: TextStyle(
                                   color: AppConstants.textColor,
-                                  fontSize: 18,
+                                  fontSize:
+                                      AppConstants.fontSizeXLargeResponsive(
+                                        context,
+                                      ) +
+                                      2,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
+                              const SizedBox(height: 3),
+                              Text(
+                                '${event.date.year}/${event.date.month}/${event.date.day} ${event.date.hour}:${event.date.minute.toString().padLeft(2, '0')}',
+                                style: TextStyle(color: AppConstants.textColor),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: AppConstants.mainContainerHeight(context) * 0.01,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(
+                      AppConstants.paddingMedium(context),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: AppConstants.descriptionWidth(context),
+                          height: AppConstants.descriptionHeight(context),
+                          //padding: const EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: AppConstants.descriptionPrimaryColor,
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.borderRadiusMedium(context),
                             ),
-                            Expanded(
-                              child: SingleChildScrollView(
-                                padding: EdgeInsets.all(8.0),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                    left: 12.0,
-                                    right: 12.0,
-                                    bottom: 6.0,
-                                    top: 6.0,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                alignment: Alignment.topLeft,
+                                width: AppConstants.descriptionWidth(context),
+                                height: AppConstants.sectionHeaderHeight(
+                                  context,
+                                ),
+                                padding: EdgeInsets.only(
+                                  top: AppConstants.paddingSmall(context) - 5,
+                                  left: AppConstants.paddingMedium(context),
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(
+                                      AppConstants.borderRadiusMedium(context),
+                                    ),
+                                    topRight: Radius.circular(
+                                      AppConstants.borderRadiusMedium(context),
+                                    ),
                                   ),
-                                  child: Text(
-                                    event.description,
-                                    textAlign: TextAlign.start,
-                                    style: TextStyle(
-                                      color: AppConstants.textColor,
+                                  color: AppConstants.descriptionSecondaryColor,
+                                ),
+                                child: Text(
+                                  'Description',
+                                  style: TextStyle(
+                                    color: AppConstants.textColor,
+                                    fontSize:
+                                        AppConstants.fontSizeLargeResponsive(
+                                          context,
+                                        ),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  padding: EdgeInsets.all(
+                                    AppConstants.paddingSmall(context),
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                      left: AppConstants.paddingMedium(context),
+                                      right: AppConstants.paddingMedium(
+                                        context,
+                                      ),
+                                      bottom:
+                                          AppConstants.paddingSmall(context) -
+                                          2,
+                                      top:
+                                          AppConstants.paddingSmall(context) -
+                                          2,
+                                    ),
+                                    child: Text(
+                                      event.description,
+                                      textAlign: TextAlign.start,
+                                      style: TextStyle(
+                                        color: AppConstants.textColor,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(width: 12),
-                          Container(
-                            width: 215,
-                            height: 130,
-                            //padding: const EdgeInsets.all(16.0),
-                            decoration: BoxDecoration(
-                              color: AppConstants.playersPrimaryColor,
-                              borderRadius: BorderRadius.circular(16.0),
+                        SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: AppConstants.paddingMedium(context) - 3,
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  alignment: Alignment.topLeft,
-                                  width: 215,
-                                  height: 30,
-                                  padding: EdgeInsets.only(
-                                    top: 3.0,
-                                    left: 12.0,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(16.0),
-                                      topRight: Radius.circular(16.0),
+                            Container(
+                              width: AppConstants.playerBoxWidth(context),
+                              height: AppConstants.playerBoxHeight(context),
+                              //padding: const EdgeInsets.all(16.0),
+                              decoration: BoxDecoration(
+                                color: AppConstants.playersPrimaryColor,
+                                borderRadius: BorderRadius.circular(
+                                  AppConstants.borderRadiusMedium(context),
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    alignment: Alignment.topLeft,
+                                    width: AppConstants.playerBoxWidth(context),
+                                    height: AppConstants.sectionHeaderHeight(
+                                      context,
                                     ),
-                                    color: AppConstants.playersSecondaryColor,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        'Players',
-                                        style: TextStyle(
-                                          color: AppConstants.textColor,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
+                                    padding: EdgeInsets.only(
+                                      top:
+                                          AppConstants.paddingSmall(context) -
+                                          5,
+                                      left: AppConstants.paddingMedium(context),
+                                    ),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(
+                                          AppConstants.borderRadiusMedium(
+                                            context,
+                                          ),
+                                        ),
+                                        topRight: Radius.circular(
+                                          AppConstants.borderRadiusMedium(
+                                            context,
+                                          ),
                                         ),
                                       ),
-                                      SizedBox(width: 85),
-                                      Text(
-                                        textAlign: TextAlign.start,
-                                        '${event.players == null ? 0 : event.players!.length}/${event.maxPlayers}',
-                                        style: TextStyle(
-                                          color: AppConstants
-                                              .semitransparentTextColor,
-                                          fontSize: 18,
+                                      color: AppConstants.playersSecondaryColor,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          'Players      ',
+                                          style: TextStyle(
+                                            color: AppConstants.textColor,
+                                            fontSize:
+                                                AppConstants.fontSizeLargeResponsive(
+                                                  context,
+                                                ),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: AppConstants.screenWidth(
+                                            context,
+                                            0.11,
+                                          ).clamp(75.0, 85.0),
+                                        ),
+                                        Text(
+                                          textAlign: TextAlign.start,
+                                          '${event.players == null ? 0 : event.players!.length}/${event.maxPlayers}',
+                                          style: TextStyle(
+                                            color: AppConstants
+                                                .semitransparentTextColor,
+                                            fontSize:
+                                                AppConstants.fontSizeLargeResponsive(
+                                                  context,
+                                                ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Stack(
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      Expanded(
+                                        child: SingleChildScrollView(
+                                          padding: EdgeInsets.all(
+                                            AppConstants.paddingSmall(context),
+                                          ),
+                                          child: Padding(
+                                            padding: EdgeInsets.only(
+                                              left: AppConstants.paddingMedium(
+                                                context,
+                                              ),
+                                              right: AppConstants.paddingMedium(
+                                                context,
+                                              ),
+                                              bottom:
+                                                  AppConstants.paddingSmall(
+                                                    context,
+                                                  ) -
+                                                  2,
+                                              top:
+                                                  AppConstants.paddingSmall(
+                                                    context,
+                                                  ) -
+                                                  2,
+                                            ),
+                                            child:
+                                                event.players == null ||
+                                                    event.players!.isEmpty
+                                                ? Container()
+                                                : Column(
+                                                    children: event.players!
+                                                        .map(
+                                                          (item) => InkWell(
+                                                            onTap: () {
+                                                              NexusAppState()
+                                                                  .updateState(
+                                                                    'Event',
+                                                                    params: [
+                                                                      item,
+                                                                    ],
+                                                                  );
+                                                            },
+                                                            child:
+                                                                VisualizeUserPreview(
+                                                                  user: item,
+                                                                ),
+                                                          ),
+                                                        )
+                                                        .toList(),
+                                                  ),
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: AppConstants.screenHeight(
+                                          context,
+                                          0.115,
+                                        ).clamp(75.0, 90.0),
+                                        left: AppConstants.paddingSmall(
+                                          context,
+                                        ),
+                                        right: AppConstants.paddingSmall(
+                                          context,
+                                        ),
+                                        child: Container(
+                                          alignment: Alignment.bottomCenter,
+                                          height: AppConstants.joinButtonHeight(
+                                            context,
+                                          ),
+                                          width: AppConstants.joinButtonWidth(
+                                            context,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppConstants.secondaryColor,
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(
+                                                AppConstants.borderRadiusMedium(
+                                                      context,
+                                                    ) *
+                                                    2,
+                                              ),
+                                            ),
+                                          ),
+                                          child: Padding(
+                                            padding: EdgeInsets.only(
+                                              right: AppConstants.paddingSmall(
+                                                context,
+                                              ),
+                                              left: AppConstants.paddingSmall(
+                                                context,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Text(
+                                                  'Join as Player      ',
+                                                  style: TextStyle(
+                                                    color: AppConstants
+                                                        .semitransparentTextColor,
+                                                    fontSize:
+                                                        AppConstants.fontSizeMediumResponsive(
+                                                          context,
+                                                        ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width:
+                                                      AppConstants.screenWidth(
+                                                        context,
+                                                        0.16,
+                                                      ).clamp(
+                                                        48.0,
+                                                        AppConstants.screenWidth(
+                                                          context,
+                                                          0.13,
+                                                        ),
+                                                      ),
+                                                ),
+                                                Icon(
+                                                  Icons.add_circle,
+                                                  color: AppConstants
+                                                      .playersButtonColor,
+                                                  size: 14,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              width: AppConstants.paddingLarge(context) + 7,
+                            ),
+                            Container(
+                              width: AppConstants.playerBoxWidth(context),
+                              height: AppConstants.playerBoxHeight(context),
+                              //padding: const EdgeInsets.all(16.0),
+                              decoration: BoxDecoration(
+                                color: AppConstants.spectatorsPrimaryColor,
+                                borderRadius: BorderRadius.circular(
+                                  AppConstants.borderRadiusMedium(context),
                                 ),
-                                Stack(
-                                  clipBehavior: Clip.none,
-                                  children: [
-                                    Expanded(
-                                      child: SingleChildScrollView(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            left: 12.0,
-                                            right: 12.0,
-                                            bottom: 6.0,
-                                            top: 6.0,
-                                          ),
-                                          child:
-                                              event.players == null ||
-                                                  event.players!.isEmpty
-                                              ? Container()
-                                              : Column(
-                                                  children: event.players!
-                                                      .map(
-                                                        (item) => InkWell(
-                                                          onTap: () {
-                                                            NexusAppState().updateState('Event', params: [item]);
-                                                          },
-                                                          child:
-                                                              VisualizeUserPreview(
-                                                                user: item,
-                                                              ),
-                                                        ),
-                                                      )
-                                                      .toList(),
-                                                ),
-                                        ),
-                                      ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    alignment: Alignment.topLeft,
+                                    width: AppConstants.playerBoxWidth(context),
+                                    height: AppConstants.sectionHeaderHeight(
+                                      context,
                                     ),
-                                    Positioned(
-                                      top: 85,
-                                      left: 8,
-                                      right: 8,
-                                      child: Container(
-                                        alignment: Alignment.bottomCenter,
-                                        height: 20,
-                                        width: 200,
-                                        decoration: BoxDecoration(
-                                          color: AppConstants.secondaryColor,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(32.0),
+                                    padding: EdgeInsets.only(
+                                      top:
+                                          AppConstants.paddingSmall(context) -
+                                          5,
+                                      left: AppConstants.paddingMedium(context),
+                                    ),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(
+                                          AppConstants.borderRadiusMedium(
+                                            context,
                                           ),
                                         ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            right: 8.0,
-                                            left: 8.0,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                'Join as Player',
-                                                style: TextStyle(
-                                                  color: AppConstants
-                                                      .semitransparentTextColor,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                              SizedBox(width: 78),
-                                              Icon(
-                                                Icons.add_circle,
-                                                color: AppConstants
-                                                    .playersButtonColor,
-                                                size: 14,
-                                              ),
-                                            ],
+                                        topRight: Radius.circular(
+                                          AppConstants.borderRadiusMedium(
+                                            context,
                                           ),
                                         ),
                                       ),
+                                      color:
+                                          AppConstants.spectatorsSecondaryColor,
                                     ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          Container(
-                            width: 215,
-                            height: 130,
-                            //padding: const EdgeInsets.all(16.0),
-                            decoration: BoxDecoration(
-                              color: AppConstants.spectatorsPrimaryColor,
-                              borderRadius: BorderRadius.circular(16.0),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  alignment: Alignment.topLeft,
-                                  width: 215,
-                                  height: 30,
-                                  padding: EdgeInsets.only(
-                                    top: 3.0,
-                                    left: 12.0,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(16.0),
-                                      topRight: Radius.circular(16.0),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          'Spectators',
+                                          style: TextStyle(
+                                            color: AppConstants.textColor,
+                                            fontSize:
+                                                AppConstants.fontSizeLargeResponsive(
+                                                  context,
+                                                ),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: AppConstants.screenWidth(
+                                            context,
+                                            0.11,
+                                          ).clamp(75.0, 85.0),
+                                        ),
+                                        Text(
+                                          textAlign: TextAlign.start,
+                                          '${event.spectators == null ? 0 : event.spectators!.length}/${event.maxSpectators}',
+                                          style: TextStyle(
+                                            color: AppConstants
+                                                .semitransparentTextColor,
+                                            fontSize:
+                                                AppConstants.fontSizeLargeResponsive(
+                                                  context,
+                                                ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    color:
-                                        AppConstants.spectatorsSecondaryColor,
                                   ),
-                                  child: Row(
+                                  Stack(
+                                    clipBehavior: Clip.none,
                                     children: [
-                                      Text(
-                                        'Spectators',
-                                        style: TextStyle(
-                                          color: AppConstants.textColor,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
+                                      Expanded(
+                                        child: SingleChildScrollView(
+                                          padding: EdgeInsets.all(
+                                            AppConstants.paddingSmall(context),
+                                          ),
+                                          child: Padding(
+                                            padding: EdgeInsets.only(
+                                              left: AppConstants.paddingMedium(
+                                                context,
+                                              ),
+                                              right: AppConstants.paddingMedium(
+                                                context,
+                                              ),
+                                              bottom:
+                                                  AppConstants.paddingSmall(
+                                                    context,
+                                                  ) -
+                                                  2,
+                                              top:
+                                                  AppConstants.paddingSmall(
+                                                    context,
+                                                  ) -
+                                                  2,
+                                            ),
+                                            child:
+                                                event.spectators == null ||
+                                                    event.spectators!.isEmpty
+                                                ? Container()
+                                                : Column(
+                                                    children: event.spectators!
+                                                        .map(
+                                                          (item) => InkWell(
+                                                            onTap: () {
+                                                              NexusAppState()
+                                                                  .updateState(
+                                                                    'Event',
+                                                                    params: [
+                                                                      item,
+                                                                    ],
+                                                                  );
+                                                            },
+                                                            child:
+                                                                VisualizeUserPreview(
+                                                                  user: item,
+                                                                ),
+                                                          ),
+                                                        )
+                                                        .toList(),
+                                                  ),
+                                          ),
                                         ),
                                       ),
-                                      SizedBox(width: 55),
-                                      Text(
-                                        textAlign: TextAlign.start,
-                                        '${event.spectators == null ? 0 : event.spectators!.length}/${event.maxSpectators}',
-                                        style: TextStyle(
-                                          color: AppConstants
-                                              .semitransparentTextColor,
-                                          fontSize: 18,
+                                      Positioned(
+                                        top: AppConstants.screenHeight(
+                                          context,
+                                          0.115,
+                                        ).clamp(75.0, 90.0),
+                                        left: AppConstants.paddingSmall(
+                                          context,
+                                        ),
+                                        right: AppConstants.paddingSmall(
+                                          context,
+                                        ),
+                                        child: Container(
+                                          alignment: Alignment.bottomCenter,
+                                          height: AppConstants.joinButtonHeight(
+                                            context,
+                                          ),
+                                          width: AppConstants.joinButtonWidth(
+                                            context,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppConstants.secondaryColor,
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(
+                                                AppConstants.borderRadiusMedium(
+                                                      context,
+                                                    ) *
+                                                    2,
+                                              ),
+                                            ),
+                                          ),
+                                          child: Padding(
+                                            padding: EdgeInsets.only(
+                                              right: AppConstants.paddingSmall(
+                                                context,
+                                              ),
+                                              left: AppConstants.paddingSmall(
+                                                context,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Text(
+                                                  'Join as Spectator',
+                                                  style: TextStyle(
+                                                    color: AppConstants
+                                                        .semitransparentTextColor,
+                                                    fontSize:
+                                                        AppConstants.fontSizeMediumResponsive(
+                                                          context,
+                                                        ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width:
+                                                      AppConstants.screenWidth(
+                                                        context,
+                                                        0.16,
+                                                      ).clamp(
+                                                        48.0,
+                                                        AppConstants.screenWidth(
+                                                          context,
+                                                          0.13,
+                                                        ),
+                                                      ),
+                                                ),
+                                                Icon(
+                                                  Icons.add_circle,
+                                                  color: AppConstants
+                                                      .spectatorsButtonColor,
+                                                  size: 14,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
-                                Stack(
-                                  clipBehavior: Clip.none,
-                                  children: [
-                                    Expanded(
-                                      child: SingleChildScrollView(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            left: 12.0,
-                                            right: 12.0,
-                                            bottom: 6.0,
-                                            top: 6.0,
-                                          ),
-                                          child:
-                                              event.spectators == null ||
-                                                  event.spectators!.isEmpty
-                                              ? Container()
-                                              : Column(
-                                                  children: event.spectators!
-                                                      .map(
-                                                        (item) => InkWell(
-                                                          onTap: () {
-                                                            NexusAppState().updateState('Event', params: [item]);
-                                                          },
-                                                          child:
-                                                              VisualizeUserPreview(
-                                                                user: item,
-                                                              ),
-                                                        ),
-                                                      )
-                                                      .toList(),
-                                                ),
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: 85,
-                                      left: 8,
-                                      right: 8,
-                                      child: Container(
-                                        alignment: Alignment.bottomCenter,
-                                        height: 20,
-                                        width: 200,
-                                        decoration: BoxDecoration(
-                                          color: AppConstants.secondaryColor,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(32.0),
-                                          ),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            right: 8.0,
-                                            left: 8.0,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                'Join as Spectator',
-                                                style: TextStyle(
-                                                  color: AppConstants
-                                                      .semitransparentTextColor,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                              SizedBox(width: 55),
-                                              Icon(
-                                                Icons.add_circle,
-                                                color: AppConstants
-                                                    .spectatorsButtonColor,
-                                                size: 14,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
+                        Container(
+                          width: AppConstants.descriptionWidth(context),
+                          height: AppConstants.descriptionHeight(context) * 0.6,
+                          //padding: const EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: AppConstants.gamesPrimaryColor,
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.borderRadiusMedium(context),
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        width: 450,
-                        height: 90,
-                        //padding: const EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: AppConstants.gamesPrimaryColor,
-                          borderRadius: BorderRadius.circular(16.0),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              alignment: Alignment.topLeft,
-                              width: 450,
-                              height: 30,
-                              padding: EdgeInsets.only(top: 3.0, left: 12.0),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(16.0),
-                                  topRight: Radius.circular(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                alignment: Alignment.topLeft,
+                                width: AppConstants.descriptionWidth(context),
+                                height: AppConstants.sectionHeaderHeight(
+                                  context,
                                 ),
-                                color: AppConstants.gamesSecondaryColor,
-                              ),
-                              child: Text(
-                                'Games',
-                                style: TextStyle(
-                                  color: AppConstants.textColor,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                                padding: EdgeInsets.only(
+                                  top: AppConstants.paddingSmall(context) - 5,
+                                  left: AppConstants.paddingMedium(context),
                                 ),
-                              ),
-                            ),
-                            Expanded(
-                              child: SingleChildScrollView(
-                                padding: EdgeInsets.all(8.0),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                    left: 12.0,
-                                    right: 12.0,
-                                    bottom: 6.0,
-                                    top: 6.0,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(
+                                      AppConstants.borderRadiusMedium(context),
+                                    ),
+                                    topRight: Radius.circular(
+                                      AppConstants.borderRadiusMedium(context),
+                                    ),
                                   ),
-                                  child:
-                                      event.games == null ||
-                                          event.games!.isEmpty
-                                      ? Container()
-                                      : Column(
-                                          children: event.games!
-                                              .map(
-                                                (game) => Text(
-                                                  game.title,
-                                                  textAlign: TextAlign.start,
-                                                  style: TextStyle(
-                                                    color:
-                                                        AppConstants.textColor,
-                                                  ),
-                                                ),
-                                              )
-                                              .toList(),
+                                  color: AppConstants.gamesSecondaryColor,
+                                ),
+                                child: Text(
+                                  'Games',
+                                  style: TextStyle(
+                                    color: AppConstants.textColor,
+                                    fontSize:
+                                        AppConstants.fontSizeLargeResponsive(
+                                          context,
                                         ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        width: 450,
-                        height: 90,
-                        //padding: const EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: AppConstants.linksPrimaryColor,
-                          borderRadius: BorderRadius.circular(16.0),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              alignment: Alignment.topLeft,
-                              width: 450,
-                              height: 30,
-                              padding: EdgeInsets.only(top: 3.0, left: 12.0),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(16.0),
-                                  topRight: Radius.circular(16.0),
-                                ),
-                                color: AppConstants.linksSecondaryColor,
-                              ),
-                              child: Text(
-                                'Links',
-                                style: TextStyle(
-                                  color: AppConstants.textColor,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: SingleChildScrollView(
-                                padding: EdgeInsets.all(8.0),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                    left: 12.0,
-                                    right: 12.0,
-                                    bottom: 6.0,
-                                    top: 6.0,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  child:
-                                      event.links == null ||
-                                          event.links!.isEmpty
-                                      ? Container()
-                                      : Column(
-                                          children: event.links!
-                                              .map(
-                                                (link) => Text(
-                                                  link.title,
-                                                  textAlign: TextAlign.start,
-                                                  style: TextStyle(
-                                                    color:
-                                                        AppConstants.textColor,
-                                                  ),
-                                                ),
-                                              )
-                                              .toList(),
-                                        ),
                                 ),
                               ),
-                            ),
-                          ],
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  padding: EdgeInsets.all(
+                                    AppConstants.paddingSmall(context),
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                      left: AppConstants.paddingMedium(context),
+                                      right: AppConstants.paddingMedium(
+                                        context,
+                                      ),
+                                      bottom:
+                                          AppConstants.paddingSmall(context) -
+                                          2,
+                                      top:
+                                          AppConstants.paddingSmall(context) -
+                                          2,
+                                    ),
+                                    child:
+                                        event.games == null ||
+                                            event.games!.isEmpty
+                                        ? Container()
+                                        : Column(
+                                            children: event.games!
+                                                .map(
+                                                  (game) => Text(
+                                                    game,
+                                                    textAlign: TextAlign.start,
+                                                    style: TextStyle(
+                                                      color: AppConstants
+                                                          .textColor,
+                                                    ),
+                                                  ),
+                                                )
+                                                .toList(),
+                                          ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                        SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
+                        Container(
+                          width: AppConstants.descriptionWidth(context),
+                          height: AppConstants.descriptionHeight(context) * 0.6,
+                          //padding: const EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: AppConstants.linksPrimaryColor,
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.borderRadiusMedium(context),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                alignment: Alignment.topLeft,
+                                width: AppConstants.descriptionWidth(context),
+                                height: AppConstants.sectionHeaderHeight(
+                                  context,
+                                ),
+                                padding: EdgeInsets.only(
+                                  top: AppConstants.paddingSmall(context) - 5,
+                                  left: AppConstants.paddingMedium(context),
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(
+                                      AppConstants.borderRadiusMedium(context),
+                                    ),
+                                    topRight: Radius.circular(
+                                      AppConstants.borderRadiusMedium(context),
+                                    ),
+                                  ),
+                                  color: AppConstants.linksSecondaryColor,
+                                ),
+                                child: Text(
+                                  'Links',
+                                  style: TextStyle(
+                                    color: AppConstants.textColor,
+                                    fontSize:
+                                        AppConstants.fontSizeLargeResponsive(
+                                          context,
+                                        ),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  padding: EdgeInsets.all(
+                                    AppConstants.paddingSmall(context),
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                      left: AppConstants.paddingMedium(context),
+                                      right: AppConstants.paddingMedium(
+                                        context,
+                                      ),
+                                      bottom:
+                                          AppConstants.paddingSmall(context) -
+                                          2,
+                                      top:
+                                          AppConstants.paddingSmall(context) -
+                                          2,
+                                    ),
+                                    child:
+                                        event.links == null ||
+                                            event.links!.isEmpty
+                                        ? Container()
+                                        : Column(
+                                            children: event.links!
+                                                .map(
+                                                  (link) => Text(
+                                                    link,
+                                                    textAlign: TextAlign.start,
+                                                    style: TextStyle(
+                                                      color: AppConstants
+                                                          .textColor,
+                                                    ),
+                                                  ),
+                                                )
+                                                .toList(),
+                                          ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
   }
@@ -586,9 +852,12 @@ class VisualizeEventPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: AppConstants.secondaryColor,
-      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+      margin: EdgeInsets.symmetric(
+        vertical: AppConstants.paddingSmall(context),
+        horizontal: AppConstants.paddingSmall(context),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: EdgeInsets.all(AppConstants.paddingSmall(context)),
         child: Row(
           children: [
             Expanded(
@@ -597,18 +866,19 @@ class VisualizeEventPreview extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "${event.author}'s",
-                    style: const TextStyle(
+                    "${event.author.username}'s",
+                    style: TextStyle(
                       fontWeight: FontWeight.normal,
-                      fontSize: 7.0,
+                      fontSize:
+                          AppConstants.fontSizeSmallResponsive(context),
                       color: AppConstants.semitransparentTextColor,
                     ),
                   ),
                   Text(
                     event.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 14.0,
+                      fontSize: AppConstants.fontSizeMediumResponsive(context),
                       color: AppConstants.textColor,
                     ),
                   ),
@@ -616,12 +886,14 @@ class VisualizeEventPreview extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 12.0),
+              padding: EdgeInsets.only(
+                left: AppConstants.paddingMedium(context),
+              ),
               child: Text(
                 "${event.players == null ? 0 : event.players!.length}/${event.maxPlayers}",
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 12.0,
+                  fontSize: AppConstants.fontSizeSmallResponsive(context),
                   color: AppConstants.textColor,
                 ),
               ),

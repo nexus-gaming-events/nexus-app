@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "278379567684",
+    "project_id": "nexus-ed7c2",
+    "storage_bucket": "nexus-ed7c2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278379567684:android:143ba3ced7f755ff057a11",
+        "android_client_info": {
+          "package_name": "com.example.nexus_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "278379567684-rcu9g8iaqegm4a58ok68b79a0etnoock.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMx-w5IAD3Sn8S-uQNp8cBClbjVuYNpu4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "278379567684-rcu9g8iaqegm4a58ok68b79a0etnoock.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "278379567684-bh9br65por5ha8o6279v9licrvnqhfcv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.nexusApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

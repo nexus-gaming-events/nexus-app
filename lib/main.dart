@@ -6,8 +6,13 @@ import 'widgets/custom_navbar.dart';
 import 'screens/screens.dart';  
 import 'classes/event.dart';
 import 'classes/application_object.dart';
+import 'classes/user.dart';
+import 'screens/login_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(NexusApp());
 }
 
@@ -20,10 +25,13 @@ class NexusApp extends StatefulWidget {
 
 class NexusAppState extends State<NexusApp> {
   static NexusAppState? instance;
-  static String _currentScreenTitle = 'Home';
-  static int _selectedIndex = 2;
-  static late final int selfId; 
-  static List<ApplicationObject> currentParams = [];
+  String _currentScreenTitle = 'Settings';
+  int _selectedIndex = 2;
+  late final int selfId;
+  User? selfUser;
+  List<ApplicationObject> currentParams = [];
+  bool isLoggedIn = true;
+  List<String> returnScreenPath = [];
 
   factory NexusAppState() {
     instance ??= NexusAppState._internal();
@@ -36,6 +44,16 @@ class NexusAppState extends State<NexusApp> {
   void initState() {
     super.initState();
     selfId = 0;
+    selfUser = User(
+      id: selfId,
+      username: "Neil",
+    );
+    if(!isLoggedIn){
+      _currentScreenTitle = 'Login';
+      _selectedIndex = 2;
+    } else {
+      updateState(_currentScreenTitle);
+    }
   }
 
   @override
@@ -43,9 +61,8 @@ class NexusAppState extends State<NexusApp> {
     return MaterialApp(
       home: Scaffold(
         backgroundColor: AppConstants.backgroundColor,
-        appBar: null, //const CustomAppBar(),
-        body: _buildScreenBody(_currentScreenTitle, currentParams),
-        bottomNavigationBar: CustomNavBar(
+        body: Container(alignment: Alignment.topCenter, child: _buildScreenBody(_currentScreenTitle, currentParams)),
+        bottomNavigationBar: isLoggedIn ? CustomNavBar(
           selectedIndex: _selectedIndex,
           onTap: (index) {
             setState(() {
@@ -53,17 +70,20 @@ class NexusAppState extends State<NexusApp> {
               _mapIndexToTitle(index);
             });
           },
-        ),
+        ) : null,
       ),
     );
   }
 
-  void updateState(String screenTitle, {List<ApplicationObject> params = const []}) {
+  void updateState(String screenTitle, {List<ApplicationObject> params = const [], String? returnScreenTitle = null}) {
     debugPrint('Params length: ${params.length}');
     setState(() {
       debugPrint('Updating state to screen: $screenTitle with params: $params');
       _currentScreenTitle = screenTitle;
       currentParams = params;
+      if(returnScreenTitle != null){
+        returnScreenPath.add(returnScreenTitle);
+      }
     });
   }
   
@@ -95,6 +115,8 @@ class NexusAppState extends State<NexusApp> {
           });
         });*/
         return Container();
+      case 'Login':
+        return LoginScreen();
       case 'Chats':
         return Container();
       case 'Home':
@@ -104,8 +126,9 @@ class NexusAppState extends State<NexusApp> {
       case 'Calendar':
         return ExpeditionsScreen();
       case 'Event':
-        debugPrint('Navigating to Event screen with params: $params');
-        return VisualizeEventScreen.buildFullDetails(params[0] as Event);
+        return VisualizeEventScreen.buildFullDetails(params[0] as Event, context, returnScreenPath.isNotEmpty ? returnScreenPath.removeLast() : 'Home');
+      case 'Settings':
+        return SettingsScreen();
       default:
         return Center(child: Text('Screen not found: $currentScreenTitle'));
     }

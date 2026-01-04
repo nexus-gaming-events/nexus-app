@@ -4,20 +4,23 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 class UserSettings {
-  String userImagePath;
-  Gradient bannerGradient;
-
+  static String userImagePath = 'assets/icons/Neil.png';
+  static Gradient bannerGradient = const LinearGradient(
+    colors: [Colors.blue, Colors.purple],
+  );
+ static double paramter = 0.0;
   // Dictionary for selectable images
-  static final Map<String, String> availableImages = {
-    'Neil': 'assets/icons/Neil.png',
+  static Map<String, String> availableImages = {
+    'Neil': 'assets/pfps/Neil.png',
+    'Cyclo': 'assets/pfps/Cyclo.png',
+    'Extra': 'assets/pfps/Extra.png',
+    'Psyino': 'assets/pfps/Psyino.png'
   };
 
-  // Dictionary for selectable gradients (empty for now)
-  static final Map<String, Gradient> availableGradients = {};
 
   UserSettings({
-    this.userImagePath = 'assets/icons/Neil.png',
-    this.bannerGradient = const LinearGradient(
+    userImagePath = 'assets/icons/Neil.png',
+    bannerGradient = const LinearGradient(
       colors: [Colors.blue, Colors.purple],
     ),
   });
@@ -38,6 +41,7 @@ class UserSettings {
     );
   }
 
+  
   /// Get the settings file path
   static Future<File> _getSettingsFile() async {
     final directory = await getApplicationDocumentsDirectory();
@@ -56,19 +60,32 @@ class UserSettings {
   }
 
   /// Load settings from JSON file
-  static Future<UserSettings> loadFromJson() async {
-    try {
-      final file = await _getSettingsFile();
-      if (await file.exists()) {
-        final jsonString = await file.readAsString();
-        final json = jsonDecode(jsonString) as Map<String, dynamic>;
-        return UserSettings.fromJson(json);
-      }
-    } catch (e) {
-      debugPrint('Error loading user settings: $e');
+ static Future<UserSettings> loadFromJson() async {
+  try {
+    final file = await _getSettingsFile();
+    if (await file.exists()) {
+      final jsonString = await file.readAsString();
+      final json = jsonDecode(jsonString) as Map<String, dynamic>;
+      
+      // Update static variables from JSON
+      userImagePath = json['userImagePath'] ?? 'assets/icons/Neil.png';
+      bannerGradient = _gradientFromJson(json['bannerGradient']);
+      paramter = json['bannerGradient']?['parameter'] ?? 0.0;
+      
+      return UserSettings.fromJson(json);
+    } else {
+      // File doesn't exist, create it with default settings
+      final defaultSettings = UserSettings();
+      await defaultSettings.saveToJson();
+      return defaultSettings;
     }
-    return UserSettings();
+  } catch (e) {
+    debugPrint('Error loading user settings: $e');
+    final defaultSettings = UserSettings();
+    await defaultSettings.saveToJson();
+    return defaultSettings;
   }
+}
 
   /// Convert Gradient to JSON (stores as LinearGradient with colors and stops)
   static Map<String, dynamic> _gradientToJson(Gradient gradient) {
@@ -78,9 +95,28 @@ class UserSettings {
         'colors': gradient.colors
             .map((c) => c.value.toRadixString(16))
             .toList(),
+        'parameter': paramter,
       };
     }
-    return {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF']};
+    if (gradient is RadialGradient) {
+      return {
+        'type': 'radial',
+        'colors': gradient.colors
+            .map((c) => c.value.toRadixString(16))
+            .toList(),
+        'parameter': paramter,
+      };
+    }
+    if (gradient is SweepGradient) {
+      return {
+        'type': 'sweep',
+        'colors': gradient.colors
+            .map((c) => c.value.toRadixString(16))
+            .toList(),
+        'parameter': paramter,
+      };
+    }
+    return {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': paramter};
   }
 
   /// Convert JSON to Gradient
@@ -93,10 +129,19 @@ class UserSettings {
       final colors = (json['colors'] as List)
           .map((c) => Color(int.parse(c, radix: 16)))
           .toList();
-      return LinearGradient(colors: colors);
+      if (json['type'] == 'linear') {
+        return LinearGradient(colors: colors.isEmpty ? [Colors.blue, Colors.purple] : colors, begin: Alignment(-1, 0.0), end: Alignment(paramter + 1, 0.0));
+      }
+      if (json['type'] == 'radial') {
+        return RadialGradient(colors: colors.isEmpty ? [Colors.blue, Colors.purple] : colors, radius: paramter + 1);
+      }
+      if (json['type'] == 'sweep') {
+        return SweepGradient(colors: colors.isEmpty ? [Colors.blue, Colors.purple] : colors, startAngle: 0, endAngle: (4 * (3.141592653589793 + 1) * (paramter/2.0 + 0.5)).clamp(0.000000000001, (4*3.141592653589793 + 1)));
+      }
+      return LinearGradient(colors: colors.isEmpty ? [Colors.blue, Colors.purple] : colors, begin: Alignment(-1, 0.0), end: Alignment(paramter + 1, 0.0));
     } catch (e) {
       debugPrint('Error parsing gradient: $e');
-      return const LinearGradient(colors: [Colors.blue, Colors.purple]);
+      return const LinearGradient(colors: [Colors.blue, Colors.purple], begin: Alignment(-1, 0.0), end: Alignment(0.5, 0.0));
     }
   }
 
@@ -108,9 +153,7 @@ class UserSettings {
   }
 
   /// Set gradient from available dictionary
-  void setGradientByKey(String key) {
-    if (availableGradients.containsKey(key)) {
-      bannerGradient = availableGradients[key]!;
-    }
+  void setGradient(Gradient gradient) {
+    bannerGradient = gradient;
   }
 }

@@ -5,25 +5,46 @@ import '../constants.dart';
 import 'event.dart';
 
 class User extends ApplicationObject {
-  final String id;
-  final String name;
+  final String _token;
+  final int id;
+  final String username;
+  final String email;
+  final String imageUrl;
   final List<VisualLink>? games;
   final List<Event>? organizedEvents;
   final List<Event>? recentEvents;
 
   User({
     required this.id,
-    required this.name,
+    required this.username,
     this.games,
     this.organizedEvents,
     this.recentEvents,
-  });
+    this.email = '',
+    this.imageUrl = '',
+  }) : _token = '';
+
+  String setToken(String token) {
+    return token;
+  }
+
+  String getToken() {
+    return _token;
+  }
 }
 
-class VisualizeUserScreen{
-
+class VisualizeUserScreen {
   static Widget buildFullDetails(User user) {
-    return Container();
+    return Builder(
+      builder: (context) => Container(
+        width: AppConstants.mainContainerWidth(context),
+        height: AppConstants.mainContainerHeight(context),
+        color: AppConstants.backgroundColor,
+        child: Stack(children: [Column(children: [
+
+      ],)]),
+      ),
+    );
   }
 }
 
@@ -36,22 +57,31 @@ class VisualizeUserPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: AppConstants.secondaryColor,
-      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+      margin: EdgeInsets.symmetric(
+        vertical: AppConstants.paddingSmall(context),
+        horizontal: AppConstants.paddingSmall(context) - 4,
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: EdgeInsets.all(AppConstants.paddingMedium(context)),
         child: Row(
           children: [
-            Image.asset(  
-              'assets/icons/assets/icons/Neil.png',
-              width: AppConstants.iconSize/2,
-              height: AppConstants.iconSize/2,
-            ),
+            user.imageUrl.isEmpty
+                ? Image.asset(
+                    'assets/icons/Neil.png',
+                    width: AppConstants.iconSizeSmall(context),
+                    height: AppConstants.iconSizeSmall(context),
+                  )
+                : Image.network(
+                    user.imageUrl,
+                    width: AppConstants.iconSizeSmall(context),
+                    height: AppConstants.iconSizeSmall(context),
+                  ),
             Expanded(
               child: Text(
-                user.name,
-                style: const TextStyle(
+                user.username,
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 14.0,
+                  fontSize: AppConstants.fontSizeMediumResponsive(context),
                   color: AppConstants.textColor,
                 ),
               ),
