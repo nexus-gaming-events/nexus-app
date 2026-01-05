@@ -30,7 +30,7 @@ class NexusAppState extends State<NexusApp> {
   late final int selfId;
   User? selfUser;
   List<ApplicationObject> currentParams = [];
-  bool isLoggedIn = true;
+  bool isLoggedIn = false;
   List<String> returnScreenPath = [];
 
   factory NexusAppState() {
