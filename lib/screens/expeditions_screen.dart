@@ -14,18 +14,6 @@ class ExpeditionsScreenState extends State<ExpeditionsScreen> {
   static CalendarFormat _calendarFormat = CalendarFormat.month;
   static DateTime _focusedDay = DateTime.now();
   static DateTime? _selectedDay;
-  static List<Event> _events = [
-    new Event(
-      id: 0,
-      title: "Sample Event",
-      author: new User(id: 0, username: "Neil"),
-      description:
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-      date: DateTime.now(),
-      maxPlayers: 10,
-      maxSpectators: 10,
-    ),
-  ];
   static List<Event> _focusedEvents = [];
 
   // Inline details state
@@ -33,8 +21,8 @@ class ExpeditionsScreenState extends State<ExpeditionsScreen> {
   static bool _showingEventDetails = false;
   static List<Event> _getEventsForDay(DateTime day) {
     try {
-      if (_events.isEmpty) return <Event>[];
-      return _events.where((event) => isSameDay(event.date, day)).toList();
+      if (NexusAppState.instance!.events.isEmpty) return <Event>[];
+      return NexusAppState.instance!.events.where((event) => isSameDay(event.date, day)).toList();
     } catch (_) {
       return <Event>[];
     }
@@ -54,14 +42,12 @@ class ExpeditionsScreenState extends State<ExpeditionsScreen> {
         left: AppConstants.paddingSmall(context),
         right: AppConstants.paddingSmall(context),
         bottom: 0.0,
-        top: AppConstants.paddingMedium(context),
+        top: AppConstants.paddingLarge(context)*3.5,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _showingEventDetails && _activeEvent != null
-              ? VisualizeEventScreen.buildFullDetails(_activeEvent!, context, 'Calendar')
-              : Stack(
+                  Stack(
                   alignment: Alignment.topCenter,
                   children: [
                     // Background container

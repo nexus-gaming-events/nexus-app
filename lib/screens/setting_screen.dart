@@ -140,7 +140,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         left: AppConstants.paddingSmall(context),
         right: AppConstants.paddingSmall(context),
         bottom: 0.0,
-        top: AppConstants.paddingMedium(context),
+        top: AppConstants.paddingLarge(context)*3.5,
       ),
       child: Container(
         alignment: Alignment.topCenter,
@@ -159,7 +159,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               width: AppConstants.mainContainerWidth(context),
               height: AppConstants.headerHeight(context),
               padding: EdgeInsets.only(
-                top: AppConstants.paddingLarge(context) - 3,
+                top: (AppConstants.paddingLarge(context) > 3 ? AppConstants.paddingLarge(context) - 3 : 0),
               ),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
@@ -553,3 +553,5 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 }
+
+

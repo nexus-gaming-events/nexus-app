@@ -27,7 +27,7 @@ class VisualizeVisualLink extends StatelessWidget {
       color: AppConstants.secondaryColor,
       margin: EdgeInsets.symmetric(
         vertical: AppConstants.paddingSmall(context),
-        horizontal: AppConstants.paddingSmall(context) - 4,
+        horizontal: (AppConstants.paddingSmall(context) > 4 ? AppConstants.paddingSmall(context) - 4 : 0),
       ),
       child: Padding(
         padding: EdgeInsets.all(AppConstants.paddingMedium(context)),
@@ -64,3 +64,5 @@ class VisualizeVisualLink extends StatelessWidget {
     );
   }
 }
+
+

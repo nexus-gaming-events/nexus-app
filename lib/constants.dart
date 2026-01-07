@@ -39,8 +39,8 @@ class AppConstants {
   static const Color linksSecondaryColor = Color.fromRGBO(116, 62, 62, 0.70);
 
   //background color
-  static const Color backgroundColor = Color.fromRGBO(11, 32, 63, 1);
-
+  static const Color primaryBackgroundColor = Color.fromRGBO(11, 32, 63, 1);
+  static const Color secondaryBackgroundColor = Color.fromRGBO(34, 11, 63, 1);
   //text colors
   static const Color textColor = Colors.white;
   static const Color semitransparentTextColor = Color.fromRGBO(
@@ -163,7 +163,7 @@ class AppConstants {
   static double joinButtonHeight(BuildContext context) =>
       responsiveSize(context, 0.025).clamp(18.0, 20.0);
   static double joinButtonWidth(BuildContext context) =>
-      playerBoxWidth(context) - 16;
+      (playerBoxWidth(context) > 16 ? playerBoxWidth(context) - 16 : 0);
 
   /// Icon dimensions for visual links
   static double linkIconSize(BuildContext context) =>

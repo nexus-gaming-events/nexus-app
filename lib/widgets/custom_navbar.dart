@@ -60,7 +60,7 @@ class CustomNavBar extends StatelessWidget {
                   : AppConstants.navbarIconSize(context),
             ),
           ),
-          SizedBox(height: AppConstants.paddingSmall(context) - 4),
+          SizedBox(height: (AppConstants.paddingSmall(context) > 4 ? AppConstants.paddingSmall(context) - 4 : 0)),
           /*Text(
                 label,
                 style: TextStyle(
@@ -75,3 +75,5 @@ class CustomNavBar extends StatelessWidget {
     );
   }
 }
+
+

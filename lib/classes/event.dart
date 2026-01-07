@@ -36,20 +36,22 @@ class Event extends ApplicationObject {
 class VisualizeEventScreen {
   static bool _showingEventDetails = false;
   static User? _activeUser;
+  static Event? event;
 
   static Widget buildFullDetails(
-    Event event,
     BuildContext context,
     String returnScreenTitle,
   ) {
-    return _showingEventDetails && _activeUser != null
-        ? VisualizeUserScreen.buildFullDetails(_activeUser!)
-        : Padding(
+    if (event == null) {
+      debugPrint('No event to display');
+      return Container();
+    }
+    return Padding(
             padding: EdgeInsets.only(
               left: AppConstants.paddingSmall(context),
               right: AppConstants.paddingSmall(context),
               bottom: 0.0,
-              top: AppConstants.paddingMedium(context),
+              top: AppConstants.paddingLarge(context)*3.5,
             ),
             child: Container(
               width: AppConstants.mainContainerWidth(context),
@@ -68,7 +70,7 @@ class VisualizeEventScreen {
                     width: AppConstants.mainContainerWidth(context),
                     height: AppConstants.headerHeight(context),
                     padding: EdgeInsets.only(
-                      top: AppConstants.paddingSmall(context) - 3,
+                      top: (AppConstants.paddingSmall(context) > 3 ? AppConstants.paddingSmall(context) - 3 : 0),
                     ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(
@@ -102,18 +104,19 @@ class VisualizeEventScreen {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${event.author.username}\'s',
+                                '${event!.author.username}\'s',
                                 style: TextStyle(
                                   color: AppConstants.semitransparentTextColor,
                                   fontSize:
-                                      AppConstants.fontSizeSmallResponsive(
+                                      (AppConstants.fontSizeSmallResponsive(
                                         context,
-                                      ) -
-                                      1,
+                                      ) > 1 ? AppConstants.fontSizeSmallResponsive(
+                                        context,
+                                      ) - 1 : 0),
                                 ),
                               ),
                               Text(
-                                event.title,
+                                event!.title,
                                 style: TextStyle(
                                   color: AppConstants.textColor,
                                   fontSize:
@@ -126,7 +129,7 @@ class VisualizeEventScreen {
                               ),
                               const SizedBox(height: 3),
                               Text(
-                                '${event.date.year}/${event.date.month}/${event.date.day} ${event.date.hour}:${event.date.minute.toString().padLeft(2, '0')}',
+                                '${event!.date.year}/${event!.date.month}/${event!.date.day} ${event!.date.hour}:${event!.date.minute.toString().padLeft(2, '0')}',
                                 style: TextStyle(color: AppConstants.textColor),
                               ),
                             ],
@@ -164,7 +167,7 @@ class VisualizeEventScreen {
                                   context,
                                 ),
                                 padding: EdgeInsets.only(
-                                  top: AppConstants.paddingSmall(context) - 5,
+                                  top: (AppConstants.paddingSmall(context) > 5 ? AppConstants.paddingSmall(context) - 5 : 0),
                                   left: AppConstants.paddingMedium(context),
                                 ),
                                 decoration: BoxDecoration(
@@ -201,15 +204,11 @@ class VisualizeEventScreen {
                                       right: AppConstants.paddingMedium(
                                         context,
                                       ),
-                                      bottom:
-                                          AppConstants.paddingSmall(context) -
-                                          2,
-                                      top:
-                                          AppConstants.paddingSmall(context) -
-                                          2,
+                                      bottom: (AppConstants.paddingSmall(context) > 2 ? AppConstants.paddingSmall(context) - 2 : 0),
+                                      top: (AppConstants.paddingSmall(context) > 2 ? AppConstants.paddingSmall(context) - 2 : 0),
                                     ),
                                     child: Text(
-                                      event.description,
+                                      event!.description,
                                       textAlign: TextAlign.start,
                                       style: TextStyle(
                                         color: AppConstants.textColor,
@@ -226,7 +225,7 @@ class VisualizeEventScreen {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             SizedBox(
-                              width: AppConstants.paddingMedium(context) - 3,
+                              width: (AppConstants.paddingMedium(context) > 3 ? AppConstants.paddingMedium(context) - 3 : 0),
                             ),
                             Container(
                               width: AppConstants.playerBoxWidth(context),
@@ -249,8 +248,7 @@ class VisualizeEventScreen {
                                     ),
                                     padding: EdgeInsets.only(
                                       top:
-                                          AppConstants.paddingSmall(context) -
-                                          5,
+                                          (AppConstants.paddingSmall(context) > 5 ? AppConstants.paddingSmall(context) - 5 : 0),
                                       left: AppConstants.paddingMedium(context),
                                     ),
                                     decoration: BoxDecoration(
@@ -281,15 +279,25 @@ class VisualizeEventScreen {
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        SizedBox(
-                                          width: AppConstants.screenWidth(
-                                            context,
-                                            0.11,
-                                          ).clamp(75.0, 85.0),
-                                        ),
-                                        Text(
+                                       SizedBox(
+                                                  width:
+                                                      AppConstants.screenWidth(
+                                                        context,
+                                                        0.08,
+                                                      ).clamp(
+                                                        AppConstants.screenWidth(
+                                                          context,
+                                                          0.05,
+                                                        ),
+                                                        AppConstants.screenWidth(
+                                                          context,
+                                                          0.13,
+                                                        ),
+                                                      ),
+                                                ),
+                                                Text(
                                           textAlign: TextAlign.start,
-                                          '${event.players == null ? 0 : event.players!.length}/${event.maxPlayers}',
+                                          '${event!.players == null ? 0 : event!.players!.length}/${event!.maxPlayers}',
                                           style: TextStyle(
                                             color: AppConstants
                                                 .semitransparentTextColor,
@@ -319,31 +327,26 @@ class VisualizeEventScreen {
                                                 context,
                                               ),
                                               bottom:
-                                                  AppConstants.paddingSmall(
-                                                    context,
-                                                  ) -
-                                                  2,
+                                                  (AppConstants.paddingSmall(context,) > 2 ? AppConstants.paddingSmall(context,) - 2 : 0),
                                               top:
-                                                  AppConstants.paddingSmall(
-                                                    context,
-                                                  ) -
-                                                  2,
+                                                  (AppConstants.paddingSmall(context,) > 2 ? AppConstants.paddingSmall(context,) - 2 : 0),
                                             ),
                                             child:
-                                                event.players == null ||
-                                                    event.players!.isEmpty
+                                                event!.players == null ||
+                                                    event!.players!.isEmpty
                                                 ? Container()
                                                 : Column(
-                                                    children: event.players!
+                                                    children: event!.players!
                                                         .map(
                                                           (item) => InkWell(
                                                             onTap: () {
                                                               NexusAppState()
                                                                   .updateState(
-                                                                    'Event',
+                                                                    'User',
                                                                     params: [
                                                                       item,
                                                                     ],
+                                                                    returnScreenTitle: 'Event',
                                                                   );
                                                             },
                                                             child:
@@ -413,9 +416,12 @@ class VisualizeEventScreen {
                                                   width:
                                                       AppConstants.screenWidth(
                                                         context,
-                                                        0.16,
+                                                        0.09,
                                                       ).clamp(
-                                                        48.0,
+                                                        AppConstants.screenWidth(
+                                                          context,
+                                                          0.05,
+                                                        ),
                                                         AppConstants.screenWidth(
                                                           context,
                                                           0.13,
@@ -439,7 +445,7 @@ class VisualizeEventScreen {
                               ),
                             ),
                             SizedBox(
-                              width: AppConstants.paddingLarge(context) + 7,
+                              width: AppConstants.paddingLarge(context) * 1.2,
                             ),
                             Container(
                               width: AppConstants.playerBoxWidth(context),
@@ -462,8 +468,7 @@ class VisualizeEventScreen {
                                     ),
                                     padding: EdgeInsets.only(
                                       top:
-                                          AppConstants.paddingSmall(context) -
-                                          5,
+                                          (AppConstants.paddingSmall(context) > 5 ? AppConstants.paddingSmall(context) - 5 : 0),
                                       left: AppConstants.paddingMedium(context),
                                     ),
                                     decoration: BoxDecoration(
@@ -496,14 +501,24 @@ class VisualizeEventScreen {
                                           ),
                                         ),
                                         SizedBox(
-                                          width: AppConstants.screenWidth(
-                                            context,
-                                            0.11,
-                                          ).clamp(75.0, 85.0),
-                                        ),
-                                        Text(
+                                                  width:
+                                                      AppConstants.screenWidth(
+                                                        context,
+                                                        0.08,
+                                                      ).clamp(
+                                                        AppConstants.screenWidth(
+                                                          context,
+                                                          0.05,
+                                                        ),
+                                                        AppConstants.screenWidth(
+                                                          context,
+                                                          0.13,
+                                                        ),
+                                                      ),
+                                                ),
+                                                Text(
                                           textAlign: TextAlign.start,
-                                          '${event.spectators == null ? 0 : event.spectators!.length}/${event.maxSpectators}',
+                                          '${event!.spectators == null ? 0 : event!.spectators!.length}/${event!.maxSpectators}',
                                           style: TextStyle(
                                             color: AppConstants
                                                 .semitransparentTextColor,
@@ -533,31 +548,34 @@ class VisualizeEventScreen {
                                                 context,
                                               ),
                                               bottom:
-                                                  AppConstants.paddingSmall(
+                                                  (AppConstants.paddingSmall(
                                                     context,
-                                                  ) -
-                                                  2,
+                                                  ) > 2 ? AppConstants.paddingSmall(
+                                                    context,
+                                                  ) - 2 : 0),
                                               top:
-                                                  AppConstants.paddingSmall(
+                                                  (AppConstants.paddingSmall(
                                                     context,
-                                                  ) -
-                                                  2,
+                                                  ) > 2 ? AppConstants.paddingSmall(
+                                                    context,
+                                                  ) - 2 : 0),
                                             ),
                                             child:
-                                                event.spectators == null ||
-                                                    event.spectators!.isEmpty
+                                                event!.spectators == null ||
+                                                    event!.spectators!.isEmpty
                                                 ? Container()
                                                 : Column(
-                                                    children: event.spectators!
+                                                    children: event!.spectators!
                                                         .map(
                                                           (item) => InkWell(
                                                             onTap: () {
                                                               NexusAppState()
                                                                   .updateState(
-                                                                    'Event',
+                                                                    'User',
                                                                     params: [
                                                                       item,
                                                                     ],
+                                                                    returnScreenTitle: 'Event',
                                                                   );
                                                             },
                                                             child:
@@ -627,9 +645,12 @@ class VisualizeEventScreen {
                                                   width:
                                                       AppConstants.screenWidth(
                                                         context,
-                                                        0.16,
+                                                        0.09,
                                                       ).clamp(
-                                                        48.0,
+                                                        AppConstants.screenWidth(
+                                                          context,
+                                                          0.05,
+                                                        ),
                                                         AppConstants.screenWidth(
                                                           context,
                                                           0.13,
@@ -675,7 +696,7 @@ class VisualizeEventScreen {
                                   context,
                                 ),
                                 padding: EdgeInsets.only(
-                                  top: AppConstants.paddingSmall(context) - 5,
+                                  top: (AppConstants.paddingSmall(context) > 5 ? AppConstants.paddingSmall(context) - 5 : 0),
                                   left: AppConstants.paddingMedium(context),
                                 ),
                                 decoration: BoxDecoration(
@@ -713,18 +734,16 @@ class VisualizeEventScreen {
                                         context,
                                       ),
                                       bottom:
-                                          AppConstants.paddingSmall(context) -
-                                          2,
+                                          (AppConstants.paddingSmall(context) > 2 ? AppConstants.paddingSmall(context) - 2 : 0),
                                       top:
-                                          AppConstants.paddingSmall(context) -
-                                          2,
+                                          (AppConstants.paddingSmall(context) > 2 ? AppConstants.paddingSmall(context) - 2 : 0),
                                     ),
                                     child:
-                                        event.games == null ||
-                                            event.games!.isEmpty
+                                        event!.games == null ||
+                                            event!.games!.isEmpty
                                         ? Container()
                                         : Column(
-                                            children: event.games!
+                                            children: event!.games!
                                                 .map(
                                                   (game) => Text(
                                                     game,
@@ -764,7 +783,7 @@ class VisualizeEventScreen {
                                   context,
                                 ),
                                 padding: EdgeInsets.only(
-                                  top: AppConstants.paddingSmall(context) - 5,
+                                  top: (AppConstants.paddingSmall(context) > 5 ? AppConstants.paddingSmall(context) - 5 : 0),
                                   left: AppConstants.paddingMedium(context),
                                 ),
                                 decoration: BoxDecoration(
@@ -802,18 +821,16 @@ class VisualizeEventScreen {
                                         context,
                                       ),
                                       bottom:
-                                          AppConstants.paddingSmall(context) -
-                                          2,
+                                          (AppConstants.paddingSmall(context) > 2 ? AppConstants.paddingSmall(context) - 2 : 0),
                                       top:
-                                          AppConstants.paddingSmall(context) -
-                                          2,
+                                          (AppConstants.paddingSmall(context) > 2 ? AppConstants.paddingSmall(context) - 2 : 0),
                                     ),
                                     child:
-                                        event.links == null ||
-                                            event.links!.isEmpty
+                                        event!.links == null ||
+                                            event!.links!.isEmpty
                                         ? Container()
                                         : Column(
-                                            children: event.links!
+                                            children: event!.links!
                                                 .map(
                                                   (link) => Text(
                                                     link,

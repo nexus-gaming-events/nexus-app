@@ -3,16 +3,19 @@ import 'package:flutter/services.dart';
 import 'package:nexus_app/classes/application_object.dart';
 import 'constants.dart';
 import 'widgets/custom_navbar.dart';
+import 'widgets/galaxy_background.dart';
 import 'screens/screens.dart';  
 import 'classes/event.dart';
 import 'classes/application_object.dart';
 import 'classes/user.dart';
 import 'screens/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'classes/user_settings.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await UserSettings.loadFromJson();
   runApp(NexusApp());
 }
 
@@ -25,13 +28,15 @@ class NexusApp extends StatefulWidget {
 
 class NexusAppState extends State<NexusApp> {
   static NexusAppState? instance;
-  String _currentScreenTitle = 'Settings';
+  String _currentScreenTitle = 'Home';
   int _selectedIndex = 2;
   late final int selfId;
   User? selfUser;
   List<ApplicationObject> currentParams = [];
-  bool isLoggedIn = false;
+  bool isLoggedIn = true;
   List<String> returnScreenPath = [];
+  List<Event> events = [
+  ];
 
   factory NexusAppState() {
     instance ??= NexusAppState._internal();
@@ -43,10 +48,21 @@ class NexusAppState extends State<NexusApp> {
   @override
   void initState() {
     super.initState();
+    
     selfId = 0;
-    selfUser = User(
-      id: selfId,
-      username: "Neil",
+    selfUser = User(id: 12, username: "Big Boss", imageUrl: "https://imgur.com/Fjiw4cX.jpg", email: "big.boss@outerheaven.zl");
+    events.add(   new Event(
+      id: 0,
+      title: "Outer Heaven Recruitment Meeting",
+      author: selfUser!,
+      description:
+          "Join us for an exclusive recruitment meeting for Outer Heaven. Learn about our mission, values, and how you can be a part of our elite team.",
+      date: DateTime.now(),
+      maxPlayers: 10,
+      maxSpectators: 10,
+      players: [selfUser!],
+      spectators: [],
+    ),
     );
     if(!isLoggedIn){
       _currentScreenTitle = 'Login';
@@ -59,18 +75,23 @@ class NexusAppState extends State<NexusApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        backgroundColor: AppConstants.backgroundColor,
-        body: Container(alignment: Alignment.topCenter, child: _buildScreenBody(_currentScreenTitle, currentParams)),
-        bottomNavigationBar: isLoggedIn ? CustomNavBar(
-          selectedIndex: _selectedIndex,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-              _mapIndexToTitle(index);
-            });
-          },
-        ) : null,
+      home: GalaxyBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Container(
+            alignment: Alignment.topCenter,
+            child: _buildScreenBody(_currentScreenTitle, currentParams),
+          ),
+          bottomNavigationBar: isLoggedIn ? CustomNavBar(
+            selectedIndex: _selectedIndex,
+            onTap: (index) {
+              setState(() {
+                _selectedIndex = index;
+                _mapIndexToTitle(index);
+              });
+            },
+          ) : null,
+        ),
       ),
     );
   }
@@ -108,13 +129,9 @@ class NexusAppState extends State<NexusApp> {
   Widget? _buildScreenBody(String currentScreenTitle, [List<ApplicationObject> params = const []]) {
     switch (currentScreenTitle) {
       case 'User':
-        /*return VisualizeUserScreen.buildFullDetails(params[0] as User, () {
-          setState(() {
-            _currentScreenTitle = 'Home';
-            _selectedIndex = 2;
-          });
-        });*/
-        return Container();
+        debugPrint(params.isNotEmpty.toString());
+        VisualizeUserScreen.user = params.isNotEmpty? params[0] as User : selfUser!;
+        return VisualizeUserScreen.buildFullDetails( context, returnScreenPath.isNotEmpty ? returnScreenPath.removeLast() : 'Home');
       case 'Login':
         return LoginScreen();
       case 'Chats':
@@ -126,7 +143,8 @@ class NexusAppState extends State<NexusApp> {
       case 'Calendar':
         return ExpeditionsScreen();
       case 'Event':
-        return VisualizeEventScreen.buildFullDetails(params[0] as Event, context, returnScreenPath.isNotEmpty ? returnScreenPath.removeLast() : 'Home');
+        VisualizeEventScreen.event = params.isNotEmpty? params[0] as Event : null;
+        return VisualizeEventScreen.buildFullDetails(context, returnScreenPath.isNotEmpty ? returnScreenPath.removeLast() : 'Home');
       case 'Settings':
         return SettingsScreen();
       default:
