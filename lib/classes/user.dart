@@ -5,6 +5,8 @@ import 'package:nexus_app/main.dart';
 import 'visual_link.dart';
 import '../constants.dart';
 import 'event.dart';
+import '../main.dart';
+import '../widgets/back_button_widget.dart';
 
 class User extends ApplicationObject {
   final String _token;
@@ -40,22 +42,21 @@ class VisualizeUserScreen {
 
   static Widget buildFullDetails(
     BuildContext context,
-    String returnScreenTitle,
   ) {
     return Builder(
       builder: (context) => Padding(
         padding: EdgeInsets.only(
-              left: AppConstants.paddingSmall(context),
-              right: AppConstants.paddingSmall(context),
-              bottom: 0.0,
-              top: AppConstants.paddingLarge(context)*3.5,
-            ),
+          left: AppConstants.paddingSmall(context),
+          right: AppConstants.paddingSmall(context),
+          bottom: 0.0,
+          top: AppConstants.paddingLarge(context) * 3.5,
+        ),
         child: Container(
           decoration: BoxDecoration(
-                  color: AppConstants.primaryColor,
-                  borderRadius: BorderRadius.circular(
-                    AppConstants.borderRadiusMedium(context),
-                  ),
+            color: AppConstants.primaryColor,
+            borderRadius: BorderRadius.circular(
+              AppConstants.borderRadiusMedium(context),
+            ),
           ),
           width: AppConstants.mainContainerWidth(context),
           height: AppConstants.mainContainerHeight(context),
@@ -64,7 +65,7 @@ class VisualizeUserScreen {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Stack(
-                alignment: Alignment.center,
+                alignment: Alignment.topCenter,
                 clipBehavior: Clip.none,
                 children: [
                   Container(
@@ -73,14 +74,19 @@ class VisualizeUserScreen {
                     decoration: BoxDecoration(
                       gradient: UserSettings.bannerGradient,
                       borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(AppConstants.borderRadiusMedium(context)),
-                    topRight: Radius.circular(AppConstants.borderRadiusMedium(context)),
-                    
-                  ),
+                        topLeft: Radius.circular(
+                          AppConstants.borderRadiusMedium(context),
+                        ),
+                        topRight: Radius.circular(
+                          AppConstants.borderRadiusMedium(context),
+                        ),
+                      ),
                     ),
                   ),
                   Positioned(
-                    top: AppConstants.mainContainerHeight(context) * 0.3 - AppConstants.iconSizeLarge(context),
+                    top:
+                        AppConstants.mainContainerHeight(context) * 0.3 -
+                        AppConstants.iconSizeLarge(context),
                     child: Container(
                       margin: EdgeInsets.symmetric(
                         horizontal: AppConstants.paddingLarge(context),
@@ -105,10 +111,39 @@ class VisualizeUserScreen {
                       ),
                     ),
                   ),
+                  Row(
+                    children: [
+                      BackButtonWidget(),
+                      SizedBox(
+                        width: AppConstants.mainContainerWidth(context) -
+                            AppConstants.iconSizeMedium(context)* 2 -
+                            AppConstants.paddingLarge(context)* 3,
+                      ),
+                      user.id == NexusAppState.instance!.selfUser!.id ?
+                      IconButton(
+                        icon: Icon(
+                          Icons.settings,
+                          color: AppConstants.textColor,
+                          size: AppConstants.iconSizeMedium(context),
+                        ),
+                        onPressed: () {
+                          NexusAppState.instance!.returnScreenParams.add([VisualizeUserScreen.user]);
+                          NexusAppState.instance!.returnScreenPath.add('User');
+                          NexusAppState.instance!.updateState(
+                            'Settings',
+                          );
+                        },
+                      )
+                      : Container(),
+                    ],
+                  ),
+                  
                 ],
               ),
               SizedBox(
-                height: AppConstants.paddingLarge(context) + AppConstants.iconSizeLarge(context),
+                height:
+                    AppConstants.paddingLarge(context) +
+                    AppConstants.iconSizeLarge(context),
               ),
               Text(
                 user.username,
@@ -119,97 +154,106 @@ class VisualizeUserScreen {
                 ),
               ),
               SizedBox(height: AppConstants.paddingLarge(context) * 1.5),
-            Container(
-              padding: EdgeInsets.only(
-                left: AppConstants.paddingSmall(context),
-              ),
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Recent Expeditions',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  color: AppConstants.textColor,
-                  fontSize: AppConstants.fontSizeLargeResponsive(context),
+              Container(
+                padding: EdgeInsets.only(
+                  left: AppConstants.paddingSmall(context),
                 ),
-              ),
-            ),
-            Container(
-              width: AppConstants.mainContainerWidth(context),
-              height: AppConstants.eventListHeight(context) * 0.7,
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(
-                    color: AppConstants.semitransparentTextColor,
-                    width: 1.0,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Recent Expeditions',
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    color: AppConstants.textColor,
+                    fontSize: AppConstants.fontSizeLargeResponsive(context),
                   ),
                 ),
               ),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: Column(
-                  children: NexusAppState.instance!.events.where((event) => event.players!.any((player) => player.id == user.id)).toList()
-                      .map(
-                        (item) => InkWell(
-                          onTap: () {
-                            NexusAppState.instance!.updateState(
-                              'Event',
-                              params: [item],
-                              returnScreenTitle: 'User',
-                            );
-                          },
-                          child: VisualizeEventPreview(event: item), 
+              Container(
+                width: AppConstants.mainContainerWidth(context),
+                height: AppConstants.eventListHeight(context) * 0.7,
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: AppConstants.semitransparentTextColor,
+                      width: 1.0,
+                    ),
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Column(
+                    children: NexusAppState.instance!.events
+                        .where(
+                          (event) => event.players!.any(
+                            (player) => player.id == user.id,
                           ),
-                      )
-                      .toList(),
-                ),
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.only(
-                left: AppConstants.paddingSmall(context),
-              ),
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'My Expeditions',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  color: AppConstants.textColor,
-                  fontSize: AppConstants.fontSizeLargeResponsive(context),
-                ),
-              ),
-            ),
-            Container(
-              width: AppConstants.mainContainerWidth(context),
-              height: AppConstants.eventListHeight(context) * 0.7,
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(
-                    color: AppConstants.semitransparentTextColor,
-                    width: 1.0,
+                        )
+                        .toList()
+                        .map(
+                          (item) => InkWell(
+                            onTap: () {
+                              NexusAppState.instance!.returnScreenParams.add([VisualizeUserScreen.user]);
+                              NexusAppState.instance!.returnScreenPath.add('User');
+                              NexusAppState.instance!.updateState(
+                                'Event',
+                                params: [item],
+                              );
+                            },
+                            child: VisualizeEventPreview(event: item),
+                          ),
+                        )
+                        .toList(),
                   ),
                 ),
               ),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: Column(
-                  children: NexusAppState.instance!.events.where((event) => event.author.id == user.id).toList()
-                      .map(
-                        (item) => InkWell(
-                          onTap: () {
-                            NexusAppState.instance!.updateState(
-                              'Event',
-                              params: [item],
-                              returnScreenTitle: 'User',
-                            );
-                          },
-                          child: VisualizeEventPreview(event: item), 
-                          ),
-                      )
-                      .toList(),
+              Container(
+                padding: EdgeInsets.only(
+                  left: AppConstants.paddingSmall(context),
+                ),
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'My Expeditions',
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    color: AppConstants.textColor,
+                    fontSize: AppConstants.fontSizeLargeResponsive(context),
+                  ),
                 ),
               ),
-            ),
-            
+              Container(
+                width: AppConstants.mainContainerWidth(context),
+                height: AppConstants.eventListHeight(context) * 0.7,
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: AppConstants.semitransparentTextColor,
+                      width: 1.0,
+                    ),
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Column(
+                    children: NexusAppState.instance!.events
+                        .where((event) => event.author.id == user.id)
+                        .toList()
+                        .map(
+                          (item) => InkWell(
+                            onTap: () {
+                              NexusAppState.instance!.returnScreenParams.add([VisualizeUserScreen.user]);
+                              NexusAppState.instance!.returnScreenPath.add('User');
+                              NexusAppState.instance!.updateState(
+                                'Event',
+                                params: [item],
+                              );
+                            },
+                            child: VisualizeEventPreview(event: item),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -229,7 +273,9 @@ class VisualizeUserPreview extends StatelessWidget {
       color: AppConstants.secondaryColor,
       margin: EdgeInsets.symmetric(
         vertical: AppConstants.paddingSmall(context),
-        horizontal: (AppConstants.paddingSmall(context) > 4 ? AppConstants.paddingSmall(context) - 4 : 0),
+        horizontal: (AppConstants.paddingSmall(context) > 4
+            ? AppConstants.paddingSmall(context) - 4
+            : 0),
       ),
       child: Padding(
         padding: EdgeInsets.all(AppConstants.paddingMedium(context)),
@@ -262,5 +308,3 @@ class VisualizeUserPreview extends StatelessWidget {
     );
   }
 }
-
-

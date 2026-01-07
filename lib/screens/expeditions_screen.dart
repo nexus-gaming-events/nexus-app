@@ -149,10 +149,11 @@ class ExpeditionsScreenState extends State<ExpeditionsScreen> {
                                 .map(
                                   (item) => InkWell(
                                     onTap: () {
+                                      NexusAppState.instance!.returnScreenParams.add([]);
+                                      NexusAppState.instance!.returnScreenPath.add('Calendar');
                                       NexusAppState.instance!.updateState(
                                         'Event',
                                         params: [item],
-                                        returnScreenTitle: 'Calendar',
                                       );
                                     },
                                     child: VisualizeEventPreview(event: item),

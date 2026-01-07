@@ -4,6 +4,7 @@ import 'visual_link.dart';
 import '../constants.dart';
 import 'user.dart';
 import 'application_object.dart';
+import '../widgets/back_button_widget.dart';
 
 class Event extends ApplicationObject {
   final int id;
@@ -40,7 +41,6 @@ class VisualizeEventScreen {
 
   static Widget buildFullDetails(
     BuildContext context,
-    String returnScreenTitle,
   ) {
     if (event == null) {
       debugPrint('No event to display');
@@ -85,16 +85,7 @@ class VisualizeEventScreen {
                     ),
                     child: Row(
                       children: [
-                        IconButton(
-                          icon: Icon(
-                            Icons.arrow_back,
-                            color: AppConstants.textColor,
-                          ),
-                          onPressed: () {
-                            debugPrint('Returning to $returnScreenTitle screen');
-                            NexusAppState().updateState(returnScreenTitle);
-                          },
-                        ),
+                        BackButtonWidget(),
                         SizedBox(
                           width:
                               AppConstants.mainContainerWidth(context) * 0.01,
@@ -119,11 +110,14 @@ class VisualizeEventScreen {
                                 event!.title,
                                 style: TextStyle(
                                   color: AppConstants.textColor,
-                                  fontSize:
-                                      AppConstants.fontSizeXLargeResponsive(
-                                        context,
-                                      ) +
-                                      2,
+                                  fontSize: () {
+                                    final baseFontSize = AppConstants.fontSizeXLargeResponsive(context) + 2;
+                                    final titleLength = event!.title.length;
+                                    if (titleLength <= 15) return baseFontSize;
+                                    if (titleLength <= 25) return baseFontSize - 2;
+                                    if (titleLength <= 35) return baseFontSize - 4;
+                                    return (baseFontSize - 6).clamp(AppConstants.fontSizeMediumResponsive(context), baseFontSize);
+                                  }(),
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -313,7 +307,9 @@ class VisualizeEventScreen {
                                   Stack(
                                     clipBehavior: Clip.none,
                                     children: [
-                                      Expanded(
+                                      SizedBox(
+                                        height: AppConstants.playerBoxHeight(context) - AppConstants.sectionHeaderHeight(context),
+                                        width: AppConstants.playerBoxWidth(context),
                                         child: SingleChildScrollView(
                                           padding: EdgeInsets.all(
                                             AppConstants.paddingSmall(context),
@@ -340,13 +336,14 @@ class VisualizeEventScreen {
                                                         .map(
                                                           (item) => InkWell(
                                                             onTap: () {
+                                                              NexusAppState.instance!.returnScreenParams.add([VisualizeEventScreen.event!]);
+                                                              NexusAppState.instance!.returnScreenPath.add('Event');
                                                               NexusAppState()
                                                                   .updateState(
                                                                     'User',
                                                                     params: [
                                                                       item,
                                                                     ],
-                                                                    returnScreenTitle: 'Event',
                                                                   );
                                                             },
                                                             child:
@@ -534,7 +531,9 @@ class VisualizeEventScreen {
                                   Stack(
                                     clipBehavior: Clip.none,
                                     children: [
-                                      Expanded(
+                                      SizedBox(
+                                        height: AppConstants.playerBoxHeight(context) - AppConstants.sectionHeaderHeight(context),
+                                        width: AppConstants.playerBoxWidth(context),
                                         child: SingleChildScrollView(
                                           padding: EdgeInsets.all(
                                             AppConstants.paddingSmall(context),
@@ -569,13 +568,14 @@ class VisualizeEventScreen {
                                                         .map(
                                                           (item) => InkWell(
                                                             onTap: () {
+                                                              NexusAppState.instance!.returnScreenParams.add([VisualizeEventScreen.event!]);
+                                                              NexusAppState.instance!.returnScreenPath.add('Event');
                                                               NexusAppState()
                                                                   .updateState(
                                                                     'User',
                                                                     params: [
                                                                       item,
                                                                     ],
-                                                                    returnScreenTitle: 'Event',
                                                                   );
                                                             },
                                                             child:

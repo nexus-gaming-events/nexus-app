@@ -5,6 +5,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../constants.dart';
 import '../classes/user_settings.dart';
 import 'dart:math' as math;
+import '../widgets/back_button_widget.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -174,11 +175,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               child: Row(
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back, color: AppConstants.textColor),
-                    onPressed: () {
-                      NexusAppState().updateState('User');
-                    },
+                  BackButtonWidget(
                   ),
                   SizedBox(
                     width: AppConstants.mainContainerWidth(context) * 0.01,

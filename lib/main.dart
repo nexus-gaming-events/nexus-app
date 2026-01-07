@@ -35,8 +35,8 @@ class NexusAppState extends State<NexusApp> {
   List<ApplicationObject> currentParams = [];
   bool isLoggedIn = true;
   List<String> returnScreenPath = [];
-  List<Event> events = [
-  ];
+  List<List<ApplicationObject>> returnScreenParams = [];
+  List<Event> events = [];
 
   factory NexusAppState() {
     instance ??= NexusAppState._internal();
@@ -86,6 +86,7 @@ class NexusAppState extends State<NexusApp> {
             selectedIndex: _selectedIndex,
             onTap: (index) {
               setState(() {
+                returnScreenPath.clear();
                 _selectedIndex = index;
                 _mapIndexToTitle(index);
               });
@@ -96,15 +97,14 @@ class NexusAppState extends State<NexusApp> {
     );
   }
 
-  void updateState(String screenTitle, {List<ApplicationObject> params = const [], String? returnScreenTitle = null}) {
+  void updateState(String screenTitle, {List<ApplicationObject> params = const []}) {
     debugPrint('Params length: ${params.length}');
     setState(() {
       debugPrint('Updating state to screen: $screenTitle with params: $params');
       _currentScreenTitle = screenTitle;
       currentParams = params;
-      if(returnScreenTitle != null){
-        returnScreenPath.add(returnScreenTitle);
-      }
+      debugPrint('Return screen path: $returnScreenPath');
+      debugPrint('Return params: $returnScreenParams');
     });
   }
   
@@ -131,7 +131,7 @@ class NexusAppState extends State<NexusApp> {
       case 'User':
         debugPrint(params.isNotEmpty.toString());
         VisualizeUserScreen.user = params.isNotEmpty? params[0] as User : selfUser!;
-        return VisualizeUserScreen.buildFullDetails( context, returnScreenPath.isNotEmpty ? returnScreenPath.removeLast() : 'Home');
+        return VisualizeUserScreen.buildFullDetails(context);
       case 'Login':
         return LoginScreen();
       case 'Chats':
@@ -144,7 +144,7 @@ class NexusAppState extends State<NexusApp> {
         return ExpeditionsScreen();
       case 'Event':
         VisualizeEventScreen.event = params.isNotEmpty? params[0] as Event : null;
-        return VisualizeEventScreen.buildFullDetails(context, returnScreenPath.isNotEmpty ? returnScreenPath.removeLast() : 'Home');
+        return VisualizeEventScreen.buildFullDetails(context);
       case 'Settings':
         return SettingsScreen();
       default:
