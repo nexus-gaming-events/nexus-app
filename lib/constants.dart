@@ -19,16 +19,15 @@ class AppConstants {
   static const Color playersPrimaryColor = Color.fromRGBO(60, 87, 68, 1);
   static const Color playersSecondaryColor = Color.fromRGBO(53, 82, 53, 0.70);
   static const Color playersButtonColor = Color.fromRGBO(46, 121, 16, 1);
+  static const Color playerUserColor = Color.fromRGBO(19, 30, 18, 1);
+  static const Color playerUserTextColor = Color.fromRGBO(202, 208, 98, 1);
 
   //spectators colors
   static const Color spectatorsPrimaryColor = Color.fromRGBO(142, 83, 51, 1);
-  static const Color spectatorsSecondaryColor = Color.fromRGBO(
-    104,
-    83,
-    63,
-    0.70,
-  );
+  static const Color spectatorsSecondaryColor = Color.fromRGBO(104, 83, 63, 0.70);
   static const Color spectatorsButtonColor = Color.fromRGBO(121, 72, 16, 1);
+  static const Color spectatorUserColor = Color.fromRGBO(50, 33, 19, 1);
+  static const Color spectatorUserTextColor = Color.fromRGBO(230, 140, 76, 1);
 
   //games colors
   static const Color gamesPrimaryColor = Color.fromRGBO(17, 107, 145, 1);
@@ -53,6 +52,7 @@ class AppConstants {
 
   //accent colors
   static const Color accentColor1 = Color.fromRGBO(194, 148, 10, 1);
+  static const Color accentColor2 = Color.fromRGBO(44, 171, 255, 1);
   // Font sizes
   static const double fontSizeSmall = 12.0;
   static const double fontSizeMedium = 16.0;
@@ -147,7 +147,7 @@ class AppConstants {
   static double playerBoxWidth(BuildContext context) =>
       (mainContainerWidth(context) * 0.95 - 20) / 2;
   static double playerBoxHeight(BuildContext context) =>
-      screenHeight(context, 0.17).clamp(110.0, 130.0);
+      screenHeight(context, 0.30).clamp(110.0, 200.0);
 
   /// Section header height
   static double sectionHeaderHeight(BuildContext context) =>
@@ -191,6 +191,8 @@ class AppConstants {
       responsiveSize(context, 0.1).clamp(75.0, 80.0);
 
   /// Responsive icon sizes (scaling with screen size)
+  static double iconSizeExtraSmall(BuildContext context) =>
+      responsiveSize(context, 0.04).clamp(25.0, 30.0);
   static double iconSizeSmall(BuildContext context) =>
       responsiveSize(context, 0.05).clamp(35.0, 45.0);
   static double iconSizeMedium(BuildContext context) =>

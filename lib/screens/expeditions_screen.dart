@@ -128,45 +128,71 @@ class ExpeditionsScreenState extends State<ExpeditionsScreen> {
                       width: AppConstants.mainContainerWidth(context),
                       bottom: AppConstants.screenHeight(
                         context,
-                        0.125,
-                      ).clamp(90.0, 100.0),
-                      child: Container(
-                        padding: EdgeInsets.only(left: AppConstants.paddingSmall(context), right: AppConstants.paddingSmall(context)),
-                        width: AppConstants.mainContainerWidth(context),
-                        height: AppConstants.eventListHeight(context),
-                        decoration: BoxDecoration(
-                        border: Border(
-                            top: BorderSide(
-                              color: AppConstants.semitransparentTextColor,
-                              width: 1.0,
+                        0.01,
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.only(left: AppConstants.paddingSmall(context), right: AppConstants.paddingSmall(context)),
+                            width: AppConstants.mainContainerWidth(context),
+                            height: AppConstants.eventListHeight(context)*2,
+                            decoration: BoxDecoration(
+                            border: Border(
+                                top: BorderSide(
+                                  color: AppConstants.semitransparentTextColor,
+                                  width: 1.0,
+                                ),
+                              ),
+                            ),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.vertical,
+                              child: Column(
+                                children: _focusedEvents
+                                    .map(
+                                      (item) => InkWell(
+                                        onTap: () {
+                                          NexusAppState.instance!.returnScreenParams.add([]);
+                                          NexusAppState.instance!.returnScreenPath.add('Calendar');
+                                          NexusAppState.instance!.updateState(
+                                            'Event',
+                                            params: [item],
+                                          );
+                                        },
+                                        child: VisualizeEventPreview(event: item),
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
                             ),
                           ),
-                        ),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: Column(
-                            children: _focusedEvents
-                                .map(
-                                  (item) => InkWell(
-                                    onTap: () {
-                                      NexusAppState.instance!.returnScreenParams.add([]);
-                                      NexusAppState.instance!.returnScreenPath.add('Calendar');
-                                      NexusAppState.instance!.updateState(
-                                        'Event',
-                                        params: [item],
-                                      );
-                                    },
-                                    child: VisualizeEventPreview(event: item),
-                                  ),
-                                )
-                                .toList(),
-                          ),
-                        ),
+                          Container(
+                            height: AppConstants.iconSizeLarge(context)*1.1,
+                    alignment: Alignment.bottomRight,
+                    child: IconButton(
+                      onPressed: () {
+                        NexusAppState.instance!.returnScreenParams.add([]);
+                        NexusAppState.instance!.returnScreenPath.add('Calendar');
+                        NexusAppState.instance!.updateState(
+                          'EditEvent',
+                          params: [],
+                        );
+                      },
+
+                      icon: Icon(
+                        Icons.add_circle,
+                        color: AppConstants.accentColor2,
+                        size: AppConstants.iconSizeLarge(context),
+                        
+                      ),
+                    )
+                    )
+        
+                        ],
                       ),
                     ),
                   ],
                 ),
-        ],
+                  ],
       ),
     );
   }

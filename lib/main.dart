@@ -37,6 +37,10 @@ class NexusAppState extends State<NexusApp> {
   List<String> returnScreenPath = [];
   List<List<ApplicationObject>> returnScreenParams = [];
   List<Event> events = [];
+  List<User> friends = [];
+  late Map<String, List<User>> friendGroups = {
+    'All': friends,
+  };
 
   factory NexusAppState() {
     instance ??= NexusAppState._internal();
@@ -139,12 +143,14 @@ class NexusAppState extends State<NexusApp> {
       case 'Home':
         return Container();
       case 'Friends':
-        return Container(/*params[0] as User*/);
+        return FriendsScreen();
       case 'Calendar':
         return ExpeditionsScreen();
       case 'Event':
         VisualizeEventScreen.event = params.isNotEmpty? params[0] as Event : null;
         return VisualizeEventScreen.buildFullDetails(context);
+      case 'EditEvent':
+        return EditEventScreen(event: params.isNotEmpty? params[0] as Event : null,);
       case 'Settings':
         return SettingsScreen();
       default:
