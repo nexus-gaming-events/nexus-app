@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../constants.dart';
 import '../main.dart';
 import '../classes/user.dart';
+import '../classes/group.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({Key? key}) : super(key: key);
@@ -66,13 +67,16 @@ class _FriendsScreenState extends State<FriendsScreen>
                 indicatorSize: TabBarIndicatorSize.tab,
                 tabs: [
                   Tab(text: 'Friends'),
-                  Tab(text: 'Requests'),
+                  Tab(text: 'Groups'),
                 ],
               ),
             ),
             // Content area
             Expanded(
               child: Container(
+                padding: EdgeInsets.only(
+                  top: AppConstants.paddingMedium(context),
+                ),
                 decoration: BoxDecoration(
                   color: AppConstants.primaryColor,
                   borderRadius: BorderRadius.only(
@@ -87,37 +91,102 @@ class _FriendsScreenState extends State<FriendsScreen>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    Center(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: NexusAppState.instance!.friends.map(
-                            (friend) => InkWell(
-                              onTap: () {
-                                NexusAppState
-                                    .instance!
-                                    .returnScreenParams
-                                    .add([]);
-                                NexusAppState
-                                    .instance!
-                                    .returnScreenPath
-                                    .add('Friends');
-                                NexusAppState()
-                                    .updateState(
-                                      'User',
-                                      params: [friend],
-                                    );
-                              },
-                              child: VisualizeUserPreview(
-                                user: friend,
-                                inPlayers: true,
-                                inSpectators: false,
-                              ),
+                    Column(
+                      children: [
+                        Container(
+                          alignment: Alignment.topCenter,
+                          width: AppConstants.mainContainerWidth(context)*0.9,
+                          height: AppConstants.mainContainerHeight(context)*0.83,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: NexusAppState.instance!.friends.map(
+                                (friend) => InkWell(
+                                  onTap: () {
+                                    NexusAppState
+                                        .instance!
+                                        .returnScreenParams
+                                        .add([]);
+                                    NexusAppState
+                                        .instance!
+                                        .returnScreenPath
+                                        .add('Friends');
+                                    NexusAppState()
+                                        .updateState(
+                                          'User',
+                                          params: [friend],
+                                        );
+                                  },
+                                  child: VisualizeUserPreview(
+                                    user: friend,
+                                    inPlayers: false,
+                                    inSpectators: false,
+                                  ),
+                                ),
+                              ).toList(),
                             ),
-                          ).toList(),
+                          ),
                         ),
+                        Container(
+                            height: AppConstants.iconSizeLarge(context)*1.1,
+                    alignment: Alignment.bottomRight,
+                    child: IconButton(
+                      onPressed: () {
+                       //Add friend action
+                      },
+
+                      icon: Icon(
+                        Icons.add_circle,
+                        color: AppConstants.accentColor2,
+                        size: AppConstants.iconSizeLarge(context),
+                        
                       ),
+                    )
+                    )
+                      ],
                     ),
-                    Center(child: Text('Friend Requests', style: TextStyle(color: Colors.white))),
+                    Column(
+                      children: [
+                        Container(
+                          alignment: Alignment.topCenter,
+                          width: AppConstants.mainContainerWidth(context)*0.9,
+                          height: AppConstants.mainContainerHeight(context)*0.83,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: NexusAppState.instance!.friendGroups.map(
+                                (group) => InkWell(
+                                        onTap: () {
+                                          NexusAppState.instance!.returnScreenParams.add([]);
+                                          NexusAppState.instance!.returnScreenPath.add('Friends');
+                                          NexusAppState.instance!.updateState(
+                                            'Group',
+                                            params: [group],
+                                          );
+                                        },
+                                        child: VisualizeGroupPreview(group: group),
+                                      ),
+                                    )
+                                    .toList(),
+                            ),
+                          ),
+                        ),
+                      Container(
+                            height: AppConstants.iconSizeLarge(context)*1.1,
+                    alignment: Alignment.bottomRight,
+                    child: IconButton(
+                      onPressed: () {
+                       //Add group action
+                      },
+
+                      icon: Icon(
+                        Icons.add_circle,
+                        color: AppConstants.accentColor2,
+                        size: AppConstants.iconSizeLarge(context),
+                        
+                      ),
+                    )
+                    )
+                     ],
+                    ),
                   ],
                 ),
               ),

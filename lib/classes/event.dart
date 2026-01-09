@@ -1627,18 +1627,27 @@ class EditEventScreenState extends State<EditEventScreen> {
                                   Icons.arrow_drop_down,
                                   color: AppConstants.textColor,
                                 ),
-                                items: NexusAppState.instance!.friendGroups.keys.map((group) {
+                                items: NexusAppState.instance!.friendGroups.map((group) {
                                   return DropdownMenuItem<String>(
-                                    value: group,
+                                    value: group.name,
                                     child: Text(
-                                      group.toUpperCase(),
+                                      group.name,
                                       style: TextStyle(
                                         color: AppConstants.textColor,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   );
-                                }).toList(), 
+                                }).toList()..add(DropdownMenuItem<String>(
+                                  value: "All",
+                                  child: Text(
+                                    "All",
+                                    style: TextStyle(
+                                      color: AppConstants.textColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                )),
                                 onChanged: (value) {
                                   setState(() {
                                     friendGroup = value!;

@@ -271,36 +271,38 @@ class VisualizeUserPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double iconSize = inPlayers || inSpectators ? AppConstants.iconSizeSmall(context) : AppConstants.iconSizeLarge(context);
     return Card(
 
       color: user.id == NexusAppState.instance!.selfUser!.id ? (inPlayers ? AppConstants.playerUserColor : inSpectators ? AppConstants.spectatorUserColor : AppConstants.primaryColor) : AppConstants.primaryColor,
       margin: EdgeInsets.symmetric(
         vertical: AppConstants.paddingSmall(context),
-        horizontal: (AppConstants.paddingSmall(context) > 4
-            ? AppConstants.paddingSmall(context) - 4
+        horizontal: (AppConstants.paddingSmall(context) > 3
+            ? AppConstants.paddingSmall(context) - 3
             : 0),
       ),
       child: Padding(
-        padding: EdgeInsets.all(AppConstants.paddingMedium(context)),
+        padding: EdgeInsets.all(AppConstants.paddingLarge(context)),
         child: Row(
           children: [
             user.imageUrl.isEmpty
                 ? Image.asset(
                     'assets/icons/Neil.png',
-                    width: AppConstants.iconSizeExtraSmall(context),
-                    height: AppConstants.iconSizeExtraSmall(context),
+                    width: iconSize,
+                    height: iconSize,
                   )
                 : Image.network(
                     user.imageUrl,
-                    width: AppConstants.iconSizeExtraSmall(context),
-                    height: AppConstants.iconSizeExtraSmall(context),
+                    width: iconSize,
+                    height: iconSize,
                   ),
+            SizedBox(width: AppConstants.paddingMedium(context)),
             Expanded(
               child: Text(
                 user.username,
                 style: TextStyle(
                   fontWeight: user.id == NexusAppState.instance!.selfUser!.id ? FontWeight.bold : FontWeight.normal,
-                  fontSize: AppConstants.fontSizeMediumResponsive(context),
+                  fontSize: AppConstants.fontSizeLargeResponsive(context),
                   color: user.id == NexusAppState.instance!.selfUser!.id ? (inPlayers ? AppConstants.playerUserTextColor : inSpectators ? AppConstants.spectatorUserTextColor : AppConstants.textColor) : AppConstants.textColor,
                 ),
               ),

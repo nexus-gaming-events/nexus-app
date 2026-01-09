@@ -11,6 +11,7 @@ import 'classes/user.dart';
 import 'screens/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'classes/user_settings.dart';
+import 'classes/group.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,9 +39,9 @@ class NexusAppState extends State<NexusApp> {
   List<List<ApplicationObject>> returnScreenParams = [];
   List<Event> events = [];
   List<User> friends = [];
-  late Map<String, List<User>> friendGroups = {
-    'All': friends,
-  };
+  late List<Group> friendGroups = [
+    Group(id: 0, name: 'All', friends: friends),
+  ];
 
   factory NexusAppState() {
     instance ??= NexusAppState._internal();
@@ -74,6 +75,14 @@ class NexusAppState extends State<NexusApp> {
     } else {
       updateState(_currentScreenTitle);
     }
+    friends = [
+      User(id: 1, username: "Solid Snake", imageUrl: "https://imgur.com/zj8eDdn.jpg", email: "solid.snake@phylantropy.us"),
+      User(id: 2, username: "Liquid Snake", imageUrl: "https://imgur.com/Wqs6EKD.jpg", email: "liquid.snake@foxhound.us"),
+      User(id: 3, username: "Revolver Ocelot", imageUrl: "https://imgur.com/ohc6hXB.jpg", email: "revolver.ocelot@patriots.us"),
+      ];
+    friendGroups = [
+      Group(id: 0, name: 'Foxhound', friends: friends),
+    ];
   }
 
   @override
@@ -144,6 +153,9 @@ class NexusAppState extends State<NexusApp> {
         return Container();
       case 'Friends':
         return FriendsScreen();
+      case 'Group':
+        VisualizeGroupScreen.group = params.isNotEmpty? params[0] as Group : null;
+        return VisualizeGroupScreen.buildFullDetails(context);
       case 'Calendar':
         return ExpeditionsScreen();
       case 'Event':
