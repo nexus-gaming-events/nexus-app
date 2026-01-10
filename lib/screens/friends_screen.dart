@@ -96,7 +96,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                         Container(
                           alignment: Alignment.topCenter,
                           width: AppConstants.mainContainerWidth(context)*0.9,
-                          height: AppConstants.mainContainerHeight(context)*0.83,
+                          height: AppConstants.mainContainerHeight(context)*0.821,
                           child: SingleChildScrollView(
                             child: Column(
                               children: NexusAppState.instance!.friends.map(
@@ -149,7 +149,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                         Container(
                           alignment: Alignment.topCenter,
                           width: AppConstants.mainContainerWidth(context)*0.9,
-                          height: AppConstants.mainContainerHeight(context)*0.83,
+                          height: AppConstants.mainContainerHeight(context)*0.821,
                           child: SingleChildScrollView(
                             child: Column(
                               children: NexusAppState.instance!.friendGroups.map(

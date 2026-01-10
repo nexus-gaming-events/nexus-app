@@ -5,6 +5,8 @@ class AppConstants {
   // Colors
   static const Color primaryColor = Color.fromRGBO(36, 36, 36, 0.70);
   static const Color secondaryColor = Color.fromRGBO(24, 24, 24, 1);
+  static const Color successColor = Color.fromRGBO(76, 175, 80, 1);
+  static const Color errorColor = Color.fromRGBO(244, 67, 54, 1);
 
   //description colors
   static const Color descriptionPrimaryColor = Color.fromRGBO(60, 60, 87, 1);
@@ -50,6 +52,9 @@ class AppConstants {
   );
   static const Color bodyTextColor = Color.fromRGBO(36, 36, 36, 0.58);
 
+  //chat colors
+  static const Color messageBackgroundColor = Color.fromRGBO(43, 43, 43, 1);
+
   //accent colors
   static const Color accentColor1 = Color.fromRGBO(194, 148, 10, 1);
   static const Color accentColor2 = Color.fromRGBO(44, 171, 255, 1);
@@ -92,12 +97,7 @@ class AppConstants {
   );
 
   // Calendar styles
-  static const LinearGradient todayGradient = LinearGradient(
-    colors: [selectionBackgroundColor1, selectionBackgroundColor2],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-  );
-  static const Color selectedDayColor = Color.fromRGBO(26, 26, 26, 0.934);
+  static const Color todayColor = Color.fromRGBO(26, 26, 26, 0.934);
 
   // Responsive Design Utilities
   /// Get responsive width based on screen width

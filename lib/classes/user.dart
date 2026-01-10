@@ -274,7 +274,7 @@ class VisualizeUserPreview extends StatelessWidget {
     double iconSize = inPlayers || inSpectators ? AppConstants.iconSizeSmall(context) : AppConstants.iconSizeLarge(context);
     return Card(
 
-      color: user.id == NexusAppState.instance!.selfUser!.id ? (inPlayers ? AppConstants.playerUserColor : inSpectators ? AppConstants.spectatorUserColor : AppConstants.primaryColor) : AppConstants.primaryColor,
+      color: user.id == NexusAppState.instance!.selfUser!.id ? (inPlayers ? AppConstants.playerUserColor : inSpectators ? AppConstants.spectatorUserColor : AppConstants.secondaryColor) : AppConstants.secondaryColor,
       margin: EdgeInsets.symmetric(
         vertical: AppConstants.paddingSmall(context),
         horizontal: (AppConstants.paddingSmall(context) > 3

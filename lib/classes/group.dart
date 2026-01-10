@@ -7,6 +7,7 @@ import '../constants.dart';
 import 'user.dart';
 import '../main.dart';
 import '../widgets/back_button_widget.dart';
+import '../widgets/user_stack.dart';
 
 class Group extends ApplicationObject {
   final int id;
@@ -172,122 +173,11 @@ class VisualizeGroupPreview extends StatelessWidget {
 
   const VisualizeGroupPreview({Key? key, required this.group}) : super(key: key);
 
-  Widget _buildGroupIcon(BuildContext context) {
-    final iconSize = AppConstants.iconSizeLarge(context);
-    
-    if (group.friends.isEmpty) {
-      return Image.asset(
-        'assets/icons/Friends.png',
-        width: iconSize,
-        height: iconSize,
-        color: AppConstants.textColor,
-      );
-    }
-    
-    if (group.friends.length == 1) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
-        child: Image.network(
-          group.friends[0].imageUrl,
-          width: iconSize,
-          height: iconSize,
-          fit: BoxFit.cover,
-        ),
-      );
-    }
-    
-    if (group.friends.length == 2) {
-      return SizedBox(
-        width: iconSize,
-        height: iconSize,
-        child: Stack(
-          children: [
-            Positioned(
-              top: 0,
-              right: 0,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
-                child: Image.network(
-                  group.friends[0].imageUrl,
-                  width: iconSize * 0.6,
-                  height: iconSize * 0.6,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
-                child: Image.network(
-                  group.friends[1].imageUrl,
-                  width: iconSize * 0.6,
-                  height: iconSize * 0.6,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-    
-    // 3 or more users
-    return SizedBox(
-      width: iconSize,
-      height: iconSize,
-      child: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            left: iconSize * 0.2,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
-              child: Image.network(
-                group.friends[0].imageUrl,
-                width: iconSize * 0.5,
-                height: iconSize * 0.5,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
-              child: Image.network(
-                group.friends[1].imageUrl,
-                width: iconSize * 0.5,
-                height: iconSize * 0.5,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
-              child: Image.network(
-                group.friends[2].imageUrl,
-                width: iconSize * 0.5,
-                height: iconSize * 0.5,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Card(
 
-      color: AppConstants.primaryColor,
+      color: AppConstants.secondaryColor,
       margin: EdgeInsets.symmetric(
         vertical: AppConstants.paddingSmall(context),
         horizontal: (AppConstants.paddingSmall(context) > 4
@@ -298,7 +188,7 @@ class VisualizeGroupPreview extends StatelessWidget {
         padding: EdgeInsets.all(AppConstants.paddingSmall(context)),
         child: Row(
           children: [
-            _buildGroupIcon(context),
+            UserStackIcon(users: group.friends),
             SizedBox(width: AppConstants.paddingLarge(context)),
             Container(
               child: Text(

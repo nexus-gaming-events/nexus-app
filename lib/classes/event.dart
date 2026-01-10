@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:nexus_app/classes/chat.dart';
 import 'package:nexus_app/main.dart';
 import 'visual_link.dart';
 import '../constants.dart';
@@ -21,6 +22,8 @@ class Event extends ApplicationObject {
   List<User>? spectators;
   List<String>? games;
   List<String>? links;
+  late Chat? chat;
+  late List<User> participants;
 
   Event({
     required this.id,
@@ -34,7 +37,17 @@ class Event extends ApplicationObject {
     this.spectators,
     this.games,
     this.links,
-  });
+  }) {
+    chat = Chat(id: 0, eventId: id, messages: []);
+
+    participants = [];
+    if (players != null) {
+      participants.addAll(players!);
+    }
+    if (spectators != null) {
+      participants.addAll(spectators!);
+    }
+  }
 }
 
 class VisualizeEventScreen {
@@ -81,7 +94,7 @@ class VisualizeEventScreen {
           children: [
             Container(
               width: AppConstants.mainContainerWidth(context),
-              height: AppConstants.headerHeight(context),
+              height: AppConstants.headerHeight(context)*1.1,
               padding: EdgeInsets.only(
                 top: (AppConstants.paddingSmall(context) > 3
                     ? AppConstants.paddingSmall(context) - 3
@@ -104,7 +117,8 @@ class VisualizeEventScreen {
                   SizedBox(
                     width: AppConstants.mainContainerWidth(context) * 0.01,
                   ),
-                  Expanded(
+                  Container(
+                    width: AppConstants.mainContainerWidth(context) * 0.5,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -152,6 +166,56 @@ class VisualizeEventScreen {
                       ],
                     ),
                   ),
+                  (!isUserInSpectators && !isUserInPlayers) ? Container(width: AppConstants.iconSizeMedium(context),) : 
+                  IconButton(
+                    padding: EdgeInsets.all(AppConstants.paddingSmall(context) * 0.5),
+                    constraints: BoxConstraints(),
+                    icon: ImageIcon(
+                      size: AppConstants.iconSizeMedium(context),
+                      Image.asset(
+                        'assets/icons/chat.png',
+                      ).image,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      NexusAppState.instance!.returnScreenParams.add([event!]);
+                      NexusAppState.instance!.returnScreenPath.add('Event');
+                      NexusAppState.instance!.updateState('Chat', params: [event!.chat!]);
+                    },
+                  ),
+                  (!isUserAuthor) ? Container(width: AppConstants.iconSizeMedium(context),) : 
+                  PopupMenuButton(
+                    padding: EdgeInsets.all(AppConstants.paddingSmall(context) * 0.5),
+                    icon: Icon(
+                      Icons.more_vert,
+                      size: AppConstants.iconSizeMedium(context),
+                      color: Colors.white,
+                    ),
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Text('Edit Event'),
+                      ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Text('Delete Event'),
+                      ),
+                    ],
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        // Navigate to edit screen
+                        NexusAppState.instance!.returnScreenParams.add([event!]);
+                        NexusAppState.instance!.returnScreenPath.add('Event');
+                        NexusAppState.instance!.updateState(
+                          'EditEvent',
+                          params: [event!],
+                        );
+                      } else if (value == 'delete') {
+                        // Handle delete event
+                      }
+                    },
+                  ),
+                
                 ],
               ),
             ),
@@ -1195,11 +1259,11 @@ class EditEventScreenState extends State<EditEventScreen> {
                 focusedDay: DateTime.now(),
                 calendarStyle: CalendarStyle(
                   todayDecoration: BoxDecoration(
-                    gradient: AppConstants.todayGradient,
+                    color: AppConstants.todayColor,
                     shape: BoxShape.circle,
                   ),
                   selectedDecoration: BoxDecoration(
-                    color: AppConstants.selectedDayColor,
+                    gradient: AppConstants.selectionBackgroundGradient,
                     shape: BoxShape.circle,
                   ),
                   defaultTextStyle: TextStyle(color: AppConstants.textColor),

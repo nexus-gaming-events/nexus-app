@@ -86,11 +86,11 @@ class ExpeditionsScreenState extends State<ExpeditionsScreen> {
                       focusedDay: DateTime.now(),
                       calendarStyle: CalendarStyle(
                         todayDecoration: BoxDecoration(
-                          gradient: AppConstants.todayGradient,
+                          color: AppConstants.todayColor,
                           shape: BoxShape.circle,
                         ),
                         selectedDecoration: BoxDecoration(
-                          color: AppConstants.selectedDayColor,
+                          gradient: AppConstants.selectionBackgroundGradient,
                           shape: BoxShape.circle,
                         ),
                         defaultTextStyle: TextStyle(

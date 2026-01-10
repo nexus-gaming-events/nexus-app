@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nexus_app/classes/application_object.dart';
+import 'package:nexus_app/classes/friend_request.dart';
+import 'package:nexus_app/classes/message.dart';
 import 'constants.dart';
 import 'widgets/custom_navbar.dart';
 import 'widgets/galaxy_background.dart';
@@ -12,6 +14,7 @@ import 'screens/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'classes/user_settings.dart';
 import 'classes/group.dart';
+import '../classes/chat.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,15 +36,16 @@ class NexusAppState extends State<NexusApp> {
   int _selectedIndex = 2;
   late final int selfId;
   User? selfUser;
+  List<User> users = [];
   List<ApplicationObject> currentParams = [];
   bool isLoggedIn = true;
   List<String> returnScreenPath = [];
   List<List<ApplicationObject>> returnScreenParams = [];
   List<Event> events = [];
   List<User> friends = [];
-  late List<Group> friendGroups = [
-    Group(id: 0, name: 'All', friends: friends),
-  ];
+  List<Group> friendGroups = [];
+  List<FriendRequest> friendRequests = [];
+  List<Chat> chats = [];
 
   factory NexusAppState() {
     instance ??= NexusAppState._internal();
@@ -56,7 +60,8 @@ class NexusAppState extends State<NexusApp> {
     
     selfId = 0;
     selfUser = User(id: 12, username: "Big Boss", imageUrl: "https://imgur.com/Fjiw4cX.jpg", email: "big.boss@outerheaven.zl");
-    events.add(   new Event(
+    events.add(   
+      Event(
       id: 0,
       title: "Outer Heaven Recruitment Meeting",
       author: selfUser!,
@@ -66,7 +71,12 @@ class NexusAppState extends State<NexusApp> {
       maxPlayers: 10,
       maxSpectators: 10,
       players: [selfUser!],
-      spectators: [],
+      spectators: [User(id: 1, username: "Solid Snake", imageUrl: "https://imgur.com/zj8eDdn.jpg", email: "solid.snake@phylantropy.us"),
+      User(id: 2, username: "Liquid Snake", imageUrl: "https://imgur.com/Wqs6EKD.jpg", email: "liquid.snake@foxhound.us"),
+      User(id: 3, username: "Revolver Ocelot", imageUrl: "https://imgur.com/ohc6hXB.jpg", email: "revolver.ocelot@patriots.us"),
+      ],
+      games: ["Metal Gear Solid"],
+      links: ["https://www.konamimerda.com/mg/"],
     ),
     );
     if(!isLoggedIn){
@@ -82,6 +92,19 @@ class NexusAppState extends State<NexusApp> {
       ];
     friendGroups = [
       Group(id: 0, name: 'Foxhound', friends: friends),
+    ];
+    friendRequests = [
+      FriendRequest(id: 0, username: "Raiden", imageUrl: "https://imgur.com/EwOrrYT.jpg", date: DateTime.now()),
+      FriendRequest(id:1, username: "Campbell", imageUrl: "", date: DateTime(2024, 6, 1)),    
+    ];
+    chats = [
+      Chat(id: 0, eventId: 0, messages: [Message(1, 0, "Father...", DateTime.now(), Colors.blue)]),
+    ];
+    users = [
+      selfUser!,
+      ...friends,
+      User(id: 4, username: "Raiden", imageUrl: "https://imgur.com/EwOrrYT.jpg", email: ""),
+      User(id: 5, username: "Campbell", imageUrl: "", email: ""),
     ];
   }
 
@@ -148,9 +171,11 @@ class NexusAppState extends State<NexusApp> {
       case 'Login':
         return LoginScreen();
       case 'Chats':
-        return Container();
+        return ChatsScreen();
+      case 'Chat':
+        return VisualizeChatScreen(chat: params.isNotEmpty ? params[0] as Chat : chats.first); //Placeholder for ChatScreen
       case 'Home':
-        return Container();
+        return HomeScreen();
       case 'Friends':
         return FriendsScreen();
       case 'Group':
