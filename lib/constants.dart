@@ -14,31 +14,30 @@ class AppConstants {
     53,
     53,
     82,
-    0.70,
+    0.30,
   );
 
   //players colors
   static const Color playersPrimaryColor = Color.fromRGBO(60, 87, 68, 1);
-  static const Color playersSecondaryColor = Color.fromRGBO(53, 82, 53, 0.70);
+  static const Color playersSecondaryColor = Color.fromRGBO(53, 82, 53, 0.30);
   static const Color playersButtonColor = Color.fromRGBO(46, 121, 16, 1);
   static const Color playerUserColor = Color.fromRGBO(19, 30, 18, 1);
   static const Color playerUserTextColor = Color.fromRGBO(202, 208, 98, 1);
 
   //spectators colors
   static const Color spectatorsPrimaryColor = Color.fromRGBO(142, 83, 51, 1);
-  static const Color spectatorsSecondaryColor = Color.fromRGBO(104, 83, 63, 0.70);
+  static const Color spectatorsSecondaryColor = Color.fromRGBO(104, 83, 63, 0.30);
   static const Color spectatorsButtonColor = Color.fromRGBO(121, 72, 16, 1);
   static const Color spectatorUserColor = Color.fromRGBO(50, 33, 19, 1);
   static const Color spectatorUserTextColor = Color.fromRGBO(230, 140, 76, 1);
 
   //games colors
   static const Color gamesPrimaryColor = Color.fromRGBO(17, 107, 145, 1);
-  static const Color gamesSecondaryColor = Color.fromRGBO(62, 107, 116, 0.70);
+  static const Color gamesSecondaryColor = Color.fromRGBO(62, 107, 116, 0.30);
 
   //links colors
   static const Color linksPrimaryColor = Color.fromRGBO(145, 43, 17, 1);
-  static const Color linksSecondaryColor = Color.fromRGBO(116, 62, 62, 0.70);
-
+  static const Color linksSecondaryColor = Color.fromRGBO(116, 62, 62, 0.30);
   //background color
   static const Color primaryBackgroundColor = Color.fromRGBO(11, 32, 63, 1);
   static const Color secondaryBackgroundColor = Color.fromRGBO(34, 11, 63, 1);

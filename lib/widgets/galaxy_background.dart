@@ -31,9 +31,9 @@ class _GalaxyBackgroundState extends State<GalaxyBackground>
 
   Future<void> _loadShader() async {
     // Skip shader loading in debug mode to avoid compilation issues
-    if (kDebugMode) {
+    /*if (kDebugMode) {
       return;
-    }
+    }*/
     
     try {
       final program = await ui.FragmentProgram.fromAsset('shaders/galaxy.frag');
