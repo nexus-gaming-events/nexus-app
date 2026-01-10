@@ -116,7 +116,7 @@ class VisualizeGroupScreen {
             SizedBox(height: AppConstants.paddingMedium(context),),
             Container(
                 padding: EdgeInsets.only(
-                  left: AppConstants.paddingSmall(context),
+                  left: AppConstants.paddingMedium(context),
                 ),
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -128,9 +128,10 @@ class VisualizeGroupScreen {
                   ),
                 ),
               ),
+            SizedBox(height: AppConstants.paddingMedium(context),),
             Container(
-                width: AppConstants.mainContainerWidth(context),
-                height: AppConstants.mainContainerHeight(context)*0.7,
+                width: AppConstants.mainContainerWidth(context)*0.95,
+                height: AppConstants.mainContainerHeight(context)*0.7265,
                 decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(
@@ -160,6 +161,22 @@ class VisualizeGroupScreen {
                   ),
                 ),
               ),
+            Container(
+                            height: AppConstants.iconSizeLarge(context)*1.1,
+                    alignment: Alignment.bottomRight,
+                    child: IconButton(
+                      onPressed: () {
+                       //Add friend to group action
+                      },
+
+                      icon: Icon(
+                        Icons.add_circle,
+                        color: AppConstants.accentColor2,
+                        size: AppConstants.iconSizeLarge(context),
+                        
+                      ),
+                    )
+                    )
           ],
         ),
       ),
