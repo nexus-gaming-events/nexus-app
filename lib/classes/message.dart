@@ -26,8 +26,14 @@ class VisualizeMessagePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isCurrentUser = message.senderId ==
+        NexusAppState.instance!.selfUser!.id;
     return Row(
+      mainAxisAlignment: isCurrentUser
+          ? MainAxisAlignment.end
+          : MainAxisAlignment.start,
       children: [
+        isCurrentUser? SizedBox.shrink() :
         ClipRRect(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
           child: Image.network(
@@ -91,6 +97,21 @@ class VisualizeMessagePreview extends StatelessWidget {
             ),
           ),
         ),
+        !isCurrentUser? SizedBox.shrink() :
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
+          child: Image.network(
+            NexusAppState.instance!.events
+                .firstWhere((event) => event.id == message.eventId)
+                .participants
+                .firstWhere((user) => user.id == message.senderId)
+                .imageUrl,
+            width: AppConstants.iconSizeMedium(context),
+            height: AppConstants.iconSizeMedium(context),
+            fit: BoxFit.cover,
+          ),
+        ),
+        
       ],
     );
   }

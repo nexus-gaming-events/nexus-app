@@ -66,42 +66,66 @@ class VisualizeChatScreen extends StatelessWidget {
                 ),
                 color: AppConstants.secondaryColor,
               ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      BackButtonWidget(),
-                      SizedBox(
-                        width: AppConstants.mainContainerWidth(context) * 0.01,
-                      ),
-                      Expanded(
-                        child: Text(
-                          NexusAppState.instance!.events.firstWhere((event) => event.id == chat.eventId).title,
-                          style: TextStyle(
-                            color: AppConstants.textColor,
-                            fontSize: () {
-                              final baseFontSize =
-                                  AppConstants.fontSizeXLargeResponsive(
-                                    context,
-                                  ) +
-                                  2;
-                              final titleLength = NexusAppState.instance!.events.firstWhere((event) => event.id == chat.eventId).title.length;
-                              if (titleLength <= 15) return baseFontSize;
-                              if (titleLength <= 25) return baseFontSize - 2;
-                              if (titleLength <= 35) return baseFontSize - 4;
-                              return (baseFontSize - 6).clamp(
-                                AppConstants.fontSizeMediumResponsive(context),
-                                baseFontSize,
-                              );
-                            }(),
-                            fontWeight: FontWeight.bold,
-                          ),
+              child: Flexible(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        BackButtonWidget(),
+                        SizedBox(
+                          width: AppConstants.mainContainerWidth(context) * 0.01,
                         ),
-                      ),
-                    ],
-                  ),
-                  //print all messages from bottom to top
-                ],
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              NexusAppState.instance!.events.firstWhere((event) => event.id == chat.eventId).title,
+                              style: TextStyle(
+                                color: AppConstants.textColor,
+                                fontSize: () {
+                                  final baseFontSize =
+                                      AppConstants.fontSizeXLargeResponsive(
+                                        context,
+                                      ) +
+                                      2;
+                                  final titleLength = NexusAppState.instance!.events.firstWhere((event) => event.id == chat.eventId).title.length;
+                                  if (titleLength <= 15) return baseFontSize;
+                                  if (titleLength <= 25) return baseFontSize - 2;
+                                  if (titleLength <= 35) return baseFontSize - 4;
+                                  return (baseFontSize - 6).clamp(
+                                    AppConstants.fontSizeMediumResponsive(context),
+                                    baseFontSize,
+                                  );
+                                }(),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: AppConstants.mainContainerWidth(context) * 0.7,
+                              ),
+                              child: ClipRect(
+                                clipBehavior: Clip.hardEdge,
+                                child: Text(
+                                  NexusAppState.instance!.events.firstWhere((event) => event.id == chat.eventId).participants.map((participant) => participant.username).toList().join(', '),
+                                  style: TextStyle(
+                                    color: AppConstants.semitransparentTextColor,
+                                    fontSize: AppConstants.fontSizeMediumResponsive(context),
+                                    fontWeight: FontWeight.normal,  
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    //print all messages from bottom to top
+                  ],
+                ),
               ),
             ),
             Expanded(
@@ -118,6 +142,64 @@ class VisualizeChatScreen extends StatelessWidget {
                     child: VisualizeMessagePreview(message: message),
                   );
                 },
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.all(AppConstants.paddingMedium(context)),
+              decoration: BoxDecoration(
+                color: AppConstants.secondaryColor,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(
+                    AppConstants.borderRadiusMedium(context),
+                  ),
+                  bottomRight: Radius.circular(
+                    AppConstants.borderRadiusMedium(context),
+                  ),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      style: TextStyle(
+                        color: AppConstants.textColor,
+                        fontSize: AppConstants.fontSizeMediumResponsive(context),
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Type a message...',
+                        hintStyle: TextStyle(
+                          color: AppConstants.semitransparentTextColor,
+                        ),
+                        filled: true,
+                        fillColor: AppConstants.primaryColor,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.borderRadiusSmall(context),
+                          ),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: AppConstants.paddingMedium(context),
+                          vertical: AppConstants.paddingSmall(context),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: AppConstants.paddingSmall(context)),
+                  IconButton(
+                    onPressed: () {
+                      // TODO: Implement send message logic
+                    },
+                    icon: Icon(
+                      Icons.send,
+                      color: AppConstants.textColor,
+                      size: AppConstants.iconSizeMedium(context)*0.8,
+                    ),
+                    style: IconButton.styleFrom(
+                      backgroundColor: AppConstants.accentColor2,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -151,6 +233,7 @@ class VisualizeChatPreview extends StatelessWidget {
             SizedBox(width: AppConstants.paddingMedium(context)),
             Expanded(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     NexusAppState.instance!.events.firstWhere((event) => event.id == chat.eventId).title,
@@ -162,12 +245,13 @@ class VisualizeChatPreview extends StatelessWidget {
                   ),
                   SizedBox(height: AppConstants.paddingSmall(context)),
                   Text(
+                    textAlign: TextAlign.left,
                     chat.messages.isNotEmpty
                         ? '${NexusAppState.instance!.events.firstWhere((event) => event.id == chat.eventId).participants.firstWhere((user) => user.id == chat.messages.last.senderId).username}: ${chat.messages.last.content}'
                         : '',
                     style: TextStyle(
                       fontSize: AppConstants.fontSizeMediumResponsive(context),
-                      color: AppConstants.bodyTextColor,
+                      color: AppConstants.semitransparentTextColor,
                     ),
                   )
                 ],

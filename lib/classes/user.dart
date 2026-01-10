@@ -70,7 +70,7 @@ class VisualizeUserScreen {
                 children: [
                   Container(
                     width: AppConstants.mainContainerWidth(context),
-                    height: AppConstants.mainContainerHeight(context) * 0.3,
+                    height: AppConstants.mainContainerHeight(context) * 0.2,
                     decoration: BoxDecoration(
                       gradient: UserSettings.bannerGradient,
                       borderRadius: BorderRadius.only(
@@ -85,7 +85,7 @@ class VisualizeUserScreen {
                   ),
                   Positioned(
                     top:
-                        AppConstants.mainContainerHeight(context) * 0.3 -
+                        AppConstants.mainContainerHeight(context) * 0.2 -
                         AppConstants.iconSizeLarge(context),
                     child: Container(
                       margin: EdgeInsets.symmetric(
@@ -148,12 +148,119 @@ class VisualizeUserScreen {
               Text(
                 user.username,
                 style: TextStyle(
-                  fontSize: AppConstants.fontSizeLargeResponsive(context),
+                  fontSize: AppConstants.fontSizeXLargeResponsive(context),
                   fontWeight: FontWeight.bold,
                   color: AppConstants.textColor,
                 ),
               ),
               SizedBox(height: AppConstants.paddingLarge(context) * 1.5),
+              user.id == NexusAppState.instance!.selfUser!.id ?
+              InkWell(
+                onTap: () {
+                  NexusAppState.instance!.returnScreenParams.add([VisualizeUserScreen.user]);
+                  NexusAppState.instance!.returnScreenPath.add('User');
+                  NexusAppState.instance!.updateState(
+                    'FriendRequests',
+                  );
+                },
+                child: Container(
+                width: AppConstants.mainContainerWidth(context),
+                height: AppConstants.headerHeight(context)*0.5,
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.only(
+                  left: AppConstants.paddingMedium(context),
+                ),
+                decoration: BoxDecoration(
+                  color: AppConstants.secondaryColor,
+                  borderRadius: BorderRadius.all(Radius.circular(AppConstants.borderRadiusMedium(context))),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.email,
+                      color: AppConstants.textColor,
+                      size: AppConstants.iconSizeSmall(context),
+                    ),
+                    SizedBox(width: AppConstants.paddingMedium(context)),
+                    Text(
+                      "Friend Requests",
+                      style: TextStyle(
+                        fontSize: AppConstants.fontSizeLargeResponsive(context),
+                        color: AppConstants.textColor,
+                      ),
+                    ),
+                  ],),
+                              ),
+              ): 
+              NexusAppState.instance!.friends.contains(user) ?
+              InkWell(
+                onTap: () {
+                 //Remove friend logic
+                },
+                child: Container(
+                width: AppConstants.mainContainerWidth(context),
+                height: AppConstants.headerHeight(context)*0.5,
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.only(
+                  left: AppConstants.paddingMedium(context),
+                ),
+                decoration: BoxDecoration(
+                  color: AppConstants.errorColor,
+                  borderRadius: BorderRadius.all(Radius.circular(AppConstants.borderRadiusMedium(context))),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.person_remove,
+                      color: AppConstants.textColor,
+                      size: AppConstants.iconSizeSmall(context),
+                    ),
+                    SizedBox(width: AppConstants.paddingMedium(context)),
+                    Text(
+                      "Remove Friend",
+                      style: TextStyle(
+                        fontSize: AppConstants.fontSizeLargeResponsive(context),
+                        color: AppConstants.textColor,
+                      ),
+                    ),
+                  ],),
+                              ),
+              )
+              :
+              InkWell(
+                onTap: () {
+                 //Add friend logic
+                },
+                child: Container(
+                width: AppConstants.mainContainerWidth(context),
+                height: AppConstants.headerHeight(context)*0.5,
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.only(
+                  left: AppConstants.paddingMedium(context),
+                ),
+                decoration: BoxDecoration(
+                  color: AppConstants.successColor,
+                  borderRadius: BorderRadius.all(Radius.circular(AppConstants.borderRadiusMedium(context))),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.person_add,
+                      color: AppConstants.textColor,
+                      size: AppConstants.iconSizeSmall(context),
+                    ),
+                    SizedBox(width: AppConstants.paddingMedium(context)),
+                    Text(
+                      "Add Friend",
+                      style: TextStyle(
+                        fontSize: AppConstants.fontSizeLargeResponsive(context),
+                        color: AppConstants.textColor,
+                      ),
+                    ),
+                  ],),
+                              ),
+              ),
+              SizedBox(height: AppConstants.paddingMedium(context),),
               Container(
                 padding: EdgeInsets.only(
                   left: AppConstants.paddingSmall(context),

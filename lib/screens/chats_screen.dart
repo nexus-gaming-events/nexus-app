@@ -10,6 +10,7 @@ class ChatsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint(NexusAppState.instance!.chats.length.toString());
     return Padding(
         padding: EdgeInsets.only(
           left: AppConstants.paddingSmall(context),

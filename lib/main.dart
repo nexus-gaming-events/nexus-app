@@ -15,6 +15,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'classes/user_settings.dart';
 import 'classes/group.dart';
 import '../classes/chat.dart';
+import 'screens/friend_requests_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,7 +60,7 @@ class NexusAppState extends State<NexusApp> {
     super.initState();
     
     selfId = 0;
-    selfUser = User(id: 12, username: "Big Boss", imageUrl: "https://imgur.com/Fjiw4cX.jpg", email: "big.boss@outerheaven.zl");
+    selfUser = User(id: 0, username: "Big Boss", imageUrl: "https://imgur.com/Fjiw4cX.jpg", email: "big.boss@outerheaven.zl");
     events.add(   
       Event(
       id: 0,
@@ -70,7 +71,7 @@ class NexusAppState extends State<NexusApp> {
       date: DateTime.now(),
       maxPlayers: 10,
       maxSpectators: 10,
-      players: [selfUser!],
+      players: [selfUser!, User(id:4, username: "Raiden", imageUrl: "https://imgur.com/EwOrrYT.jpg", email: "")],
       spectators: [User(id: 1, username: "Solid Snake", imageUrl: "https://imgur.com/zj8eDdn.jpg", email: "solid.snake@phylantropy.us"),
       User(id: 2, username: "Liquid Snake", imageUrl: "https://imgur.com/Wqs6EKD.jpg", email: "liquid.snake@foxhound.us"),
       User(id: 3, username: "Revolver Ocelot", imageUrl: "https://imgur.com/ohc6hXB.jpg", email: "revolver.ocelot@patriots.us"),
@@ -98,7 +99,7 @@ class NexusAppState extends State<NexusApp> {
       FriendRequest(id:1, username: "Campbell", imageUrl: "", date: DateTime(2024, 6, 1)),    
     ];
     chats = [
-      Chat(id: 0, eventId: 0, messages: [Message(1, 0, "Father...", DateTime.now(), Colors.blue)]),
+      Chat(id: 0, eventId: 0, messages: [Message(1, 0, "Father...", DateTime(2024, 6, 1), Colors.blue), Message(0, 0, "Yes, my son?", DateTime(2025, 6, 1), Colors.green)]),
     ];
     users = [
       selfUser!,
@@ -178,6 +179,8 @@ class NexusAppState extends State<NexusApp> {
         return HomeScreen();
       case 'Friends':
         return FriendsScreen();
+      case 'FriendRequests':
+        return FriendRequestsScreen();
       case 'Group':
         VisualizeGroupScreen.group = params.isNotEmpty? params[0] as Group : null;
         return VisualizeGroupScreen.buildFullDetails(context);
