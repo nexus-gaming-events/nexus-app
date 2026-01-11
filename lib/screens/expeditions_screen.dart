@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nexus_app/data_manager.dart';
 import '../constants.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../classes/event.dart';
@@ -21,8 +22,8 @@ class ExpeditionsScreenState extends State<ExpeditionsScreen> {
   static bool _showingEventDetails = false;
   static List<Event> _getEventsForDay(DateTime day) {
     try {
-      if (NexusAppState.instance!.events.isEmpty) return <Event>[];
-      return NexusAppState.instance!.events.where((event) => isSameDay(event.date, day)).toList();
+      if (DataManager.getEvents().isEmpty) return <Event>[];
+      return DataManager.getEvents().where((event) => isSameDay(event.date, day)).toList();
     } catch (_) {
       return <Event>[];
     }

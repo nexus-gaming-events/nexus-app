@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nexus_app/classes/chat.dart';
+import 'package:nexus_app/data_manager.dart';
 import 'package:nexus_app/main.dart';
 import 'visual_link.dart';
 import '../constants.dart';
@@ -38,7 +39,7 @@ class Event extends ApplicationObject {
     this.games,
     this.links,
   }) {
-    chat = Chat(id: 0, eventId: id, messages: []);
+    chat = Chat(eventId: id, messages: []);
 
     participants = [];
     if (players != null) {
@@ -50,28 +51,44 @@ class Event extends ApplicationObject {
   }
 }
 
-class VisualizeEventScreen {
-  static bool _showingEventDetails = false;
-  static User? _activeUser;
-  static Event? event;
+class VisualizeEventScreen extends StatefulWidget {
+  final Event? event;
 
-  static Widget buildFullDetails(BuildContext context) {
-    if (event == null) {
-      debugPrint('No event to display');
-      return Container();
-    }
-    bool isUserInPlayers =
-        (event!.players != null &&
-        event!.players!.any(
-          (player) => player.id == NexusAppState.instance!.selfUser!.id,
-        ));
-    bool isUserInSpectators =
-        (event!.spectators != null &&
-        event!.spectators!.any(
-          (spectator) => spectator.id == NexusAppState.instance!.selfUser!.id,
-        ));
-    bool isUserAuthor =
-        event!.author.id == NexusAppState.instance!.selfUser!.id;
+  const VisualizeEventScreen({Key? key, required this.event}) : super(key: key);
+
+  @override
+  State<VisualizeEventScreen> createState() => _VisualizeEventScreenState();
+}
+
+class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
+  late bool isUserInPlayers;
+  late bool isUserInSpectators;
+  late bool isUserAuthor;
+  late Event event;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateUserStatus();
+  }
+
+  void _updateUserStatus() {
+    isUserInPlayers = DataManager.isUserInPlayers(
+      DataManager.getSelfUser()!.id,
+      widget.event?.id ?? -1,
+    );
+    isUserInSpectators = DataManager.isUserInSpectators(
+      DataManager.getSelfUser()!.id,
+      widget.event?.id ?? -1,
+    );
+    isUserAuthor = DataManager.isAuthor(
+      DataManager.getSelfUser()!.id,
+      widget.event?.id ?? -1,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
         left: AppConstants.paddingSmall(context),
@@ -94,7 +111,7 @@ class VisualizeEventScreen {
           children: [
             Container(
               width: AppConstants.mainContainerWidth(context),
-              height: AppConstants.headerHeight(context)*1.1,
+              height: AppConstants.headerHeight(context) * 1.1,
               padding: EdgeInsets.only(
                 top: (AppConstants.paddingSmall(context) > 3
                     ? AppConstants.paddingSmall(context) - 3
@@ -123,7 +140,7 @@ class VisualizeEventScreen {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${event!.author.username}\'s',
+                          '${widget.event!.author.username}\'s',
                           style: TextStyle(
                             color: AppConstants.semitransparentTextColor,
                             fontSize:
@@ -137,7 +154,7 @@ class VisualizeEventScreen {
                           ),
                         ),
                         Text(
-                          event!.title,
+                          widget.event!.title,
                           style: TextStyle(
                             color: AppConstants.textColor,
                             fontSize: () {
@@ -146,7 +163,7 @@ class VisualizeEventScreen {
                                     context,
                                   ) +
                                   2;
-                              final titleLength = event!.title.length;
+                              final titleLength = widget.event!.title.length;
                               if (titleLength <= 15) return baseFontSize;
                               if (titleLength <= 25) return baseFontSize - 2;
                               if (titleLength <= 35) return baseFontSize - 4;
@@ -160,62 +177,121 @@ class VisualizeEventScreen {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          '${event!.date.year}/${event!.date.month}/${event!.date.day} ${event!.date.hour}:${event!.date.minute.toString().padLeft(2, '0')}',
+                          '${widget.event!.date.year}/${widget.event!.date.month}/${widget.event!.date.day} ${widget.event!.date.hour}:${widget.event!.date.minute.toString().padLeft(2, '0')}',
                           style: TextStyle(color: AppConstants.textColor),
                         ),
                       ],
                     ),
                   ),
-                  (!isUserInSpectators && !isUserInPlayers) ? Container(width: AppConstants.iconSizeMedium(context),) : 
-                  IconButton(
-                    padding: EdgeInsets.all(AppConstants.paddingSmall(context) * 0.5),
-                    constraints: BoxConstraints(),
-                    icon: ImageIcon(
-                      size: AppConstants.iconSizeMedium(context),
-                      Image.asset(
-                        'assets/icons/chat.png',
-                      ).image,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      NexusAppState.instance!.returnScreenParams.add([event!]);
-                      NexusAppState.instance!.returnScreenPath.add('Event');
-                      NexusAppState.instance!.updateState('Chat', params: [event!.chat!]);
-                    },
-                  ),
-                  (!isUserAuthor) ? Container(width: AppConstants.iconSizeMedium(context),) : 
-                  PopupMenuButton(
-                    padding: EdgeInsets.all(AppConstants.paddingSmall(context) * 0.5),
-                    icon: Icon(
-                      Icons.more_vert,
-                      size: AppConstants.iconSizeMedium(context),
-                      color: Colors.white,
-                    ),
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: Text('Edit Event'),
-                      ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Text('Delete Event'),
-                      ),
-                    ],
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        // Navigate to edit screen
-                        NexusAppState.instance!.returnScreenParams.add([event!]);
-                        NexusAppState.instance!.returnScreenPath.add('Event');
-                        NexusAppState.instance!.updateState(
-                          'EditEvent',
-                          params: [event!],
-                        );
-                      } else if (value == 'delete') {
-                        // Handle delete event
-                      }
-                    },
-                  ),
-                
+                  (!isUserInSpectators && !isUserInPlayers)
+                      ? Container(width: AppConstants.iconSizeMedium(context))
+                      : IconButton(
+                          padding: EdgeInsets.all(
+                            AppConstants.paddingSmall(context) * 0.5,
+                          ),
+                          constraints: BoxConstraints(),
+                          icon: ImageIcon(
+                            size: AppConstants.iconSizeMedium(context),
+                            Image.asset('assets/icons/chat.png').image,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            NexusAppState.instance!.returnScreenParams.add([
+                              widget.event!,
+                            ]);
+                            NexusAppState.instance!.returnScreenPath.add(
+                              'Event',
+                            );
+                            NexusAppState.instance!.updateState(
+                              'Chat',
+                              params: [widget.event!.chat!],
+                            );
+                          },
+                        ),
+                  (!isUserAuthor)
+                      ? Container(width: AppConstants.iconSizeMedium(context))
+                      : PopupMenuButton(
+                          padding: EdgeInsets.all(
+                            AppConstants.paddingSmall(context) * 0.5,
+                          ),
+                          icon: Icon(
+                            Icons.more_vert,
+                            size: AppConstants.iconSizeMedium(context),
+                            color: Colors.white,
+                          ),
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'edit',
+                              child: Text('Edit Event'),
+                            ),
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Text('Delete Event'),
+                            ),
+                          ],
+                          onSelected: (value) {
+                            if (value == 'edit') {
+                              // Navigate to edit screen
+                              NexusAppState.instance!.returnScreenParams.add([
+                                widget.event!,
+                              ]);
+                              NexusAppState.instance!.returnScreenPath.add(
+                                'Event',
+                              );
+                              NexusAppState.instance!.updateState(
+                                'EditEvent',
+                                params: [widget.event!],
+                              );
+                            } else if (value == 'delete') {
+                              DataManager.deleteEvent(widget.event!.id);
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    backgroundColor:
+                                        AppConstants.secondaryColor,
+                                    title: Text(
+                                      'Event Deleted',
+                                      style: TextStyle(
+                                        color: AppConstants.textColor,
+                                      ),
+                                    ),
+                                    content: Text(
+                                      'The event has been successfully deleted.',
+                                      style: TextStyle(
+                                        color: AppConstants.textColor,
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          NexusAppState
+                                              .instance!
+                                              .returnScreenParams
+                                              .clear();
+                                          NexusAppState
+                                              .instance!
+                                              .returnScreenPath
+                                              .clear();
+                                          NexusAppState.instance!.updateState(
+                                            'Home',
+                                          );
+                                        },
+                                        child: Text(
+                                          'OK',
+                                          style: TextStyle(
+                                            color: AppConstants.textColor,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+                          },
+                        ),
                 ],
               ),
             ),
@@ -286,7 +362,7 @@ class VisualizeEventScreen {
                                     : 0),
                               ),
                               child: Text(
-                                event!.description,
+                                widget.event!.description,
                                 textAlign: TextAlign.start,
                                 style: TextStyle(color: AppConstants.textColor),
                               ),
@@ -370,7 +446,7 @@ class VisualizeEventScreen {
                                   ),
                                   Text(
                                     textAlign: TextAlign.start,
-                                    '${event!.players == null ? 0 : event!.players!.length}/${event!.maxPlayers}',
+                                    '${widget.event!.players == null ? 0 : widget.event!.players!.length}/${widget.event!.maxPlayers}',
                                     style: TextStyle(
                                       color:
                                           AppConstants.semitransparentTextColor,
@@ -425,11 +501,11 @@ class VisualizeEventScreen {
                                             : 0),
                                       ),
                                       child:
-                                          event!.players == null ||
-                                              event!.players!.isEmpty
+                                          widget.event!.players == null ||
+                                              widget.event!.players!.isEmpty
                                           ? Container()
                                           : Column(
-                                              children: event!.players!
+                                              children: widget.event!.players!
                                                   .map(
                                                     (item) => InkWell(
                                                       onTap: () {
@@ -437,8 +513,7 @@ class VisualizeEventScreen {
                                                             .instance!
                                                             .returnScreenParams
                                                             .add([
-                                                              VisualizeEventScreen
-                                                                  .event!,
+                                                              widget.event!,
                                                             ]);
                                                         NexusAppState
                                                             .instance!
@@ -473,8 +548,8 @@ class VisualizeEventScreen {
                                   child:
                                       isUserInSpectators ||
                                           isUserAuthor ||
-                                          event!.players!.length >=
-                                              event!.maxPlayers
+                                          widget.event!.players!.length >=
+                                              widget.event!.maxPlayers
                                       ? Container()
                                       : Container(
                                           alignment: Alignment.bottomCenter,
@@ -504,51 +579,81 @@ class VisualizeEventScreen {
                                                 context,
                                               ),
                                             ),
-                                            child: Row(
-                                              children: [
-                                                Text(
-                                                  isUserInPlayers
-                                                      ? 'Leave as Player     '
-                                                      : 'Join as Player      ',
-                                                  style: TextStyle(
-                                                    color: AppConstants
-                                                        .semitransparentTextColor,
-                                                    fontSize:
-                                                        AppConstants.fontSizeMediumResponsive(
+                                            child: InkWell(
+                                              onTap: () {
+                                                if (isUserInPlayers) {
+                                                  DataManager.leaveEvent(
+                                                    widget.event!.id,
+                                                  );
+                                                  setState(() {
+                                                    isUserInPlayers = false;
+                                                    widget.event!.players!
+                                                        .removeWhere(
+                                                          (user) =>
+                                                              user.id ==
+                                                              DataManager.getSelfUser()!
+                                                                  .id,
+                                                        );
+                                                  });
+                                                } else {
+                                                  DataManager.joinEvent(
+                                                    widget.event!.id,
+                                                    "player",
+                                                  );
+                                                  setState(() {
+                                                    isUserInPlayers = true;
+                                                    widget.event!.players!.add(
+                                                      DataManager.getSelfUser()!,
+                                                    );
+                                                  });
+                                                }
+                                              },
+                                              child: Row(
+                                                children: [
+                                                  Text(
+                                                    isUserInPlayers
+                                                        ? 'Leave as Player     '
+                                                        : 'Join as Player      ',
+                                                    style: TextStyle(
+                                                      color: AppConstants
+                                                          .semitransparentTextColor,
+                                                      fontSize:
+                                                          AppConstants.fontSizeMediumResponsive(
+                                                            context,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width:
+                                                        AppConstants.screenWidth(
                                                           context,
+                                                          0.09,
+                                                        ).clamp(
+                                                          AppConstants.screenWidth(
+                                                            context,
+                                                            0.05,
+                                                          ),
+                                                          AppConstants.screenWidth(
+                                                            context,
+                                                            0.13,
+                                                          ),
                                                         ),
                                                   ),
-                                                ),
-                                                SizedBox(
-                                                  width:
-                                                      AppConstants.screenWidth(
-                                                        context,
-                                                        0.09,
-                                                      ).clamp(
-                                                        AppConstants.screenWidth(
-                                                          context,
-                                                          0.05,
+                                                  isUserInPlayers
+                                                      ? Icon(
+                                                          Icons.remove_circle,
+                                                          color: AppConstants
+                                                              .playersButtonColor,
+                                                          size: 14,
+                                                        )
+                                                      : Icon(
+                                                          Icons.add_circle,
+                                                          color: AppConstants
+                                                              .playersButtonColor,
+                                                          size: 14,
                                                         ),
-                                                        AppConstants.screenWidth(
-                                                          context,
-                                                          0.13,
-                                                        ),
-                                                      ),
-                                                ),
-                                                isUserInPlayers
-                                                    ? Icon(
-                                                        Icons.remove_circle,
-                                                        color: AppConstants
-                                                            .playersButtonColor,
-                                                        size: 14,
-                                                      )
-                                                    : Icon(
-                                                        Icons.add_circle,
-                                                        color: AppConstants
-                                                            .playersButtonColor,
-                                                        size: 14,
-                                                      ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -624,7 +729,7 @@ class VisualizeEventScreen {
                                   ),
                                   Text(
                                     textAlign: TextAlign.start,
-                                    '${event!.spectators == null ? 0 : event!.spectators!.length}/${event!.maxSpectators}',
+                                    '${widget.event!.spectators == null ? 0 : widget.event!.spectators!.length}/${widget.event!.maxSpectators}',
                                     style: TextStyle(
                                       color:
                                           AppConstants.semitransparentTextColor,
@@ -679,11 +784,13 @@ class VisualizeEventScreen {
                                             : 0),
                                       ),
                                       child:
-                                          event!.spectators == null ||
-                                              event!.spectators!.isEmpty
+                                          widget.event!.spectators == null ||
+                                              widget.event!.spectators!.isEmpty
                                           ? Container()
                                           : Column(
-                                              children: event!.spectators!
+                                              children: widget
+                                                  .event!
+                                                  .spectators!
                                                   .map(
                                                     (item) => InkWell(
                                                       onTap: () {
@@ -691,8 +798,7 @@ class VisualizeEventScreen {
                                                             .instance!
                                                             .returnScreenParams
                                                             .add([
-                                                              VisualizeEventScreen
-                                                                  .event!,
+                                                              widget.event!,
                                                             ]);
                                                         NexusAppState
                                                             .instance!
@@ -727,8 +833,8 @@ class VisualizeEventScreen {
                                   child:
                                       isUserInPlayers ||
                                           isUserAuthor ||
-                                          event!.players!.length >=
-                                              event!.maxPlayers
+                                          widget.event!.players!.length >=
+                                              widget.event!.maxPlayers
                                       ? Container()
                                       : Container(
                                           alignment: Alignment.bottomCenter,
@@ -758,51 +864,81 @@ class VisualizeEventScreen {
                                                 context,
                                               ),
                                             ),
-                                            child: Row(
-                                              children: [
-                                                Text(
-                                                  isUserInSpectators
-                                                      ? 'Leave as Spectator'
-                                                      : 'Join as Spectator ',
-                                                  style: TextStyle(
-                                                    color: AppConstants
-                                                        .semitransparentTextColor,
-                                                    fontSize:
-                                                        AppConstants.fontSizeMediumResponsive(
+                                            child: InkWell(
+                                              onTap: () {
+                                                if (isUserInSpectators) {
+                                                  DataManager.leaveEvent(
+                                                    widget.event!.id,
+                                                  );
+                                                  setState(() {
+                                                    isUserInSpectators = false;
+                                                    widget.event!.spectators!
+                                                        .removeWhere(
+                                                          (user) =>
+                                                              user.id ==
+                                                              DataManager.getSelfUser()!
+                                                                  .id,
+                                                        );
+                                                  });
+                                                } else {
+                                                  DataManager.joinEvent(
+                                                    widget.event!.id,
+                                                    "spectator",
+                                                  );
+                                                  setState(() {
+                                                    isUserInSpectators = true;
+                                                    widget.event!.spectators!.add(
+                                                      DataManager.getSelfUser()!,
+                                                    );
+                                                  });
+                                                }
+                                              },
+                                              child: Row(
+                                                children: [
+                                                  Text(
+                                                    isUserInSpectators
+                                                        ? 'Leave as Spectator'
+                                                        : 'Join as Spectator ',
+                                                    style: TextStyle(
+                                                      color: AppConstants
+                                                          .semitransparentTextColor,
+                                                      fontSize:
+                                                          AppConstants.fontSizeMediumResponsive(
+                                                            context,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width:
+                                                        AppConstants.screenWidth(
                                                           context,
+                                                          0.09,
+                                                        ).clamp(
+                                                          AppConstants.screenWidth(
+                                                            context,
+                                                            0.05,
+                                                          ),
+                                                          AppConstants.screenWidth(
+                                                            context,
+                                                            0.13,
+                                                          ),
                                                         ),
                                                   ),
-                                                ),
-                                                SizedBox(
-                                                  width:
-                                                      AppConstants.screenWidth(
-                                                        context,
-                                                        0.09,
-                                                      ).clamp(
-                                                        AppConstants.screenWidth(
-                                                          context,
-                                                          0.05,
+                                                  isUserInSpectators
+                                                      ? Icon(
+                                                          Icons.remove_circle,
+                                                          color: AppConstants
+                                                              .spectatorsButtonColor,
+                                                          size: 14,
+                                                        )
+                                                      : Icon(
+                                                          Icons.add_circle,
+                                                          color: AppConstants
+                                                              .spectatorsButtonColor,
+                                                          size: 14,
                                                         ),
-                                                        AppConstants.screenWidth(
-                                                          context,
-                                                          0.13,
-                                                        ),
-                                                      ),
-                                                ),
-                                                isUserInSpectators
-                                                    ? Icon(
-                                                        Icons.remove_circle,
-                                                        color: AppConstants
-                                                            .spectatorsButtonColor,
-                                                        size: 14,
-                                                      )
-                                                    : Icon(
-                                                        Icons.add_circle,
-                                                        color: AppConstants
-                                                            .spectatorsButtonColor,
-                                                        size: 14,
-                                                      ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -877,10 +1013,11 @@ class VisualizeEventScreen {
                                     : 0),
                               ),
                               child:
-                                  event!.games == null || event!.games!.isEmpty
+                                  widget.event!.games == null ||
+                                      widget.event!.games!.isEmpty
                                   ? Container()
                                   : Column(
-                                      children: event!.games!
+                                      children: widget.event!.games!
                                           .map(
                                             (game) => Text(
                                               game,
@@ -961,10 +1098,11 @@ class VisualizeEventScreen {
                                     : 0),
                               ),
                               child:
-                                  event!.links == null || event!.links!.isEmpty
+                                  widget.event!.links == null ||
+                                      widget.event!.links!.isEmpty
                                   ? Container()
                                   : Column(
-                                      children: event!.links!
+                                      children: widget.event!.links!
                                           .map(
                                             (link) => Text(
                                               link,
@@ -1075,7 +1213,6 @@ class EditEventScreenState extends State<EditEventScreen> {
   late TextEditingController _linkController;
   late String friendGroup;
 
-  
   @override
   void initState() {
     super.initState();
@@ -1102,9 +1239,9 @@ class EditEventScreenState extends State<EditEventScreen> {
           : '',
     );
     newEvent = new Event(
-      id: -1,
+      id: widget.event != null ? widget.event!.id : -1,
       title: "",
-      author: NexusAppState.instance!.selfUser!,
+      author: DataManager.getSelfUser()!,
       description: "",
       date: DateTime.now(),
       maxPlayers: 0,
@@ -1293,7 +1430,7 @@ class EditEventScreenState extends State<EditEventScreen> {
               SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
               Container(
                 width: AppConstants.descriptionWidth(context),
-                height: AppConstants.descriptionHeight(context)*1.15,
+                height: AppConstants.descriptionHeight(context) * 1.15,
                 //padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   color: AppConstants.descriptionPrimaryColor,
@@ -1485,7 +1622,7 @@ class EditEventScreenState extends State<EditEventScreen> {
               SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
               Container(
                 width: AppConstants.descriptionWidth(context),
-                height: AppConstants.descriptionHeight(context)*0.75,
+                height: AppConstants.descriptionHeight(context) * 0.75,
                 //padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   color: AppConstants.gamesPrimaryColor,
@@ -1571,7 +1708,7 @@ class EditEventScreenState extends State<EditEventScreen> {
               SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
               Container(
                 width: AppConstants.descriptionWidth(context),
-                height: AppConstants.descriptionHeight(context)*0.9,
+                height: AppConstants.descriptionHeight(context) * 0.9,
                 //padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   color: AppConstants.linksPrimaryColor,
@@ -1658,99 +1795,147 @@ class EditEventScreenState extends State<EditEventScreen> {
               Container(
                 padding: EdgeInsets.all(AppConstants.paddingMedium(context)),
                 width: AppConstants.descriptionWidth(context),
-                height: AppConstants.sectionHeaderHeight(context)*2,
+                height: AppConstants.sectionHeaderHeight(context) * 2,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(  
-                    AppConstants.borderRadiusMedium(context),),
-                    color: AppConstants.secondaryColor,
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.borderRadiusMedium(context),
                   ),
-                  
+                  color: AppConstants.secondaryColor,
+                ),
+
                 child: Row(
                   children: [
                     Text(
                       'Friends to Invite',
                       style: TextStyle(
                         color: AppConstants.textColor,
-                        fontSize: AppConstants.fontSizeLargeResponsive(
-                          context,
-                        ),
+                        fontSize: AppConstants.fontSizeLargeResponsive(context),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(width: AppConstants.paddingLarge(context) * 12),
                     DropdownButton<String>(
-                                value: friendGroup,
-                                isExpanded: false,
-                                underline: SizedBox(),
-                                dropdownColor: AppConstants.secondaryColor,
+                      value: friendGroup,
+                      isExpanded: false,
+                      underline: SizedBox(),
+                      dropdownColor: AppConstants.secondaryColor,
+                      style: TextStyle(
+                        color: AppConstants.textColor,
+                        fontSize: AppConstants.fontSizeMediumResponsive(
+                          context,
+                        ),
+                      ),
+                      icon: Icon(
+                        Icons.arrow_drop_down,
+                        color: AppConstants.textColor,
+                      ),
+                      items:
+                          DataManager.getGroups().map((group) {
+                            return DropdownMenuItem<String>(
+                              value: group.name,
+                              child: Text(
+                                group.name,
                                 style: TextStyle(
                                   color: AppConstants.textColor,
-                                  fontSize: AppConstants.fontSizeMediumResponsive(context),
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                icon: Icon(
-                                  Icons.arrow_drop_down,
-                                  color: AppConstants.textColor,
-                                ),
-                                items: NexusAppState.instance!.friendGroups.map((group) {
-                                  return DropdownMenuItem<String>(
-                                    value: group.name,
-                                    child: Text(
-                                      group.name,
-                                      style: TextStyle(
-                                        color: AppConstants.textColor,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  );
-                                }).toList()..add(DropdownMenuItem<String>(
-                                  value: "All",
-                                  child: Text(
-                                    "All",
-                                    style: TextStyle(
-                                      color: AppConstants.textColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                )),
-                                onChanged: (value) {
-                                  setState(() {
-                                    friendGroup = value!;
-                                  });
-                                },
                               ),
+                            );
+                          }).toList()..add(
+                            DropdownMenuItem<String>(
+                              value: "All",
+                              child: Text(
+                                "All",
+                                style: TextStyle(
+                                  color: AppConstants.textColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                      onChanged: (value) {
+                        setState(() {
+                          friendGroup = value!;
+                        });
+                      },
+                    ),
                   ],
                 ),
               ),
               SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
               Container(
-              height: AppConstants.mainContainerHeight(context) * 0.06,
-              width: AppConstants.mainContainerWidth(context) * 0.4,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Save event logic here
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: AppConstants.paddingLarge(context),
-                    vertical: AppConstants.paddingMedium(context),
+                height: AppConstants.mainContainerHeight(context) * 0.06,
+                width: AppConstants.mainContainerWidth(context) * 0.4,
+                child: ElevatedButton(
+                  onPressed: () {
+                    newEvent.title = _titleController.text;
+                    newEvent.description = _descriptionController.text;
+                    newEvent.date = _selectedDay!;
+                    newEvent.maxPlayers =
+                        int.tryParse(_maxPlayersController.text) ?? 1;
+                    newEvent.maxSpectators =
+                        int.tryParse(_maxSpectatorsController.text) ?? 0;
+                    newEvent.games = [_gameController.text];
+                    newEvent.links = [_linkController.text];
+                    newEvent = DataManager.editAndGetEvent(newEvent);
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          backgroundColor: AppConstants.secondaryColor,
+                          title: Text(
+                            'Event Saved',
+                            style: TextStyle(color: AppConstants.textColor),
+                          ),
+                          content: Text(
+                            'The event has been successfully saved.',
+                            style: TextStyle(color: AppConstants.textColor),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                NexusAppState.instance!.returnScreenParams
+                                    .removeLast();
+                                NexusAppState.instance!.returnScreenPath
+                                    .removeLast();
+                                NexusAppState.instance!.updateState(
+                                  'Event',
+                                  params: [newEvent],
+                                );
+                              },
+                              child: Text(
+                                'OK',
+                                style: TextStyle(color: AppConstants.textColor),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppConstants.paddingLarge(context),
+                      vertical: AppConstants.paddingMedium(context),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.borderRadiusSmall(context),
+                      ),
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.borderRadiusSmall(context),
+                  child: Text(
+                    'SAVE EVENT',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: AppConstants.fontSizeLargeResponsive(context),
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                child: Text(
-                  'SAVE EVENT',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: AppConstants.fontSizeLargeResponsive(context),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
               ),
-            ),
               SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
             ],
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nexus_app/data_manager.dart';
 import '../constants.dart';
 import '../main.dart';
 import '../classes/user.dart';
@@ -99,7 +100,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                           height: AppConstants.mainContainerHeight(context)*0.821,
                           child: SingleChildScrollView(
                             child: Column(
-                              children: NexusAppState.instance!.friends.map(
+                              children: DataManager.getFriends().map(
                                 (friend) => InkWell(
                                   onTap: () {
                                     NexusAppState
@@ -131,7 +132,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                     alignment: Alignment.bottomRight,
                     child: IconButton(
                       onPressed: () {
-                       //Add friend action
+                        //Add friend action
                       },
 
                       icon: Icon(
@@ -152,7 +153,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                           height: AppConstants.mainContainerHeight(context)*0.821,
                           child: SingleChildScrollView(
                             child: Column(
-                              children: NexusAppState.instance!.friendGroups.map(
+                              children: DataManager.getGroups().map(
                                 (group) => InkWell(
                                         onTap: () {
                                           NexusAppState.instance!.returnScreenParams.add([]);

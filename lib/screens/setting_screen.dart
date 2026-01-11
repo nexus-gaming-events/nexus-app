@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nexus_app/classes/user.dart';
+import 'package:nexus_app/data_manager.dart';
 import 'package:nexus_app/main.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../constants.dart';
@@ -47,9 +48,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     for (var entry in UserSettings.availableImages.entries) {
       availableImages[entry.key] = entry.value;
     }
-    if (NexusAppState.instance?.selfUser?.imageUrl?.isNotEmpty ?? false) {
+    if (DataManager.getSelfUser()?.imageUrl?.isNotEmpty ?? false) {
       availableImages['UserImage'] =
-          NexusAppState.instance!.selfUser!.imageUrl!;
+          DataManager.getSelfUser()!.imageUrl!;
     }
     selectedImagePath = UserSettings.userImagePath;
     

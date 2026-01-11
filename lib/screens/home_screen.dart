@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nexus_app/data_manager.dart';
 import '../constants.dart';
 import '../main.dart';
 import '../classes/event.dart';
@@ -90,7 +91,7 @@ class HomeScreen extends StatelessWidget {
                 scrollDirection: Axis.vertical,
                 child: Column(
                   children:
-                      (NexusAppState.instance!.events
+                      (DataManager.getEvents()
                             ..sort((a, b) => b.date.compareTo(a.date)))
                           .take(5)
                           .map(
@@ -142,7 +143,7 @@ class HomeScreen extends StatelessWidget {
                 scrollDirection: Axis.vertical,
                 child: Column(
                   children:
-                      (NexusAppState.instance!.friendRequests
+                      (DataManager.getFriendRequests()
                             ..sort((a, b) => b.date.compareTo(a.date)))
                           .take(5)
                           .map(

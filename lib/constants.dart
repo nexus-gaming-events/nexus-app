@@ -7,6 +7,7 @@ class AppConstants {
   static const Color secondaryColor = Color.fromRGBO(24, 24, 24, 1);
   static const Color successColor = Color.fromRGBO(76, 175, 80, 1);
   static const Color errorColor = Color.fromRGBO(244, 67, 54, 1);
+  static const Color warningColor = Color.fromRGBO(255, 160, 7, 1);
 
   //description colors
   static const Color descriptionPrimaryColor = Color.fromRGBO(60, 60, 87, 1);

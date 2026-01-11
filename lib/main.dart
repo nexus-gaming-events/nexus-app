@@ -16,11 +16,13 @@ import 'classes/user_settings.dart';
 import 'classes/group.dart';
 import '../classes/chat.dart';
 import 'screens/friend_requests_screen.dart';
+import 'data_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await UserSettings.loadFromJson();
+  await DataManager.initialize();
   runApp(NexusApp());
 }
 
@@ -35,18 +37,10 @@ class NexusAppState extends State<NexusApp> {
   static NexusAppState? instance;
   String _currentScreenTitle = 'Home';
   int _selectedIndex = 2;
-  late final int selfId;
-  User? selfUser;
-  List<User> users = [];
   List<ApplicationObject> currentParams = [];
   bool isLoggedIn = true;
   List<String> returnScreenPath = [];
   List<List<ApplicationObject>> returnScreenParams = [];
-  List<Event> events = [];
-  List<User> friends = [];
-  List<Group> friendGroups = [];
-  List<FriendRequest> friendRequests = [];
-  List<Chat> chats = [];
 
   factory NexusAppState() {
     instance ??= NexusAppState._internal();
@@ -59,54 +53,12 @@ class NexusAppState extends State<NexusApp> {
   void initState() {
     super.initState();
     
-    selfId = 0;
-    selfUser = User(id: 0, username: "Big Boss", imageUrl: "https://imgur.com/Fjiw4cX.jpg", email: "big.boss@outerheaven.zl");
-    events.add(   
-      Event(
-      id: 0,
-      title: "Outer Heaven Recruitment Meeting",
-      author: selfUser!,
-      description:
-          "Join us for an exclusive recruitment meeting for Outer Heaven. Learn about our mission, values, and how you can be a part of our elite team.",
-      date: DateTime.now(),
-      maxPlayers: 10,
-      maxSpectators: 10,
-      players: [selfUser!, User(id:4, username: "Raiden", imageUrl: "https://imgur.com/EwOrrYT.jpg", email: "")],
-      spectators: [User(id: 1, username: "Solid Snake", imageUrl: "https://imgur.com/zj8eDdn.jpg", email: "solid.snake@phylantropy.us"),
-      User(id: 2, username: "Liquid Snake", imageUrl: "https://imgur.com/Wqs6EKD.jpg", email: "liquid.snake@foxhound.us"),
-      User(id: 3, username: "Revolver Ocelot", imageUrl: "https://imgur.com/ohc6hXB.jpg", email: "revolver.ocelot@patriots.us"),
-      ],
-      games: ["Metal Gear Solid"],
-      links: ["https://www.konamimerda.com/mg/"],
-    ),
-    );
     if(!isLoggedIn){
       _currentScreenTitle = 'Login';
       _selectedIndex = 2;
     } else {
       updateState(_currentScreenTitle);
     }
-    friends = [
-      User(id: 1, username: "Solid Snake", imageUrl: "https://imgur.com/zj8eDdn.jpg", email: "solid.snake@phylantropy.us"),
-      User(id: 2, username: "Liquid Snake", imageUrl: "https://imgur.com/Wqs6EKD.jpg", email: "liquid.snake@foxhound.us"),
-      User(id: 3, username: "Revolver Ocelot", imageUrl: "https://imgur.com/ohc6hXB.jpg", email: "revolver.ocelot@patriots.us"),
-      ];
-    friendGroups = [
-      Group(id: 0, name: 'Foxhound', friends: friends),
-    ];
-    friendRequests = [
-      FriendRequest(id: 0, username: "Raiden", imageUrl: "https://imgur.com/EwOrrYT.jpg", date: DateTime.now()),
-      FriendRequest(id:1, username: "Campbell", imageUrl: "", date: DateTime(2024, 6, 1)),    
-    ];
-    chats = [
-      Chat(id: 0, eventId: 0, messages: [Message(1, 0, "Father...", DateTime(2024, 6, 1), Colors.blue), Message(0, 0, "Yes, my son?", DateTime(2025, 6, 1), Colors.green)]),
-    ];
-    users = [
-      selfUser!,
-      ...friends,
-      User(id: 4, username: "Raiden", imageUrl: "https://imgur.com/EwOrrYT.jpg", email: ""),
-      User(id: 5, username: "Campbell", imageUrl: "", email: ""),
-    ];
   }
 
   @override
@@ -167,14 +119,14 @@ class NexusAppState extends State<NexusApp> {
     switch (currentScreenTitle) {
       case 'User':
         debugPrint(params.isNotEmpty.toString());
-        VisualizeUserScreen.user = params.isNotEmpty? params[0] as User : selfUser!;
+        VisualizeUserScreen.user = params.isNotEmpty? params[0] as User : DataManager.getSelfUser()!;
         return VisualizeUserScreen.buildFullDetails(context);
       case 'Login':
         return LoginScreen();
       case 'Chats':
         return ChatsScreen();
       case 'Chat':
-        return VisualizeChatScreen(chat: params.isNotEmpty ? params[0] as Chat : chats.first); //Placeholder for ChatScreen
+        return VisualizeChatScreen(chat: params.isNotEmpty ? params[0] as Chat : DataManager.getChats().first); //Placeholder for ChatScreen
       case 'Home':
         return HomeScreen();
       case 'Friends':

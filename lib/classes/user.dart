@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nexus_app/classes/application_object.dart';
 import 'package:nexus_app/classes/user_settings.dart';
+import 'package:nexus_app/data_manager.dart';
 import 'package:nexus_app/main.dart';
 import 'visual_link.dart';
 import '../constants.dart';
@@ -43,6 +44,10 @@ class VisualizeUserScreen {
   static Widget buildFullDetails(
     BuildContext context,
   ) {
+    bool isSelf = user.id == DataManager.getSelfUser()!.id;
+    bool isFriend = DataManager.isFriend(user.id);
+    bool hasSentRequest = DataManager.hasSentFriendRequest(user.id); //If sent them a request
+    bool hasPendingFriendRequest = DataManager.hasPendingFriendRequest(user.id); //If they sent me a request
     return Builder(
       builder: (context) => Padding(
         padding: EdgeInsets.only(
@@ -119,7 +124,7 @@ class VisualizeUserScreen {
                             AppConstants.iconSizeMedium(context)* 2 -
                             AppConstants.paddingLarge(context)* 3,
                       ),
-                      user.id == NexusAppState.instance!.selfUser!.id ?
+                      user.id == DataManager.getSelfUser()?.id ?
                       IconButton(
                         icon: Icon(
                           Icons.settings,
@@ -154,7 +159,7 @@ class VisualizeUserScreen {
                 ),
               ),
               SizedBox(height: AppConstants.paddingLarge(context) * 1.5),
-              user.id == NexusAppState.instance!.selfUser!.id ?
+              isSelf ?
               InkWell(
                 onTap: () {
                   NexusAppState.instance!.returnScreenParams.add([VisualizeUserScreen.user]);
@@ -192,10 +197,10 @@ class VisualizeUserScreen {
                   ],),
                               ),
               ): 
-              NexusAppState.instance!.friends.contains(user) ?
+              isFriend ?
               InkWell(
                 onTap: () {
-                 //Remove friend logic
+                 DataManager.deleteFriend(user.id);
                 },
                 child: Container(
                 width: AppConstants.mainContainerWidth(context),
@@ -227,9 +232,71 @@ class VisualizeUserScreen {
                               ),
               )
               :
+              hasPendingFriendRequest ?
               InkWell(
                 onTap: () {
-                 //Add friend logic
+                 DataManager.acceptFriendRequest(user.id);
+                },
+                child: Container(
+                width: AppConstants.mainContainerWidth(context),
+                height: AppConstants.headerHeight(context)*0.5,
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.only(
+                  left: AppConstants.paddingMedium(context),
+                ),
+                decoration: BoxDecoration(
+                  color: AppConstants.successColor,
+                  borderRadius: BorderRadius.all(Radius.circular(AppConstants.borderRadiusMedium(context))),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.person_add,
+                      color: AppConstants.textColor,
+                      size: AppConstants.iconSizeSmall(context),
+                    ),
+                    SizedBox(width: AppConstants.paddingMedium(context)),
+                    Text(
+                      "Accept Friend Request",
+                      style: TextStyle(
+                        fontSize: AppConstants.fontSizeLargeResponsive(context),
+                        color: AppConstants.textColor,
+                      ),
+                    ),
+                  ],),
+                              ),
+              )            
+              :
+              hasSentRequest ?
+              InkWell(
+                child: Container(
+                width: AppConstants.mainContainerWidth(context),
+                height: AppConstants.headerHeight(context)*0.5,
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.only(
+                  left: AppConstants.paddingMedium(context),
+                ),
+                decoration: BoxDecoration(
+                  color: AppConstants.warningColor,
+                  borderRadius: BorderRadius.all(Radius.circular(AppConstants.borderRadiusMedium(context))),
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(width: AppConstants.paddingMedium(context)),
+                    Text(
+                      "You already sent a Friend Request to ${user.username}",
+                      style: TextStyle(
+                        fontSize: AppConstants.fontSizeLargeResponsive(context),
+                        color: AppConstants.textColor,
+                      ),
+                    ),
+                  ],),
+                              ),
+              )
+              :
+              InkWell(
+                onTap: () {
+                 DataManager.sendFriendRequest(user.id);
                 },
                 child: Container(
                 width: AppConstants.mainContainerWidth(context),
@@ -289,13 +356,7 @@ class VisualizeUserScreen {
                 child: SingleChildScrollView(
                   scrollDirection: Axis.vertical,
                   child: Column(
-                    children: NexusAppState.instance!.events
-                        .where(
-                          (event) => event.players!.any(
-                            (player) => player.id == user.id,
-                          ),
-                        )
-                        .toList()
+                    children: DataManager.getEventsInvolved()!
                         .map(
                           (item) => InkWell(
                             onTap: () {
@@ -341,10 +402,7 @@ class VisualizeUserScreen {
                 child: SingleChildScrollView(
                   scrollDirection: Axis.vertical,
                   child: Column(
-                    children: NexusAppState.instance!.events
-                        .where((event) => event.author.id == user.id)
-                        .toList()
-                        .map(
+                    children: DataManager.getEventsAuthored(user.id)!.map(
                           (item) => InkWell(
                             onTap: () {
                               NexusAppState.instance!.returnScreenParams.add([VisualizeUserScreen.user]);
@@ -381,7 +439,7 @@ class VisualizeUserPreview extends StatelessWidget {
     double iconSize = inPlayers || inSpectators ? AppConstants.iconSizeSmall(context) : AppConstants.iconSizeLarge(context);
     return Card(
 
-      color: user.id == NexusAppState.instance!.selfUser!.id ? (inPlayers ? AppConstants.playerUserColor : inSpectators ? AppConstants.spectatorUserColor : AppConstants.secondaryColor) : AppConstants.secondaryColor,
+      color: user.id == DataManager.getSelfUser()?.id ? (inPlayers ? AppConstants.playerUserColor : inSpectators ? AppConstants.spectatorUserColor : AppConstants.secondaryColor) : AppConstants.secondaryColor,
       margin: EdgeInsets.symmetric(
         vertical: AppConstants.paddingSmall(context),
         horizontal: (AppConstants.paddingSmall(context) > 3
@@ -408,9 +466,9 @@ class VisualizeUserPreview extends StatelessWidget {
               child: Text(
                 user.username,
                 style: TextStyle(
-                  fontWeight: user.id == NexusAppState.instance!.selfUser!.id ? FontWeight.bold : FontWeight.normal,
+                  fontWeight: user.id == DataManager.getSelfUser()?.id ? FontWeight.bold : FontWeight.normal,
                   fontSize: AppConstants.fontSizeLargeResponsive(context),
-                  color: user.id == NexusAppState.instance!.selfUser!.id ? (inPlayers ? AppConstants.playerUserTextColor : inSpectators ? AppConstants.spectatorUserTextColor : AppConstants.textColor) : AppConstants.textColor,
+                  color: user.id == DataManager.getSelfUser()?.id ? (inPlayers ? AppConstants.playerUserTextColor : inSpectators ? AppConstants.spectatorUserTextColor : AppConstants.textColor) : AppConstants.textColor,
                 ),
               ),
             ),

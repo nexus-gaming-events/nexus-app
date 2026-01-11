@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nexus_app/classes/friend_request.dart';
+import 'package:nexus_app/data_manager.dart';
 import 'package:nexus_app/main.dart';
 import '../constants.dart';
 import '../widgets/back_button_widget.dart';
@@ -74,7 +75,7 @@ class FriendRequestsScreen extends StatelessWidget {
                 ),
               ),
               Column(
-                children: NexusAppState.instance!.friendRequests.map((friendRequest) =>
+                children: DataManager.getFriendRequests().map((friendRequest) =>
                   VisualizeFriendRequestPreview(friendRequest: friendRequest)
               ).toList(),
               ),

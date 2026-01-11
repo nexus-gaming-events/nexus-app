@@ -43,15 +43,13 @@ class WebInterfaceService {
   static String? token;
  
   // Users
-  static User? selfUser;
-
   static Future<User> fetchSelfUser() async {
     final request = await createRequest('me', 'GET');
     HttpClientResponse response = await sendRequest(request);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody);
-    selfUser = User(id: data['id'], username: data['username'], imageUrl: data['avatarUrl'], email: data['email']);
-    return selfUser!;
+    final selfUser = User(id: data['id'], username: data['username'], imageUrl: data['avatarUrl'], email: data['email']);
+    return selfUser;
     }
 
   static Future<List<User>> fetchUsers() async {
@@ -75,14 +73,13 @@ class WebInterfaceService {
   }
 
   // Events
-  static List<Event> events = [];
 
   static Future<List<Event>> fetchEvents() async {
     final request = await createRequest('events', 'GET');
     HttpClientResponse response = await sendRequest(request);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody) as Map<String, dynamic>;
-    events = [];
+    List<Event> events = [];
     User author;
     for (var eventData in data['data']) {
       author = await fetchUserById(eventData['hostId']);
@@ -182,15 +179,13 @@ class WebInterfaceService {
   }
 
   //Friends
-  static List<User> friends = [];
-  static List<FriendRequest> friendRequests = [];
 
   static Future<List<User>> fetchFriends() async {
     final request = await createRequest('friends', 'GET');
     HttpClientResponse response = await sendRequest(request);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody) as Map<String, dynamic>;
-    friends = [];
+    List<User> friends = [];
     for (var friendData in data['data']) {
       friends.add(User(id: friendData['id'], username: friendData['username'], imageUrl: friendData['avatarUrl'], email: friendData['email']));
     }
@@ -202,7 +197,7 @@ class WebInterfaceService {
     HttpClientResponse response = await sendRequest(request);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody) as List<dynamic>;
-    friendRequests = [];
+    List<FriendRequest> friendRequests = [];
     for (var requestData in data) {
       friendRequests.add(FriendRequest(id: requestData['id'], username: requestData['username'], imageUrl: requestData['avatarUrl'], date: DateTime.parse(requestData['sentAt'])));
     }
@@ -230,7 +225,6 @@ class WebInterfaceService {
     HttpClientResponse response = await sendRequest(request);
   }
   // Groups
-  static List<Group> groups = [];
 
   static Future<int> postGroup(String name) async {
     final request = await createRequest('groups', 'POST');
@@ -248,7 +242,7 @@ class WebInterfaceService {
     HttpClientResponse response = await sendRequest(request);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody) as Map<String, dynamic>;
-    groups = [];
+    List<Group> groups = [];
     for (var groupData in data['data']) {
       groups.add(Group(id: groupData['id'], name: groupData['name'], friends: []));
     }
@@ -311,7 +305,7 @@ class WebInterfaceService {
   }
 
   // Chats
-  static List<Chat> chats = [];
+
   static Future<List<Message>> fetchChatMessages(int eventId) async {
     final request = await createRequest('events/$eventId/messages', 'GET');
     HttpClientResponse response = await sendRequest(request);

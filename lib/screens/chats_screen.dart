@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nexus_app/data_manager.dart';
 import '../constants.dart';
 import '../widgets/back_button_widget.dart';
 import '../classes/chat.dart';
@@ -10,7 +11,6 @@ class ChatsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint(NexusAppState.instance!.chats.length.toString());
     return Padding(
         padding: EdgeInsets.only(
           left: AppConstants.paddingSmall(context),
@@ -89,7 +89,7 @@ class ChatsScreen extends StatelessWidget {
                           height: AppConstants.mainContainerHeight(context)*0.821,
                           child: SingleChildScrollView(
                             child: Column(
-                              children: NexusAppState.instance!.chats.map(
+                              children: DataManager.getChats().map(
                                 (chat) => InkWell(
                                         onTap: () {
                                           NexusAppState.instance!.returnScreenParams.add([]);

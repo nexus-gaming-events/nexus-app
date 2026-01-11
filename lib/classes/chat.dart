@@ -1,20 +1,21 @@
 import 'dart:math';
 
 import 'package:nexus_app/classes/application_object.dart';
+import 'package:nexus_app/classes/user.dart';
+import 'package:nexus_app/data_manager.dart';
 import 'package:nexus_app/main.dart';
 import 'package:nexus_app/widgets/user_stack.dart';
 import 'message.dart';
 import 'package:flutter/material.dart';
 import '../constants.dart';
 import '../widgets/back_button_widget.dart';
+import 'event.dart';
 
 class Chat extends ApplicationObject{
-  int id;
   int eventId;
   List<Message> messages;
 
   Chat({
-    required this.id,
     required this.eventId,
     required this.messages,
   });
@@ -28,6 +29,9 @@ class VisualizeChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String eventTitle =  DataManager.getEventById(chat.eventId)!.title;
+    List<User> eventParticipantsList = DataManager.getEventById(chat.eventId)!.participants;
+    String eventParticipants = eventParticipantsList.map((participant) => participant.username).toList().join(', ');
     return Padding(
         padding: EdgeInsets.only(
           left: AppConstants.paddingSmall(context),
@@ -80,7 +84,7 @@ class VisualizeChatScreen extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              NexusAppState.instance!.events.firstWhere((event) => event.id == chat.eventId).title,
+                              eventTitle,
                               style: TextStyle(
                                 color: AppConstants.textColor,
                                 fontSize: () {
@@ -89,7 +93,7 @@ class VisualizeChatScreen extends StatelessWidget {
                                         context,
                                       ) +
                                       2;
-                                  final titleLength = NexusAppState.instance!.events.firstWhere((event) => event.id == chat.eventId).title.length;
+                                  final titleLength = eventTitle.length;
                                   if (titleLength <= 15) return baseFontSize;
                                   if (titleLength <= 25) return baseFontSize - 2;
                                   if (titleLength <= 35) return baseFontSize - 4;
@@ -108,7 +112,7 @@ class VisualizeChatScreen extends StatelessWidget {
                               child: ClipRect(
                                 clipBehavior: Clip.hardEdge,
                                 child: Text(
-                                  NexusAppState.instance!.events.firstWhere((event) => event.id == chat.eventId).participants.map((participant) => participant.username).toList().join(', '),
+                                  eventParticipants,
                                   style: TextStyle(
                                     color: AppConstants.semitransparentTextColor,
                                     fontSize: AppConstants.fontSizeMediumResponsive(context),
@@ -216,6 +220,8 @@ class VisualizeChatPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String eventTitle =  DataManager.getEventById(chat.eventId)!.title;
+    List<User> eventParticipantsList = DataManager.getEventById(chat.eventId)!.participants;
     double iconSize = AppConstants.iconSizeLarge(context);
     return Card(
       color: AppConstants.secondaryColor,
@@ -229,14 +235,14 @@ class VisualizeChatPreview extends StatelessWidget {
         padding: EdgeInsets.all(AppConstants.paddingLarge(context)),
         child: Row(
           children: [
-            UserStackIcon(users: NexusAppState.instance!.events.firstWhere((event) => event.id == chat.eventId).participants),
+            UserStackIcon(users: eventParticipantsList),
             SizedBox(width: AppConstants.paddingMedium(context)),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    NexusAppState.instance!.events.firstWhere((event) => event.id == chat.eventId).title,
+                    eventTitle,
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
                       fontSize: AppConstants.fontSizeLargeResponsive(context),
@@ -247,7 +253,7 @@ class VisualizeChatPreview extends StatelessWidget {
                   Text(
                     textAlign: TextAlign.left,
                     chat.messages.isNotEmpty
-                        ? '${NexusAppState.instance!.events.firstWhere((event) => event.id == chat.eventId).participants.firstWhere((user) => user.id == chat.messages.last.senderId).username}: ${chat.messages.last.content}'
+                        ? '${eventParticipantsList.firstWhere((user) => user.id == chat.messages.last.senderId).username}: ${chat.messages.last.content}'
                         : '',
                     style: TextStyle(
                       fontSize: AppConstants.fontSizeMediumResponsive(context),

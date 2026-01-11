@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nexus_app/main.dart';
 import '../constants.dart';
+import '../data_manager.dart';
 
 class Message {
   int senderId;
@@ -27,7 +28,7 @@ class VisualizeMessagePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isCurrentUser = message.senderId ==
-        NexusAppState.instance!.selfUser!.id;
+        DataManager.getSelfUser()!.id;
     return Row(
       mainAxisAlignment: isCurrentUser
           ? MainAxisAlignment.end
@@ -37,11 +38,7 @@ class VisualizeMessagePreview extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
           child: Image.network(
-            NexusAppState.instance!.events
-                .firstWhere((event) => event.id == message.eventId)
-                .participants
-                .firstWhere((user) => user.id == message.senderId)
-                .imageUrl,
+            DataManager.getUserById(message.senderId)!.imageUrl,
             width: AppConstants.iconSizeMedium(context),
             height: AppConstants.iconSizeMedium(context),
             fit: BoxFit.cover,
@@ -61,11 +58,7 @@ class VisualizeMessagePreview extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      NexusAppState.instance!.events
-                          .firstWhere((event) => event.id == message.eventId)
-                          .participants
-                          .firstWhere((user) => user.id == message.senderId)
-                          .username,
+                      DataManager.getUserById(message.senderId)!.username,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: AppConstants.fontSizeSmallResponsive(context),
@@ -101,11 +94,7 @@ class VisualizeMessagePreview extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
           child: Image.network(
-            NexusAppState.instance!.events
-                .firstWhere((event) => event.id == message.eventId)
-                .participants
-                .firstWhere((user) => user.id == message.senderId)
-                .imageUrl,
+            DataManager.getUserById(message.senderId)!.imageUrl,
             width: AppConstants.iconSizeMedium(context),
             height: AppConstants.iconSizeMedium(context),
             fit: BoxFit.cover,

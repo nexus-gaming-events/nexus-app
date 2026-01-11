@@ -211,7 +211,7 @@ class VisualizeGroupPreview extends StatelessWidget {
               child: Text(
                 group.name,
                 style: TextStyle(
-                  fontWeight: group.id == NexusAppState.instance!.selfUser!.id ? FontWeight.bold : FontWeight.normal,
+                  fontWeight: FontWeight.normal,
                   fontSize: AppConstants.fontSizeXLargeResponsive(context),
                   color: AppConstants.textColor,
                 ),
