@@ -139,8 +139,7 @@ class NexusAppState extends State<NexusApp> {
       case 'Calendar':
         return ExpeditionsScreen();
       case 'Event':
-        VisualizeEventScreen.event = params.isNotEmpty? params[0] as Event : null;
-        return VisualizeEventScreen.buildFullDetails(context);
+        return VisualizeEventScreen(event: params.isNotEmpty? params[0] as Event : null);
       case 'EditEvent':
         return EditEventScreen(event: params.isNotEmpty? params[0] as Event : null,);
       case 'Settings':

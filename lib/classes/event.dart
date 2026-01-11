@@ -541,8 +541,8 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                 Positioned(
                                   top: AppConstants.screenHeight(
                                     context,
-                                    0.115,
-                                  ).clamp(75.0, 90.0),
+                                    0.5,
+                                  ).clamp(75.0, 160.0),
                                   left: AppConstants.paddingSmall(context),
                                   right: AppConstants.paddingSmall(context),
                                   child:
@@ -824,10 +824,10 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                   ),
                                 ),
                                 Positioned(
-                                  top: AppConstants.screenHeight(
+                                  top:  AppConstants.screenHeight(
                                     context,
-                                    0.115,
-                                  ).clamp(75.0, 90.0),
+                                    0.5,
+                                  ).clamp(75.0, 160.0),
                                   left: AppConstants.paddingSmall(context),
                                   right: AppConstants.paddingSmall(context),
                                   child:
@@ -912,7 +912,7 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                                     width:
                                                         AppConstants.screenWidth(
                                                           context,
-                                                          0.09,
+                                                          0.083,
                                                         ).clamp(
                                                           AppConstants.screenWidth(
                                                             context,
@@ -920,7 +920,7 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                                           ),
                                                           AppConstants.screenWidth(
                                                             context,
-                                                            0.13,
+                                                            0.085,
                                                           ),
                                                         ),
                                                   ),
