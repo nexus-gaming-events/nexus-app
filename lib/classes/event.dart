@@ -243,7 +243,6 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                 params: [widget.event!],
                               );
                             } else if (value == 'delete') {
-                              DataManager.deleteEvent(widget.event!.id);
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
@@ -251,13 +250,13 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                     backgroundColor:
                                         AppConstants.secondaryColor,
                                     title: Text(
-                                      'Event Deleted',
+                                      'Delete Event',
                                       style: TextStyle(
                                         color: AppConstants.textColor,
                                       ),
                                     ),
                                     content: Text(
-                                      'The event has been successfully deleted.',
+                                      'Are you sure you want to delete this event? This action cannot be undone.',
                                       style: TextStyle(
                                         color: AppConstants.textColor,
                                       ),
@@ -266,22 +265,72 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                       TextButton(
                                         onPressed: () {
                                           Navigator.of(context).pop();
-                                          NexusAppState
-                                              .instance!
-                                              .returnScreenParams
-                                              .clear();
-                                          NexusAppState
-                                              .instance!
-                                              .returnScreenPath
-                                              .clear();
-                                          NexusAppState.instance!.updateState(
-                                            'Home',
-                                          );
                                         },
                                         child: Text(
-                                          'OK',
+                                          'Cancel',
                                           style: TextStyle(
                                             color: AppConstants.textColor,
+                                          ),
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          DataManager.deleteEvent(widget.event!.id);
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                backgroundColor:
+                                                    AppConstants.secondaryColor,
+                                                title: Text(
+                                                  'Event Deleted',
+                                                  style: TextStyle(
+                                                    color: AppConstants.textColor,
+                                                  ),
+                                                ),
+                                                content: Text(
+                                                  'The event has been successfully deleted.',
+                                                  style: TextStyle(
+                                                    color: AppConstants.textColor,
+                                                  ),
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context).pop();
+                                                      
+                                                      
+                                                      NexusAppState.instance!.updateState(
+                                                        NexusAppState
+                                                          .instance!
+                                                          .returnScreenPath
+                                                          .removeLast(),
+                                                        params: NexusAppState
+                                                          .instance!
+                                                          .returnScreenParams
+                                                          .removeLast()
+                                                      );
+                                                    },
+                                                    child: Text(
+                                                      'OK',
+                                                      style: TextStyle(
+                                                        color: AppConstants.textColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                        ),
+                                        child: Text(
+                                          'Delete',
+                                          style: TextStyle(
+                                            color: Colors.white,
                                           ),
                                         ),
                                       ),
@@ -633,9 +682,9 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                                             context,
                                                             0.05,
                                                           ),
-                                                          AppConstants.screenWidth(
+                                                        AppConstants.screenWidth(
                                                             context,
-                                                            0.13,
+                                                            isUserInPlayers ? 0.075 : 0.09,
                                                           ),
                                                         ),
                                                   ),
@@ -920,7 +969,7 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                                           ),
                                                           AppConstants.screenWidth(
                                                             context,
-                                                            0.085,
+                                                            isUserInSpectators ? 0.067 : 0.085,
                                                           ),
                                                         ),
                                                   ),

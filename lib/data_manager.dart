@@ -152,6 +152,67 @@ class DataManager {
     return await WebInterfaceService.fetchGroupById(groupId);
   }
 
+  static Future<void> createGroup(String groupName) async{
+    if (isOfflineMode){
+      int newId = (_friendGroups != null && _friendGroups!.isNotEmpty) ? _friendGroups!.map((g) => g.id).reduce(max) + 1 : 0;
+      _friendGroups ??= [];
+      _friendGroups!.add(Group(id: newId, name: groupName, friends: []));
+      return;
+    }
+    await WebInterfaceService.postGroup(groupName);
+    // Optionally refresh groups list
+    loadGroups();
+  }
+
+  static Future<void> deleteGroup(int groupId) async{
+    if (isOfflineMode){
+      _friendGroups?.removeWhere((group) => group.id == groupId);
+      return;
+    }
+    await WebInterfaceService.deleteGroup(groupId);
+    // Optionally refresh groups list
+    loadGroups();
+  }
+
+  static Future<void> addFriendToGroup(int groupId, int friendId) async{
+    if (isOfflineMode){
+      Group? group = _friendGroups?.firstWhere((group) => group.id == groupId);
+      User? friend = _friends?.firstWhere((friend) => friend.id == friendId);
+      if (group != null && friend != null && !group.friends.any((f) => f.id == friendId)){
+        group.friends.add(friend);
+      }
+      return;
+    }
+    await WebInterfaceService.addFriendToGroup(groupId, friendId);
+    // Optionally refresh groups list
+    loadGroups();
+  }
+
+  static void addFriendsToGroup(int groupId, List<User> friends) async{
+    for (var friend in friends) {
+      await addFriendToGroup(groupId, friend.id);
+    }
+  }
+
+  static Future<void> removeFriendFromGroup(int groupId, int friendId) async{
+    if (isOfflineMode){
+      Group? group = _friendGroups?.firstWhere((group) => group.id == groupId);
+      if (group != null){
+        group.friends.removeWhere((f) => f.id == friendId);
+      }
+      return;
+    }
+    await WebInterfaceService.removeFriendFromGroup(groupId, friendId);
+    // Optionally refresh groups list
+    loadGroups();
+  }
+
+  static void removeFriendsFromGroup(int groupId, List<User> friends) async{
+    for (var friend in friends) {
+      await removeFriendFromGroup(groupId, friend.id);
+    }
+  }
+
   static Future<List<Message>> getMessagesForEvent(int eventId) async{
     if (isOfflineMode){
       return _chats?.firstWhere((chat) => chat.eventId == eventId)?.messages ?? [];

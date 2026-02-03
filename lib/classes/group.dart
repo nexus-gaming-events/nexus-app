@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nexus_app/classes/application_object.dart';
 import 'package:nexus_app/classes/user_settings.dart';
 import 'package:nexus_app/main.dart';
+import 'package:nexus_app/data_manager.dart';
 import 'visual_link.dart';
 import '../constants.dart';
 import 'user.dart';
@@ -26,6 +27,18 @@ class Group extends ApplicationObject {
 class VisualizeGroupScreen {
   static late Group? group;
 
+  static void _showManageMembersDialog(BuildContext context, Function() onUpdate) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return _ManageMembersDialog(
+          group: group!,
+          onUpdate: onUpdate,
+        );
+      },
+    );
+  }
+
   static Widget buildFullDetails(
     BuildContext context,
   ) {
@@ -40,8 +53,8 @@ class VisualizeGroupScreen {
         ),
       );
     }
-    return Builder(
-      builder: (context) => Padding(
+    return StatefulBuilder(
+      builder: (context, setState) => Padding(
         padding: EdgeInsets.only(
           left: AppConstants.paddingSmall(context),
           right: AppConstants.paddingSmall(context),
@@ -110,8 +123,56 @@ class VisualizeGroupScreen {
                       ),
                     ),
                   ),
-                ],
-              ),
+                  IconButton(
+                    onPressed: () {
+                      // Show delete confirmation dialog
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext dialogContext) {
+                          return AlertDialog(
+                            backgroundColor: AppConstants.primaryColor,
+                            title: Text(
+                              'Delete Group',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            content: Text(
+                              'Are you sure you want to delete this group?',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(dialogContext).pop();
+                                },
+                                child: Text(
+                                  'Cancel',
+                                  style:
+                                      TextStyle(color: Colors.white.withOpacity(0.6)),
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  DataManager.deleteGroup(group!.id);
+                                  Navigator.of(dialogContext).pop(); // Close dialog
+                                  NexusAppState.instance!.returnScreenParams.clear();
+                                  NexusAppState.instance!.returnScreenPath.clear();
+                                  NexusAppState.instance!.updateState('Friends');
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppConstants.accentColor2,
+                                ),
+                                child: Text(
+                                  'Delete',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }, 
+                    icon: Icon(Icons.delete,),),
+          ],),
             ),
             SizedBox(height: AppConstants.paddingMedium(context),),
             Container(
@@ -166,9 +227,10 @@ class VisualizeGroupScreen {
                     alignment: Alignment.bottomRight,
                     child: IconButton(
                       onPressed: () {
-                       //Add friend to group action
+                        _showManageMembersDialog(context, () {
+                          setState(() {});
+                        });
                       },
-
                       icon: Icon(
                         Icons.add_circle,
                         color: AppConstants.accentColor2,
@@ -220,6 +282,216 @@ class VisualizeGroupPreview extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ManageMembersDialog extends StatefulWidget {
+  final Group group;
+  final Function() onUpdate;
+
+  const _ManageMembersDialog({
+    Key? key,
+    required this.group,
+    required this.onUpdate,
+  }) : super(key: key);
+
+  @override
+  State<_ManageMembersDialog> createState() => _ManageMembersDialogState();
+}
+
+class _ManageMembersDialogState extends State<_ManageMembersDialog> {
+  late List<User> selectedFriends;
+  late List<User> originalMembers;
+  List<User> allFriends = [];
+
+  @override
+  void initState() {
+    super.initState();
+    allFriends = DataManager.getFriends();
+    // Create a copy of the current members list
+    originalMembers = List<User>.from(widget.group.friends);
+    selectedFriends = List<User>.from(widget.group.friends);
+  }
+
+  List<User> get addedFriends {
+    return selectedFriends
+        .where((friend) => !originalMembers.any((u) => u.id == friend.id))
+        .toList();
+  }
+
+  List<User> get removedFriends {
+    return originalMembers
+        .where((friend) => !selectedFriends.any((u) => u.id == friend.id))
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: AppConstants.primaryColor,
+      title: Text(
+        'Manage Members',
+        style: TextStyle(color: Colors.white),
+      ),
+      content: Container(
+        width: double.maxFinite,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Friend selection section
+              Text(
+                'Select Members:',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              if (allFriends.isEmpty)
+                Text(
+                  'No friends available',
+                  style: TextStyle(color: Colors.white.withOpacity(0.6)),
+                )
+              else
+                ...allFriends.map((friend) {
+                  final isSelected = selectedFriends.any((u) => u.id == friend.id);
+                  return CheckboxListTile(
+                    secondary: CircleAvatar(
+                      backgroundImage: NetworkImage(friend.imageUrl),
+                      radius: 20,
+                    ),
+                    title: Text(
+                      friend.username,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    value: isSelected,
+                    activeColor: AppConstants.accentColor2,
+                    checkColor: Colors.white,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        if (value == true) {
+                          if (!selectedFriends.any((u) => u.id == friend.id)) {
+                            selectedFriends.add(friend);
+                          }
+                        } else {
+                          selectedFriends.removeWhere((u) => u.id == friend.id);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              SizedBox(height: 16),
+              Divider(color: Colors.white.withOpacity(0.3)),
+              SizedBox(height: 16),
+              // Added friends section
+              Text(
+                'Added (${addedFriends.length}):',
+                style: TextStyle(
+                  color: AppConstants.accentColor2,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 4),
+              if (addedFriends.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: Text(
+                    'None',
+                    style: TextStyle(color: Colors.white.withOpacity(0.6)),
+                  ),
+                )
+              else
+                ...addedFriends.map((friend) => Padding(
+                  padding: const EdgeInsets.only(left: 16, top: 4),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundImage: NetworkImage(friend.imageUrl),
+                        radius: 12,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        '+ ${friend.username}',
+                        style: TextStyle(color: Colors.green),
+                      ),
+                    ],
+                  ),
+                )).toList(),
+              SizedBox(height: 12),
+              // Removed friends section
+              Text(
+                'Removed (${removedFriends.length}):',
+                style: TextStyle(
+                  color: AppConstants.accentColor2,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 4),
+              if (removedFriends.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: Text(
+                    'None',
+                    style: TextStyle(color: Colors.white.withOpacity(0.6)),
+                  ),
+                )
+              else
+                ...removedFriends.map((friend) => Padding(
+                  padding: const EdgeInsets.only(left: 16, top: 4),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundImage: NetworkImage(friend.imageUrl),
+                        radius: 12,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        '- ${friend.username}',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
+                  ),
+                )).toList(),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text(
+            'Cancel',
+            style: TextStyle(color: Colors.white.withOpacity(0.6)),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            // Get the lists of added and removed friends
+            final added = addedFriends;
+            final removed = removedFriends;
+            
+           DataManager.addFriendsToGroup(widget.group.id, added);
+           DataManager.removeFriendsFromGroup(widget.group.id, removed);
+           Navigator.of(context).pop();
+           widget.onUpdate();
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppConstants.accentColor2,
+          ),
+          child: Text(
+            'Save',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      ],
     );
   }
 }

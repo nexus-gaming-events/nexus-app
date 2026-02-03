@@ -28,6 +28,65 @@ class _FriendsScreenState extends State<FriendsScreen>
     super.dispose();
   }
 
+  void _showCreateGroupDialog() {
+    final TextEditingController groupNameController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppConstants.primaryColor,
+          title: Text(
+            'Create New Group',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: TextField(
+            controller: groupNameController,
+            style: TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              hintText: 'Enter group name',
+              hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: AppConstants.accentColor2),
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: AppConstants.accentColor2, width: 2),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.white.withOpacity(0.6)),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (groupNameController.text.trim().isNotEmpty) {
+                 
+                  DataManager.createGroup(groupNameController.text.trim());
+                  Navigator.of(context).pop();
+                  setState(() {}); // Refresh the UI
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppConstants.accentColor2,
+              ),
+              child: Text(
+                'Create',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -174,10 +233,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                             height: AppConstants.iconSizeLarge(context)*1.1,
                     alignment: Alignment.bottomRight,
                     child: IconButton(
-                      onPressed: () {
-                       //Add group action
-                      },
-
+                      onPressed: _showCreateGroupDialog,
                       icon: Icon(
                         Icons.add_circle,
                         color: AppConstants.accentColor2,

@@ -74,10 +74,13 @@ class FriendRequestsScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              Column(
-                children: DataManager.getFriendRequests().map((friendRequest) =>
-                  VisualizeFriendRequestPreview(friendRequest: friendRequest)
-              ).toList(),
+              Container(
+                width: AppConstants.mainContainerWidth(context)*0.95,
+                child: Column(
+                  children: DataManager.getFriendRequests().map((friendRequest) =>
+                    VisualizeFriendRequestPreview(friendRequest: friendRequest)
+                ).toList(),
+                ),
               ),
             ],
           ),
