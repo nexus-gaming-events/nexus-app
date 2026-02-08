@@ -34,6 +34,7 @@ class VisualizeChatScreen extends StatefulWidget {
 class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
   Event? event;
   bool isLoading = true;
+  Map<int, Color> userColors = {};
 
   @override
   void initState() {
@@ -47,7 +48,26 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
       setState(() {
         isLoading = false;
       });
+      assignUserColors();
     }
+  }
+
+  void assignUserColors() {
+    if (event == null) return;
+    final random = Random();
+    List<Color> availableColors = List.from(AppConstants.userChatColors);
+    for (var participant in event!.participants) {
+      if (availableColors.isEmpty) {
+        availableColors = List.from(AppConstants.userChatColors);
+      }
+      final colorIndex = random.nextInt(availableColors.length);
+      userColors[participant.id] = availableColors[colorIndex];
+      availableColors.removeAt(colorIndex);
+    }
+    for (var message in widget.chat.messages) {
+      message.color = userColors[message.senderId] ?? AppConstants.textColor;
+      }
+
   }
 
   @override
