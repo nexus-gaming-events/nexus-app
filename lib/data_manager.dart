@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:nexus_app/classes/event.dart';
 import 'package:nexus_app/classes/friend_request.dart';
@@ -26,8 +27,8 @@ class DataManager {
   
   static Future<void> initialize() async {
     if (isOfflineMode) {
-      _selfUser = User(id: 0, username: 'OfflineUser', email: 'offline@example.com', imageUrl: 'https://imgur.com/Fjiw4cX.png');
-      _friends = [User(id: 1, username: 'Friend1', email: 'friend1@example.com', imageUrl: 'https://imgur.com/N4Q6fcZ.png')];
+      _selfUser = User(id: 0, username: 'OfflineUser', email: 'offline@example.com', imageUrl: 'https://imgur.com/Fjiw4cX.png', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0});
+      _friends = [User(id: 1, username: 'Friend1', email: 'friend1@example.com', imageUrl: 'https://imgur.com/N4Q6fcZ.png', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0})];
       _friendRequests = [FriendRequest(id: 2, username: 'Requester1', imageUrl: 'https://imgur.com/BVayEBY.png', date: DateTime(2025,1,7))];
       _myFriendRequests = [3];
       _events = [
@@ -42,7 +43,7 @@ class DataManager {
           games: ['Metal Gear Solid'],
           links: ['https://www.example.com'],
           players: [_selfUser!],
-          spectators: [User(id: 1, username: 'Friend1', email: 'friend1@example.com', imageUrl: 'https://imgur.com/N4Q6fcZ.png')],
+          spectators: [User(id: 1, username: 'Friend1', email: 'friend1@example.com', imageUrl: 'https://imgur.com/N4Q6fcZ.png', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0})],
           ),
         Event(
           id: 1,
@@ -54,8 +55,8 @@ class DataManager {
           maxSpectators: 3,
           games: ['The Legend of Zelda'],
           links: ['https://www.example2.com'],
-          players: [_friends!.first, User(id: 2, username: 'Requester1', imageUrl: 'https://imgur.com/BVayEBY.png', email: '')],
-          spectators: [User(id: 3, username: 'Spectator1', email: 'spectator1@example.com', imageUrl: 'https://imgur.com/JEnJCBW.png')],
+          players: [_friends!.first, User(id: 2, username: 'Requester1', imageUrl: 'https://imgur.com/BVayEBY.png', email: '', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0})],
+          spectators: [User(id: 3, username: 'Spectator1', email: 'spectator1@example.com', imageUrl: 'https://imgur.com/JEnJCBW.png', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0})],
         )
           ];
           _friendGroups = [
@@ -79,12 +80,6 @@ class DataManager {
   }
 
   static User? getSelfUser() {
-    if (isOfflineMode){
-      return _selfUser;
-    }
-    if (_selfUser == null){
-      loadSelfUser();
-    }
     return _selfUser;
   }
 
@@ -430,7 +425,7 @@ class DataManager {
       debugPrint('Creating new event: ${event.title}');
       id = await createEvent(event);
       debugPrint('Event created with ID: $id');
-      _currentEvent = new Event(id: id, title: event.title, author: event.author, description: event.description, date: event.date, maxPlayers: event.maxPlayers, maxSpectators: event.maxSpectators);
+      _currentEvent = Event(id: id, title: event.title, author: event.author, description: event.description, date: event.date, maxPlayers: event.maxPlayers, maxSpectators: event.maxSpectators);
       debugPrint('Current event set to: ${_currentEvent!.title} with ID: ${_currentEvent!.id}');
     } else {
       await patchEvent(event);
@@ -536,5 +531,108 @@ class DataManager {
     return createdEvents;
   }
 
+  static void saveUserBanner(Gradient gradient, double parameter){
+    Map<String, dynamic> gradientJson;
+    if (gradient is LinearGradient) {
+      gradientJson = {
+        'type': 'linear',
+        'colors': gradient.colors
+            .map((c) => c.value.toRadixString(16))
+            .toList(),
+        'parameter': parameter,
+      };
+    }
+    else if (gradient is RadialGradient) {
+      gradientJson = {
+        'type': 'radial',
+        'colors': gradient.colors
+            .map((c) => c.value.toRadixString(16))
+            .toList(),
+        'parameter': parameter,
+      };
+    }
+    else if (gradient is SweepGradient) {
+      gradientJson = {
+        'type': 'sweep',
+        'colors': gradient.colors
+            .map((c) => c.value.toRadixString(16))
+            .toList(),
+        'parameter': parameter,
+      };
+    }
+    else gradientJson = {'type': 'linear', 'colors': ['ff0000ff', 'ffff00ff'], 'parameter': parameter};
+    WebInterfaceService.saveUserBanner(gradientJson);
+  }
+
+  static Color _parseColorFromJson(dynamic colorValue) {
+    if (colorValue is int) {
+      return Color(colorValue);
+    }
+    if (colorValue is String) {
+      String cleaned = colorValue
+          .replaceAll('0x', '')
+          .replaceAll('0X', '')
+          .replaceAll('#', '');
+      return Color(int.parse(cleaned, radix: 16));
+    }
+    throw FormatException('Invalid color format: $colorValue');
+  }
+
+  static Gradient? getGradientFromJson(Map<String, dynamic>? bannerGradient) {
+    if (bannerGradient == null) return null;
+    
+    try {
+      String selectedBlendMode = bannerGradient['type'] ?? 'linear';
+      List<Color> colors = (bannerGradient['colors'] as List)
+          .map((c) => _parseColorFromJson(c))
+          .toList();
+      double paramter = (bannerGradient['parameter'] as num?)?.toDouble() ?? 0.0;
+      
+      if (colors.length < 2) {
+        colors = [Colors.blue, Colors.purple];
+      }
+      
+      Gradient selectedGradient;
+      if (selectedBlendMode == 'linear') {
+        selectedGradient = LinearGradient(
+          colors: [colors[0], colors[1]],
+          begin: Alignment(-1, 0.0),
+          end: Alignment(paramter + 1, 0.0),
+        );
+      } else if (selectedBlendMode == 'radial') {
+        selectedGradient = RadialGradient(
+          colors: [colors[0], colors[1]],
+          radius: paramter + 1,
+        );
+      } else if (selectedBlendMode == 'sweep') {
+        selectedGradient = SweepGradient(
+          colors: [colors[0], colors[1]],
+          startAngle: 0,
+          endAngle: (4 * (math.pi + 1) * (paramter / 2.0 + 0.5)).clamp(
+            0.000000000001,
+            (4 * math.pi + 1),
+          ),
+        );
+      } else {
+        selectedGradient = LinearGradient(
+          colors: [colors[0], colors[1]],
+          begin: Alignment(-1, 0.0),
+          end: Alignment(paramter + 1, 0.0),
+        );
+      }
+      return selectedGradient;
+    } catch (e) {
+      print('Error parsing gradient from JSON: $e');
+      // Return default gradient on error
+      return LinearGradient(
+        colors: [Colors.blue, Colors.purple],
+        begin: Alignment(-1, 0.0),
+        end: Alignment(1, 0.0),
+      );
+    }
+  }
+
   static void logout() {}
+
+ 
 }

@@ -18,6 +18,7 @@ class User extends ApplicationObject {
   final List<VisualLink>? games;
   final List<Event>? organizedEvents;
   final List<Event>? recentEvents;
+  final Map<String, dynamic>? bannerGradient;
 
   User({
     required this.id,
@@ -27,6 +28,7 @@ class User extends ApplicationObject {
     this.recentEvents,
     this.email = '',
     this.imageUrl = '',
+    this.bannerGradient,
   }) : _token = '';
 
   String setToken(String token) {
@@ -62,7 +64,12 @@ class VisualizeUserScreen {
                     width: AppConstants.mainContainerWidth(context),
                     height: AppConstants.mainContainerHeight(context) * 0.2,
                     decoration: BoxDecoration(
-                      gradient: UserSettings.bannerGradient,
+                      gradient: DataManager.getGradientFromJson(user.bannerGradient) ?? 
+                          LinearGradient(
+                            colors: [Colors.blue, Colors.purple],
+                            begin: Alignment(-1, 0.0),
+                            end: Alignment(1, 0.0),
+                          ),
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(
                           AppConstants.borderRadiusMedium(context),

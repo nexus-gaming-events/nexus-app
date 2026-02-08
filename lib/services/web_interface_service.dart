@@ -47,7 +47,7 @@ class WebInterfaceService {
     HttpClientResponse response = await sendRequest(request);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody);
-    final selfUser = User(id: data['id'], username: data['username'], imageUrl: data['avatarUrl'], email: data['email']);
+    final selfUser = User(id: data['id'], username: data['username'], imageUrl: data['avatarUrl'], email: data['email'], bannerGradient: data['bannerGradient'] as Map<String, dynamic>?);
     return selfUser;
     }
 
@@ -58,7 +58,7 @@ class WebInterfaceService {
     final data = jsonDecode(responseBody) as Map<String, dynamic>;
     List<User> users = [];
     for (var userData in data['data']) {
-      users.add(User(id: userData['id'], username: userData['username'], imageUrl: userData['avatarUrl'], email: userData['email']));
+      users.add(User(id: userData['id'], username: userData['username'], imageUrl: userData['avatarUrl'], email: userData['email'], bannerGradient: userData['bannerGradient'] as Map<String, dynamic>?));
     }
     return users;
   }
@@ -68,7 +68,7 @@ class WebInterfaceService {
     HttpClientResponse response = await sendRequest(request);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody);
-    return User(id: data['id'], username: data['username'], imageUrl: data['avatarUrl'], email: data['email']);
+    return User(id: data['id'], username: data['username'], imageUrl: data['avatarUrl'], email: data['email'], bannerGradient: data['bannerGradient'] as Map<String, dynamic>?);
   }
 
   // Events
@@ -318,6 +318,14 @@ class WebInterfaceService {
       ));
     }
     return messages;
+  }
+
+  static Future<void> saveUserBanner(Map<String, dynamic> gradientJson) async {
+    final request = await createRequest('users/me', 'PATCH');
+    final body = jsonEncode({
+      'bannerGradient': gradientJson,
+    });
+    await sendRequest(request, body);
   }
 
 

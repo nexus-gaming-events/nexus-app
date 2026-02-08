@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nexus_app/classes/user.dart';
 import 'package:nexus_app/data_manager.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../constants.dart';
@@ -9,7 +10,9 @@ import '../widgets/base_screen_container.dart';
 import '../widgets/header_container.dart';
 
 class SettingsScreen extends StatefulWidget {
+
   @override
+  SettingsScreen({Key? key}) : super(key: key);
   State<StatefulWidget> createState() => _SettingsScreenState();
 }
 
@@ -25,47 +28,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
   );
   double sliderValue = 0.0;
   bool _isLoading = true;
+  Map<String, dynamic> initialGradientSettings = {};
 
-  @override
-  void initState() {
-    super.initState();
-    _loadSettings();
-  }
+   @override
+   void initState() {
+     super.initState();
+     _loadSettings();
+   }
 
   Future<void> _loadSettings() async {
-    await UserSettings.loadFromJson();
+    User? selfUser = await DataManager.getSelfUser();
+    if (selfUser != null) {
+      initialGradientSettings = selfUser.bannerGradient ?? {};
+    }
     setState(() {
-      _SettingLoader();
+      _SettingLoader(selfUser);
       _isLoading = false;
     });
   }
 
-  void _SettingLoader() {
-    for (var entry in UserSettings.availableImages.entries) {
-      availableImages[entry.key] = entry.value;
-    }
-    final selfUser = DataManager.getSelfUser();
-    if (selfUser?.imageUrl.isNotEmpty ?? false) {
-      availableImages['UserImage'] = selfUser!.imageUrl;
-    }
-    selectedImagePath = UserSettings.userImagePath;
-
+  void _SettingLoader(User? selfUser) {
+    // initialGradientSettings already set in _loadSettings(), no need to reassign
     // Load gradient settings with null safety
-    if (UserSettings.bannerGradient.colors.length >= 2) {
-      selectedGradient = UserSettings.bannerGradient;
-      selectedColor1 = UserSettings.bannerGradient.colors[0];
-      selectedColor2 = UserSettings.bannerGradient.colors[1];
+    if (initialGradientSettings['colors'] != null && initialGradientSettings['colors'].length >= 2) {
+      Gradient? parsedGradient = DataManager.getGradientFromJson(initialGradientSettings);
+      if (parsedGradient != null) {
+        selectedGradient = parsedGradient;
+        // Extract colors from the parsed gradient instead of parsing again
+        selectedColor1 = selectedGradient.colors[0];
+        selectedColor2 = selectedGradient.colors[1];
 
-      if (selectedGradient is LinearGradient) {
-        selectedBlendMode = 'linear';
-      } else if (selectedGradient is RadialGradient) {
-        selectedBlendMode = 'radial';
-      } else if (selectedGradient is SweepGradient) {
-        selectedBlendMode = 'sweep';
+        if (selectedGradient is LinearGradient) {
+          selectedBlendMode = 'linear';
+        } else if (selectedGradient is RadialGradient) {
+          selectedBlendMode = 'radial';
+        } else if (selectedGradient is SweepGradient) {
+          selectedBlendMode = 'sweep';
+        }
       }
     }
 
-    sliderValue = UserSettings.paramter;
+    sliderValue = initialGradientSettings['parameter'] != null ? (initialGradientSettings['parameter'] as num).toDouble() : 0.0;
   }
 
   void _openColorPicker(Color currentColor, Function(Color) onColorSelected) {
@@ -392,10 +395,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             width: AppConstants.mainContainerWidth(context) * 0.4,
             child: ElevatedButton(
               onPressed: () {
-                UserSettings.bannerGradient = selectedGradient;
-                UserSettings.paramter = sliderValue;
-                UserSettings.userImagePath = selectedImagePath;
-                UserSettings().saveToJson();
+                DataManager.saveUserBanner(selectedGradient, sliderValue);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
