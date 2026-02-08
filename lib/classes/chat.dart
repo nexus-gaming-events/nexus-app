@@ -22,15 +22,64 @@ class Chat extends ApplicationObject{
 
 }
 
-class VisualizeChatScreen extends StatelessWidget {
+class VisualizeChatScreen extends StatefulWidget {
   final Chat chat;
 
   const VisualizeChatScreen({Key? key, required this.chat}) : super(key: key);
 
   @override
+  State<VisualizeChatScreen> createState() => _VisualizeChatScreenState();
+}
+
+class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
+  Event? event;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEvent();
+  }
+
+  Future<void> _loadEvent() async {
+    event = await DataManager.getEventById(widget.chat.eventId);
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    String eventTitle =  DataManager.getEventById(chat.eventId)!.title;
-    List<User> eventParticipantsList = DataManager.getEventById(chat.eventId)!.participants;
+    if (isLoading || event == null) {
+      return Padding(
+        padding: EdgeInsets.only(
+          left: AppConstants.paddingSmall(context),
+          right: AppConstants.paddingSmall(context),
+          bottom: 0.0,
+          top: AppConstants.paddingLarge(context) * 3.5,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppConstants.primaryColor,
+            borderRadius: BorderRadius.circular(
+              AppConstants.borderRadiusMedium(context),
+            ),
+          ),
+          width: AppConstants.mainContainerWidth(context),
+          height: AppConstants.mainContainerHeight(context),
+          child: Center(
+            child: CircularProgressIndicator(
+              color: AppConstants.textColor,
+            ),
+          ),
+        ),
+      );
+    }
+
+    String eventTitle = event!.title;
+    List<User> eventParticipantsList = event!.participants;
     String eventParticipants = eventParticipantsList.map((participant) => participant.username).toList().join(', ');
     return Padding(
         padding: EdgeInsets.only(
@@ -127,18 +176,19 @@ class VisualizeChatScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    //print all messages from bottom to top
+                    
                   ],
                 ),
               ),
             ),
+            //print all messages from bottom to top
             Expanded(
               child: ListView.builder(
                 reverse: true,
                 padding: EdgeInsets.all(AppConstants.paddingMedium(context)),
-                itemCount: chat.messages.length,
+                itemCount: widget.chat.messages.length,
                 itemBuilder: (context, index) {
-                  final message = chat.messages[chat.messages.length - 1 - index];
+                  final message = widget.chat.messages[widget.chat.messages.length - 1 - index];
                   return Padding(
                     padding: EdgeInsets.only(
                       bottom: AppConstants.paddingSmall(context),
@@ -213,15 +263,59 @@ class VisualizeChatScreen extends StatelessWidget {
   }
 }
 
-class VisualizeChatPreview extends StatelessWidget {
+class VisualizeChatPreview extends StatefulWidget {
   final Chat chat;
 
   const VisualizeChatPreview({Key? key, required this.chat}) : super(key: key);
 
   @override
+  State<VisualizeChatPreview> createState() => _VisualizeChatPreviewState();
+}
+
+class _VisualizeChatPreviewState extends State<VisualizeChatPreview> {
+  Event? event;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEvent();
+  }
+
+  Future<void> _loadEvent() async {
+    event = await DataManager.getEventById(widget.chat.eventId);
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    String eventTitle =  DataManager.getEventById(chat.eventId)!.title;
-    List<User> eventParticipantsList = DataManager.getEventById(chat.eventId)!.participants;
+    if (isLoading || event == null) {
+      return Card(
+        color: AppConstants.secondaryColor,
+        margin: EdgeInsets.symmetric(
+          vertical: AppConstants.paddingSmall(context),
+          horizontal: (AppConstants.paddingSmall(context) > 3
+              ? AppConstants.paddingSmall(context) - 3
+              : 0),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(AppConstants.paddingLarge(context)),
+          child: Center(
+            child: CircularProgressIndicator(
+              color: AppConstants.textColor,
+              strokeWidth: 2,
+            ),
+          ),
+        ),
+      );
+    }
+
+    String eventTitle = event!.title;
+    List<User> eventParticipantsList = event!.participants;
     double iconSize = AppConstants.iconSizeLarge(context);
     return Card(
       color: AppConstants.secondaryColor,
@@ -252,8 +346,8 @@ class VisualizeChatPreview extends StatelessWidget {
                   SizedBox(height: AppConstants.paddingSmall(context)),
                   Text(
                     textAlign: TextAlign.left,
-                    chat.messages.isNotEmpty
-                        ? '${eventParticipantsList.firstWhere((user) => user.id == chat.messages.last.senderId).username}: ${chat.messages.last.content}'
+                    widget.chat.messages.isNotEmpty
+                        ? '${eventParticipantsList.firstWhere((user) => user.id == widget.chat.messages.last.senderId).username}: ${widget.chat.messages.last.content}'
                         : '',
                     style: TextStyle(
                       fontSize: AppConstants.fontSizeMediumResponsive(context),

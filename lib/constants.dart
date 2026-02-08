@@ -54,7 +54,47 @@ class AppConstants {
 
   //chat colors
   static const Color messageBackgroundColor = Color.fromRGBO(43, 43, 43, 1);
-
+  static const List<Color> userChatColors = [
+    // Reds
+    Colors.red,
+    Colors.redAccent,
+    // Oranges
+    Colors.orange,
+    Colors.orangeAccent,
+    Colors.deepOrange,
+    Colors.deepOrangeAccent,
+    // Yellows/Ambers
+    Colors.amber,
+    Colors.amberAccent,
+    Colors.yellow,
+    // Greens
+    Colors.green,
+    Colors.greenAccent,
+    Colors.lightGreen,
+    Colors.lightGreenAccent,
+    Colors.lime,
+    Colors.limeAccent,
+    // Teals/Cyans
+    Colors.teal,
+    Colors.tealAccent,
+    Colors.cyan,
+    Colors.cyanAccent,
+    // Blues
+    Colors.blue,
+    Colors.blueAccent,
+    Colors.lightBlue,
+    Colors.lightBlueAccent,
+    // Purples/Indigos
+    Colors.indigo,
+    Colors.indigoAccent,
+    Colors.purple,
+    Colors.purpleAccent,
+    Colors.deepPurple,
+    Colors.deepPurpleAccent,
+    // Pinks
+    Colors.pink,
+    Colors.pinkAccent,
+  ];
   //accent colors
   static const Color accentColor1 = Color.fromRGBO(194, 148, 10, 1);
   static const Color accentColor2 = Color.fromRGBO(44, 171, 255, 1);

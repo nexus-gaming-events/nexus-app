@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nexus_app/main.dart';
 import '../constants.dart';
 import '../data_manager.dart';
+import 'user.dart';
 
 class Message {
   int senderId;
@@ -19,15 +20,50 @@ class Message {
   );
 }
 
-class VisualizeMessagePreview extends StatelessWidget {
+class VisualizeMessagePreview extends StatefulWidget {
   final Message message;
 
   const VisualizeMessagePreview({Key? key, required this.message})
     : super(key: key);
 
   @override
+  State<VisualizeMessagePreview> createState() => _VisualizeMessagePreviewState();
+}
+
+class _VisualizeMessagePreviewState extends State<VisualizeMessagePreview> {
+  User? sender;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSender();
+  }
+
+  Future<void> _loadSender() async {
+    sender = await DataManager.getUserById(widget.message.senderId);
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    bool isCurrentUser = message.senderId ==
+    if (isLoading || sender == null) {
+      return SizedBox(
+        height: AppConstants.iconSizeMedium(context),
+        child: Center(
+          child: CircularProgressIndicator(
+            color: AppConstants.textColor,
+            strokeWidth: 2,
+          ),
+        ),
+      );
+    }
+
+    bool isCurrentUser = widget.message.senderId ==
         DataManager.getSelfUser()!.id;
     return Row(
       mainAxisAlignment: isCurrentUser
@@ -38,7 +74,7 @@ class VisualizeMessagePreview extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
           child: Image.network(
-            DataManager.getUserById(message.senderId)!.imageUrl,
+            sender!.imageUrl,
             width: AppConstants.iconSizeMedium(context),
             height: AppConstants.iconSizeMedium(context),
             fit: BoxFit.cover,
@@ -58,16 +94,16 @@ class VisualizeMessagePreview extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      DataManager.getUserById(message.senderId)!.username,
+                      sender!.username,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: AppConstants.fontSizeSmallResponsive(context),
-                        color: message.color,
+                        color: widget.message.color,
                       ),
                     ),
                     SizedBox(height: AppConstants.paddingSmall(context) * 0.5),
                     Text(
-                      message.content,
+                      widget.message.content,
                       style: TextStyle(
                         fontSize: AppConstants.fontSizeMediumResponsive(
                           context,
@@ -78,7 +114,7 @@ class VisualizeMessagePreview extends StatelessWidget {
                     SizedBox(height: AppConstants.paddingSmall(context) * 0.3),
                     Text(
                       textAlign: TextAlign.right,
-                      '${message.timestamp.year}-${message.timestamp.month.toString().padLeft(2, '0')}-${message.timestamp.day.toString().padLeft(2, '0')} ${message.timestamp.hour.toString().padLeft(2, '0')}:${message.timestamp.minute.toString().padLeft(2, '0')}',
+                      '${widget.message.timestamp.year}-${widget.message.timestamp.month.toString().padLeft(2, '0')}-${widget.message.timestamp.day.toString().padLeft(2, '0')} ${widget.message.timestamp.hour.toString().padLeft(2, '0')}:${widget.message.timestamp.minute.toString().padLeft(2, '0')}',
                       style: TextStyle(
                         fontSize: AppConstants.fontSizeSmallResponsive(context),
                         color: AppConstants.semitransparentTextColor,
@@ -94,7 +130,7 @@ class VisualizeMessagePreview extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
           child: Image.network(
-            DataManager.getUserById(message.senderId)!.imageUrl,
+            sender!.imageUrl,
             width: AppConstants.iconSizeMedium(context),
             height: AppConstants.iconSizeMedium(context),
             fit: BoxFit.cover,

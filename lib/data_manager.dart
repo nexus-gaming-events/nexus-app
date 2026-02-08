@@ -254,16 +254,16 @@ class DataManager {
   }
 
     
-  static void loadEventById(int eventId) async{
+  static Future<Event?> loadEventById(int eventId) async{
     _currentEvent = await WebInterfaceService.fetchEventById(eventId);
+    return _currentEvent;
   }
 
-  static Event? getEventById(int eventId) {
+  static Future<Event?> getEventById(int eventId) async {
     if (isOfflineMode){
       return _events?.firstWhere((event) => event.id == eventId);
     }
-    loadEventById(eventId);
-    return _currentEvent != null && _currentEvent!.id == eventId ? _currentEvent : null;
+    return await loadEventById(eventId);
   }
 
   static void joinEvent(int eventId, String role) async {
@@ -284,7 +284,7 @@ class DataManager {
     loadEvents();
   }
 
-  static void patchEvent(Event event) async {
+  static Future<void> patchEvent(Event event) async {
     if (isOfflineMode){
       return;
     }
@@ -304,6 +304,7 @@ class DataManager {
 
   static Future<int> createEvent(Event event) async {
     if (isOfflineMode){
+      debugPrint('Creating event in offline mode: ${event.title}');
       return 10;
     }
     int newEventId = await WebInterfaceService.postEvent(event);
@@ -312,11 +313,12 @@ class DataManager {
     return newEventId;
   }
 
-  static void loadUserbyId(int userId) async {
+  static Future<User?> loadUserbyId(int userId) async {
     _currentUser = await WebInterfaceService.fetchUserById(userId);
+    return _currentUser;
   }
 
-  static User? getUserById(int userId) {
+  static Future<User?> getUserById(int userId) async {
     if (isOfflineMode){
       if (_selfUser != null && _selfUser!.id == userId){
         return _selfUser;
@@ -333,8 +335,7 @@ class DataManager {
       }
       return null;
     }
-    loadUserbyId(userId);
-    return _currentUser != null && _currentUser!.id == userId ? _currentUser : null;
+    return await loadUserbyId(userId);
   }
 
   static void sendFriendRequest(int id) async {
@@ -424,20 +425,24 @@ class DataManager {
     // This function can be implemented to return events the user is involved in
   }
 
-  static void editEvent(Event event) async {
+  static Future<Event> editEvent(Event event) async {
     int id;
     if (event.id == -1) {
+      debugPrint('Creating new event: ${event.title}');
       id = await createEvent(event);
+      debugPrint('Event created with ID: $id');
       _currentEvent = new Event(id: id, title: event.title, author: event.author, description: event.description, date: event.date, maxPlayers: event.maxPlayers, maxSpectators: event.maxSpectators);
+      debugPrint('Current event set to: ${_currentEvent!.title} with ID: ${_currentEvent!.id}');
     } else {
-      patchEvent(event);
+      await patchEvent(event);
       _currentEvent = event;
     }
+    return _currentEvent!;
   }
   
-  static Event editAndGetEvent(Event event) {
-    editEvent(event);
-    return _currentEvent!;
+  static Future<Event> editAndGetEvent(Event event) async {
+    debugPrint('Editing event: ${event.title} with ID: ${event.id}');
+    return await editEvent(event);
   }
 
   static void acceptFriendRequest(int id) async {
@@ -445,5 +450,92 @@ class DataManager {
     // Optionally refresh friends and friend requests list
     loadFriends();
     loadFriendRequests();
+  }
+
+  // Helper method to add months accounting for varying month lengths
+  static DateTime addMonths(DateTime date, int months) {
+    int newYear = date.year;
+    int newMonth = date.month + months;
+    
+    // Handle year overflow/underflow
+    while (newMonth > 12) {
+      newMonth -= 12;
+      newYear += 1;
+    }
+    while (newMonth < 1) {
+      newMonth += 12;
+      newYear -= 1;
+    }
+    
+    // Handle day overflow (e.g., Jan 31 + 1 month = Feb 28/29)
+    int newDay = date.day;
+    int maxDayInMonth = DateTime(newYear, newMonth + 1, 0).day;
+    if (newDay > maxDayInMonth) {
+      newDay = maxDayInMonth;
+    }
+    
+    return DateTime(
+      newYear,
+      newMonth,
+      newDay,
+      date.hour,
+      date.minute,
+      date.second,
+      date.millisecond,
+      date.microsecond,
+    );
+  }
+
+  static Future<List<Event>> createRecurrentEvents(Event newEvent, String periodicity, String recurrenceTime) async {
+    List<Event> createdEvents = [];
+    DateTime currentDate = newEvent.date;
+    DateTime endDate;
+    int cyceles = 0;
+    if (recurrenceTime == '1 week') {
+      endDate = newEvent.date.add(Duration(days: 7));
+    } else if (recurrenceTime == '1 month') {
+      endDate = addMonths(newEvent.date, 1);
+    } else if (recurrenceTime == '3 month') {
+      endDate = addMonths(newEvent.date, 3);
+    } else if (recurrenceTime == '6 month') {
+      endDate = addMonths(newEvent.date, 6); 
+    } else if (recurrenceTime == '1 year') {
+      endDate = addMonths(newEvent.date, 12);
+    }
+    else {
+      return createdEvents; // Invalid recurrence time
+    }
+
+    while (currentDate.isBefore(endDate)) {
+      Event eventCopy = Event(
+        id: -1, // New event, ID will be assigned by backend
+        title: newEvent.title,
+        author: newEvent.author,
+        description: newEvent.description,
+        date: currentDate,
+        maxPlayers: newEvent.maxPlayers,
+        maxSpectators: newEvent.maxSpectators,
+        players: newEvent.players,
+        spectators: newEvent.spectators,
+        games: newEvent.games,
+        links: newEvent.links,
+      );
+      createdEvents.add(eventCopy);
+      if (periodicity == 'Daily') {
+        currentDate = currentDate.add(Duration(days: 1));
+      } else if (periodicity == 'Weekly') {
+        currentDate = currentDate.add(Duration(days: 7));
+      } else if (periodicity == 'Monthly') {
+        currentDate = addMonths(currentDate, 1);
+      } else {
+      currentDate = currentDate.add(Duration(days: 1));
+      } // Adjust this based on your periodicity logic
+      }
+    cyceles = 0;
+     for (var event in createdEvents) {
+      Event savedEvent = await editAndGetEvent(event); // Save event and get assigned ID
+      event.id = savedEvent.id;
+      }
+    return createdEvents;
   }
 }

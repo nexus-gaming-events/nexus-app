@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:nexus_app/data_manager.dart';
 import '../constants.dart';
@@ -92,7 +94,11 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   children:
                       (DataManager.getEvents()
-                            ..sort((a, b) => b.date.compareTo(a.date)))
+                            ..sort((a, b) => a.date.compareTo(b.date))).where(  
+                              (event) => event.date.isAfter(DateTime.now()),
+                            ).where(  
+                              (event) => event.maxPlayers > event.currentPlayers
+                              ).where((event) => !event.participants.contains(DataManager.getSelfUser()))
                           .take(5)
                           .map(
                             (item) => InkWell(

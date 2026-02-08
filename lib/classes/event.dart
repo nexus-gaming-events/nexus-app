@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nexus_app/classes/chat.dart';
@@ -49,6 +51,8 @@ class Event extends ApplicationObject {
       participants.addAll(spectators!);
     }
   }
+  int get currentPlayers => players?.length ?? 0;
+  int get currentSpectators => spectators?.length ?? 0;
 }
 
 class VisualizeEventScreen extends StatefulWidget {
@@ -276,7 +280,9 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                       ElevatedButton(
                                         onPressed: () {
                                           Navigator.of(context).pop();
-                                          DataManager.deleteEvent(widget.event!.id);
+                                          DataManager.deleteEvent(
+                                            widget.event!.id,
+                                          );
                                           showDialog(
                                             context: context,
                                             builder: (BuildContext context) {
@@ -286,36 +292,41 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                                 title: Text(
                                                   'Event Deleted',
                                                   style: TextStyle(
-                                                    color: AppConstants.textColor,
+                                                    color:
+                                                        AppConstants.textColor,
                                                   ),
                                                 ),
                                                 content: Text(
                                                   'The event has been successfully deleted.',
                                                   style: TextStyle(
-                                                    color: AppConstants.textColor,
+                                                    color:
+                                                        AppConstants.textColor,
                                                   ),
                                                 ),
                                                 actions: [
                                                   TextButton(
                                                     onPressed: () {
-                                                      Navigator.of(context).pop();
-                                                      
-                                                      
-                                                      NexusAppState.instance!.updateState(
-                                                        NexusAppState
-                                                          .instance!
-                                                          .returnScreenPath
-                                                          .removeLast(),
-                                                        params: NexusAppState
-                                                          .instance!
-                                                          .returnScreenParams
-                                                          .removeLast()
-                                                      );
+                                                      Navigator.of(
+                                                        context,
+                                                      ).pop();
+
+                                                      NexusAppState.instance!
+                                                          .updateState(
+                                                            NexusAppState
+                                                                .instance!
+                                                                .returnScreenPath
+                                                                .removeLast(),
+                                                            params: NexusAppState
+                                                                .instance!
+                                                                .returnScreenParams
+                                                                .removeLast(),
+                                                          );
                                                     },
                                                     child: Text(
                                                       'OK',
                                                       style: TextStyle(
-                                                        color: AppConstants.textColor,
+                                                        color: AppConstants
+                                                            .textColor,
                                                       ),
                                                     ),
                                                   ),
@@ -329,9 +340,7 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                         ),
                                         child: Text(
                                           'Delete',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                          ),
+                                          style: TextStyle(color: Colors.white),
                                         ),
                                       ),
                                     ],
@@ -682,9 +691,11 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                                             context,
                                                             0.05,
                                                           ),
-                                                        AppConstants.screenWidth(
+                                                          AppConstants.screenWidth(
                                                             context,
-                                                            isUserInPlayers ? 0.075 : 0.09,
+                                                            isUserInPlayers
+                                                                ? 0.075
+                                                                : 0.09,
                                                           ),
                                                         ),
                                                   ),
@@ -873,7 +884,7 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                   ),
                                 ),
                                 Positioned(
-                                  top:  AppConstants.screenHeight(
+                                  top: AppConstants.screenHeight(
                                     context,
                                     0.5,
                                   ).clamp(75.0, 160.0),
@@ -969,7 +980,9 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                                           ),
                                                           AppConstants.screenWidth(
                                                             context,
-                                                            isUserInSpectators ? 0.067 : 0.085,
+                                                            isUserInSpectators
+                                                                ? 0.067
+                                                                : 0.085,
                                                           ),
                                                         ),
                                                   ),
@@ -1197,6 +1210,22 @@ class VisualizeEventPreview extends StatelessWidget {
         padding: EdgeInsets.all(AppConstants.paddingSmall(context)),
         child: Row(
           children: [
+            Padding(
+              padding: EdgeInsets.all(AppConstants.paddingSmall(context) * 1.4),
+              child: SizedBox(
+                width: AppConstants.iconSizeSmall(context) * 1.1,
+                height: AppConstants.iconSizeSmall(context) * 1.1,
+                child: Image.asset(
+                  'assets/icons/Space ship.png',
+                  fit: BoxFit.contain,
+                  color: event.maxPlayers > event.currentPlayers
+                      ? AppConstants.successColor
+                      : event.maxSpectators > event.currentSpectators
+                      ? AppConstants.warningColor
+                      : AppConstants.errorColor,
+                ),
+              ),
+            ),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1254,12 +1283,16 @@ class EditEventScreenState extends State<EditEventScreen> {
   late Event newEvent;
   DateTime? _selectedDay;
   DateTime _focusedDay = DateTime.now();
+  TimeOfDay _selectedTime = TimeOfDay(hour: 12, minute: 0);
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
   late TextEditingController _maxPlayersController;
   late TextEditingController _maxSpectatorsController;
   late TextEditingController _gameController;
   late TextEditingController _linkController;
+  bool _isRecurrent = false;
+  late String _periodicity;
+  late String _recurrenceTime;
   late String friendGroup;
 
   @override
@@ -1297,7 +1330,16 @@ class EditEventScreenState extends State<EditEventScreen> {
       maxSpectators: 0,
     );
     _selectedDay = _focusedDay;
+    // Initialize time from existing event if available
+    if (widget.event != null) {
+      _selectedTime = TimeOfDay(
+        hour: widget.event!.date.hour,
+        minute: widget.event!.date.minute,
+      );
+    }
     friendGroup = 'All';
+    _periodicity = "Daily";
+    _recurrenceTime = "1 week";
   }
 
   @override
@@ -1479,8 +1521,305 @@ class EditEventScreenState extends State<EditEventScreen> {
               SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
               Container(
                 width: AppConstants.descriptionWidth(context),
+                height: AppConstants.sectionHeaderHeight(context) * 1.5,
+                padding: EdgeInsets.all(AppConstants.paddingMedium(context)),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.borderRadiusMedium(context),
+                  ),
+                  color: AppConstants.secondaryColor,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Time',
+                      style: TextStyle(
+                        color: AppConstants.textColor,
+                        fontSize: AppConstants.fontSizeLargeResponsive(context),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        final TimeOfDay? picked = await showTimePicker(
+                          context: context,
+                          initialTime: _selectedTime,
+                          builder: (context, child) {
+                            return Theme(
+                              data: ThemeData.dark().copyWith(
+                                colorScheme: ColorScheme.dark(
+                                  primary: AppConstants.textColor,
+                                  surface: AppConstants.secondaryColor,
+                                ),
+                              ),
+                              child: child!,
+                            );
+                          },
+                        );
+                        if (picked != null && picked != _selectedTime) {
+                          setState(() {
+                            _selectedTime = picked;
+                          });
+                        }
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppConstants.paddingMedium(context),
+                          vertical: AppConstants.paddingSmall(context),
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: AppConstants.selectionBackgroundGradient,
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.borderRadiusSmall(context),
+                          ),
+                        ),
+                        child: Text(
+                          _selectedTime.format(context),
+                          style: TextStyle(
+                            color: AppConstants.textColor,
+                            fontSize: AppConstants.fontSizeMediumResponsive(
+                              context,
+                            ),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              widget.event == null
+                  ? Column(
+                      children: [
+                        SizedBox(
+                          height: AppConstants.paddingMedium(context) * 1.2,
+                        ),
+                        AnimatedCrossFade(
+                          crossFadeState: _isRecurrent
+                              ? CrossFadeState.showSecond
+                              : CrossFadeState.showFirst,
+                          duration: Duration(milliseconds: 250),
+                          firstChild: Container(
+                            width: AppConstants.descriptionWidth(context),
+                            height:
+                                AppConstants.sectionHeaderHeight(context) *
+                                2.15,
+                            padding: EdgeInsets.all(
+                              AppConstants.paddingMedium(context),
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(
+                                AppConstants.borderRadiusMedium(context),
+                              ),
+                              color: AppConstants.secondaryColor,
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Is the event recurrent?',
+                                      style: TextStyle(
+                                        color: AppConstants.textColor,
+                                        fontSize:
+                                            AppConstants.fontSizeLargeResponsive(
+                                              context,
+                                            ),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Switch(
+                                      value: _isRecurrent,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _isRecurrent = value;
+                                        });
+                                      },
+                                      activeColor:
+                                          AppConstants.semitransparentTextColor,
+                                      inactiveThumbColor:
+                                          AppConstants.messageBackgroundColor,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          secondChild: Container(
+                            width: AppConstants.descriptionWidth(context),
+                            height:
+                                AppConstants.sectionHeaderHeight(context) * 6,
+                            padding: EdgeInsets.all(
+                              AppConstants.paddingMedium(context),
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(
+                                AppConstants.borderRadiusMedium(context),
+                              ),
+                              color: AppConstants.secondaryColor,
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Is the event recurrent?',
+                                      style: TextStyle(
+                                        color: AppConstants.textColor,
+                                        fontSize:
+                                            AppConstants.fontSizeLargeResponsive(
+                                              context,
+                                            ),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Switch(
+                                      value: _isRecurrent,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _isRecurrent = value;
+                                        });
+                                      },
+                                      activeColor:
+                                          AppConstants.semitransparentTextColor,
+                                      inactiveThumbColor:
+                                          AppConstants.messageBackgroundColor,
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: AppConstants.paddingMedium(context),
+                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      "Periodicity:",
+                                      style: TextStyle(
+                                        color: AppConstants.textColor,
+                                        fontSize:
+                                            AppConstants.fontSizeLargeResponsive(
+                                              context,
+                                            ),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: AppConstants.paddingLarge(context)*6,
+                                    ),
+                                    DropdownButton<String>(
+                                      value: _periodicity,
+                                      isExpanded: false,
+                                      underline: SizedBox(),
+                                      dropdownColor:
+                                          AppConstants.secondaryColor,
+                                      style: TextStyle(
+                                        color: AppConstants.textColor,
+                                        fontSize:
+                                            AppConstants.fontSizeLargeResponsive(
+                                              context,
+                                            ),
+                                      ),
+                                      icon: Icon(
+                                        Icons.arrow_drop_down,
+                                        color: AppConstants.textColor,
+                                      ),
+                                      items: ["Daily", "Weekly", "Monthly"].map(
+                                        (period) {
+                                          return DropdownMenuItem<String>(
+                                            value: period,
+                                            child: Text(
+                                              period,
+                                              style: TextStyle(
+                                                color: AppConstants.textColor,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ).toList(),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _periodicity = value!;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: AppConstants.paddingMedium(context),
+                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      "Duration:",
+                                      style: TextStyle(
+                                        color: AppConstants.textColor,
+                                        fontSize:
+                                            AppConstants.fontSizeLargeResponsive(
+                                              context,
+                                            ),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: AppConstants.paddingLarge(context)*6,
+                                    ),
+                                    DropdownButton<String>(
+                                      value: _recurrenceTime,
+                                      isExpanded: false,
+                                      underline: SizedBox(),
+                                      dropdownColor:
+                                          AppConstants.secondaryColor,
+                                      style: TextStyle(
+                                        color: AppConstants.textColor,
+                                        fontSize:
+                                            AppConstants.fontSizeLargeResponsive(
+                                              context,
+                                            ),
+                                      ),
+                                      icon: Icon(
+                                        Icons.arrow_drop_down,
+                                        color: AppConstants.textColor,
+                                      ),
+                                      items: ["1 week", "1 month", "3 months", "6 months", "1 year"].map(
+                                        (period) {
+                                          return DropdownMenuItem<String>(
+                                            value: period,
+                                            child: Text(
+                                              period,
+                                              style: TextStyle(
+                                                color: AppConstants.textColor,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ).toList(),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _recurrenceTime = value!;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Container(),
+              SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
+              Container(
+                width: AppConstants.descriptionWidth(context),
                 height: AppConstants.descriptionHeight(context) * 1.15,
-                //padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   color: AppConstants.descriptionPrimaryColor,
                   borderRadius: BorderRadius.circular(
@@ -1916,52 +2255,176 @@ class EditEventScreenState extends State<EditEventScreen> {
                 height: AppConstants.mainContainerHeight(context) * 0.06,
                 width: AppConstants.mainContainerWidth(context) * 0.4,
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     newEvent.title = _titleController.text;
                     newEvent.description = _descriptionController.text;
-                    newEvent.date = _selectedDay!;
+                    // Combine selected day with selected time
+                    newEvent.date = DateTime(
+                      _selectedDay!.year,
+                      _selectedDay!.month,
+                      _selectedDay!.day,
+                      _selectedTime.hour,
+                      _selectedTime.minute,
+                    );
                     newEvent.maxPlayers =
                         int.tryParse(_maxPlayersController.text) ?? 1;
                     newEvent.maxSpectators =
                         int.tryParse(_maxSpectatorsController.text) ?? 0;
                     newEvent.games = [_gameController.text];
                     newEvent.links = [_linkController.text];
-                    newEvent = DataManager.editAndGetEvent(newEvent);
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          backgroundColor: AppConstants.secondaryColor,
-                          title: Text(
-                            'Event Saved',
-                            style: TextStyle(color: AppConstants.textColor),
-                          ),
-                          content: Text(
-                            'The event has been successfully saved.',
-                            style: TextStyle(color: AppConstants.textColor),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                NexusAppState.instance!.returnScreenParams
-                                    .removeLast();
-                                NexusAppState.instance!.returnScreenPath
-                                    .removeLast();
-                                NexusAppState.instance!.updateState(
-                                  'Event',
-                                  params: [newEvent],
-                                );
-                              },
-                              child: Text(
-                                'OK',
-                                style: TextStyle(color: AppConstants.textColor),
-                              ),
+                    newEvent.players = widget.event?.players ?? [];
+                    newEvent.spectators = widget.event?.spectators ?? [];
+                    bool titleEmpty = newEvent.title.isEmpty;
+                    bool descriptionEmpty = newEvent.description.isEmpty;
+                    bool dateInvalid = !newEvent.date.isAfter(DateTime.now());
+                    bool maxPlayersUnder0 = newEvent.maxPlayers <= 0;
+                    bool maxSpectatorsUnder0 = newEvent.maxSpectators < 0;
+                    bool maxPlayersLessThanCurrent =
+                        newEvent.maxPlayers < newEvent.currentPlayers;
+                    bool maxSpectatorsLessThanCurrent =
+                        newEvent.maxSpectators < newEvent.currentSpectators;
+                    bool hasErrors =
+                        titleEmpty ||
+                        descriptionEmpty ||
+                        dateInvalid ||
+                        maxPlayersUnder0 ||
+                        maxSpectatorsUnder0 ||
+                        maxPlayersLessThanCurrent ||
+                        maxSpectatorsLessThanCurrent;
+                    if (!hasErrors) {
+                      if (!_isRecurrent){
+                        newEvent = await DataManager.editAndGetEvent(newEvent);
+                        showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            backgroundColor: AppConstants.secondaryColor,
+                            title: Text(
+                              'Event Saved',
+                              style: TextStyle(color: AppConstants.textColor),
                             ),
-                          ],
-                        );
-                      },
-                    );
+                            content: Text(
+                              'The event has been successfully saved.',
+                              style: TextStyle(color: AppConstants.textColor),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  NexusAppState.instance!.returnScreenParams
+                                      .removeLast();
+                                  NexusAppState.instance!.returnScreenPath
+                                      .removeLast();
+                                  NexusAppState.instance!.updateState(
+                                    'Event',
+                                    params: [newEvent],
+                                  );
+                                },
+                                child: Text(
+                                  'OK',
+                                  style: TextStyle(
+                                    color: AppConstants.textColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    
+                      }
+                      else{
+                        showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            backgroundColor: AppConstants.secondaryColor,
+                            title: Text(
+                              'Recurrent Event',
+                              style: TextStyle(color: AppConstants.textColor),
+                            ),
+                            content: Text(
+                              'This operation will create multiple events based on the selected periodicity and duration. Each event will be created separately. Do you want to proceed?',
+                              style: TextStyle(color: AppConstants.textColor),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () async {
+                                  List<Event> events = await DataManager.createRecurrentEvents(newEvent, _periodicity, _recurrenceTime);
+                                  newEvent = events.first;
+                                  Navigator.of(context).pop();
+                                  NexusAppState.instance!.returnScreenParams
+                                      .removeLast();
+                                  NexusAppState.instance!.returnScreenPath
+                                      .removeLast();
+                                  NexusAppState.instance!.updateState(
+                                    'Event',
+                                    params: [newEvent],
+                                  );
+                                },
+                                child: Text(
+                                  'OK',
+                                  style: TextStyle(
+                                    color: AppConstants.textColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    
+                      }
+                      } else {
+                      String errorMessage =
+                          'Please fix the following errors:\n';
+                      if (titleEmpty)
+                        errorMessage += '- Title cannot be empty\n';
+                      if (descriptionEmpty)
+                        errorMessage += '- Description cannot be empty\n';
+                      if (dateInvalid)
+                        errorMessage += '- Date must be in the future\n';
+                      if (maxPlayersUnder0)
+                        errorMessage +=
+                            '- Max players must be greater than 0\n';
+                      if (maxSpectatorsUnder0)
+                        errorMessage += '- Max spectators cannot be negative\n';
+                      if (maxPlayersLessThanCurrent)
+                        errorMessage +=
+                            '- Max players cannot be less than current players (${newEvent.currentPlayers})\n';
+                      if (maxSpectatorsLessThanCurrent)
+                        errorMessage +=
+                            '- Max spectators cannot be less than current spectators (${newEvent.currentSpectators})\n';
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            backgroundColor: AppConstants.secondaryColor,
+                            title: Text(
+                              'Error',
+                              style: TextStyle(color: AppConstants.textColor),
+                            ),
+                            content: Text(
+                              errorMessage,
+                              style: TextStyle(color: AppConstants.textColor),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text(
+                                  'OK',
+                                  style: TextStyle(
+                                    color: AppConstants.textColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
