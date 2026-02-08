@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nexus_app/classes/chat.dart';
 import 'package:nexus_app/main.dart';
 import '../constants.dart';
 import '../data_manager.dart';
@@ -22,12 +23,16 @@ class Message {
 
 class VisualizeMessagePreview extends StatefulWidget {
   final Message message;
-
-  const VisualizeMessagePreview({Key? key, required this.message})
-    : super(key: key);
+  final Chat? chat;
+  const VisualizeMessagePreview({
+    Key? key,
+    required this.message,
+    required this.chat,
+  }) : super(key: key);
 
   @override
-  State<VisualizeMessagePreview> createState() => _VisualizeMessagePreviewState();
+  State<VisualizeMessagePreview> createState() =>
+      _VisualizeMessagePreviewState();
 }
 
 class _VisualizeMessagePreviewState extends State<VisualizeMessagePreview> {
@@ -63,23 +68,38 @@ class _VisualizeMessagePreviewState extends State<VisualizeMessagePreview> {
       );
     }
 
-    bool isCurrentUser = widget.message.senderId ==
-        DataManager.getSelfUser()!.id;
+    bool isCurrentUser =
+        widget.message.senderId == DataManager.getSelfUser()!.id;
     return Row(
       mainAxisAlignment: isCurrentUser
           ? MainAxisAlignment.end
           : MainAxisAlignment.start,
       children: [
-        isCurrentUser? SizedBox.shrink() :
-        ClipRRect(
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
-          child: Image.network(
-            sender!.imageUrl,
-            width: AppConstants.iconSizeMedium(context),
-            height: AppConstants.iconSizeMedium(context),
-            fit: BoxFit.cover,
-          ),
-        ),
+        isCurrentUser
+            ? SizedBox.shrink()
+            : ClipRRect(
+                borderRadius: BorderRadius.circular(
+                  AppConstants.borderRadiusMax,
+                ),
+                child: InkWell(
+                  child: Image.network(
+                    sender!.imageUrl,
+                    width: AppConstants.iconSizeMedium(context),
+                    height: AppConstants.iconSizeMedium(context),
+                    fit: BoxFit.cover,
+                  ),
+                  onTap: () {
+                    NexusAppState.instance!.returnScreenParams.add([
+                      widget.chat!,
+                    ]);
+                    NexusAppState.instance!.returnScreenPath.add('Chat');
+                    NexusAppState.instance!.updateState(
+                      'User',
+                      params: [sender!],
+                    );
+                  },
+                ),
+              ),
         SizedBox(width: AppConstants.paddingSmall(context)),
         Flexible(
           child: Container(
@@ -126,17 +146,31 @@ class _VisualizeMessagePreviewState extends State<VisualizeMessagePreview> {
             ),
           ),
         ),
-        !isCurrentUser? SizedBox.shrink() :
-        ClipRRect(
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
-          child: Image.network(
-            sender!.imageUrl,
-            width: AppConstants.iconSizeMedium(context),
-            height: AppConstants.iconSizeMedium(context),
-            fit: BoxFit.cover,
-          ),
-        ),
-        
+        !isCurrentUser
+            ? SizedBox.shrink()
+            : ClipRRect(
+                borderRadius: BorderRadius.circular(
+                  AppConstants.borderRadiusMax,
+                ),
+                child: InkWell(
+                  child: Image.network(
+                    sender!.imageUrl,
+                    width: AppConstants.iconSizeMedium(context),
+                    height: AppConstants.iconSizeMedium(context),
+                    fit: BoxFit.cover,
+                  ),
+                  onTap: () {
+                    NexusAppState.instance!.returnScreenParams.add([
+                      widget.chat!,
+                    ]);
+                    NexusAppState.instance!.returnScreenPath.add('Chat');
+                    NexusAppState.instance!.updateState(
+                      'User',
+                      params: [sender!],
+                    );
+                  },
+                ),
+              ),
       ],
     );
   }

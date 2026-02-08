@@ -6,7 +6,6 @@ import 'package:nexus_app/main.dart';
 import 'visual_link.dart';
 import '../constants.dart';
 import 'event.dart';
-import '../main.dart';
 import '../widgets/back_button_widget.dart';
 
 class User extends ApplicationObject {
@@ -125,20 +124,149 @@ class VisualizeUserScreen {
                             AppConstants.paddingLarge(context)* 3,
                       ),
                       user.id == DataManager.getSelfUser()?.id ?
-                      IconButton(
-                        icon: Icon(
-                          Icons.settings,
-                          color: AppConstants.textColor,
-                          size: AppConstants.iconSizeMedium(context),
-                        ),
-                        onPressed: () {
-                          NexusAppState.instance!.returnScreenParams.add([VisualizeUserScreen.user]);
-                          NexusAppState.instance!.returnScreenPath.add('User');
-                          NexusAppState.instance!.updateState(
-                            'Settings',
-                          );
-                        },
-                      )
+                      PopupMenuButton(
+                          padding: EdgeInsets.all(
+                            AppConstants.paddingSmall(context) * 0.5,
+                          ),
+                          icon: Icon(
+                            Icons.settings,
+                            size: AppConstants.iconSizeMedium(context),
+                            color: Colors.white,
+                          ),
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'edit',
+                              child: Text('Edit Banner'),
+                            ),
+                            PopupMenuItem(
+                              value: 'logout',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.logout,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: AppConstants.paddingSmall(context)),
+                                  Text('Log Out', style: TextStyle(color: AppConstants.errorColor),),
+                                ],
+                              ),
+                            ),
+                          ],
+                          onSelected: (value) {
+                            if (value == 'edit') {
+                              // Navigate to edit screen
+                              NexusAppState.instance!.returnScreenParams.add([
+                                user,
+                              ]);
+                              NexusAppState.instance!.returnScreenPath.add(
+                                'User',
+                              );
+                              NexusAppState.instance!.updateState(
+                                'Settings',
+                              );
+                            } else if (value == 'logout') {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    backgroundColor:
+                                        AppConstants.secondaryColor,
+                                    title: Text(
+                                      'Log Out',
+                                      style: TextStyle(
+                                        color: AppConstants.textColor,
+                                      ),
+                                    ),
+                                    content: Text(
+                                      'Are you sure you want to log out?',
+                                      style: TextStyle(
+                                        color: AppConstants.textColor,
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text(
+                                          'Cancel',
+                                          style: TextStyle(
+                                            color: AppConstants.textColor,
+                                          ),
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          DataManager.logout();
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                backgroundColor:
+                                                    AppConstants.secondaryColor,
+                                                title: Text(
+                                                  'Goodbye!',
+                                                  style: TextStyle(
+                                                    color:
+                                                        AppConstants.textColor,
+                                                  ),
+                                                ),
+                                                content: Text(
+                                                  'You have been successfully logged out.',
+                                                  style: TextStyle(
+                                                    color:
+                                                        AppConstants.textColor,
+                                                  ),
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.of(
+                                                        context,
+                                                      ).pop();
+
+                                                      NexusAppState.instance!
+                                                          .updateState(
+                                                            NexusAppState
+                                                                .instance!
+                                                                .returnScreenPath
+                                                                .removeLast(),
+                                                            params: NexusAppState
+                                                                .instance!
+                                                                .returnScreenParams
+                                                                .removeLast(),
+                                                          );
+                                                    },
+                                                    child: Text(
+                                                      'OK',
+                                                      style: TextStyle(
+                                                        color: AppConstants
+                                                            .textColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                        ),
+                                        child: Text(
+                                          'Confirm',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+                          },
+                        )
+                
                       : Container(),
                     ],
                   ),

@@ -538,4 +538,6 @@ class DataManager {
       }
     return createdEvents;
   }
+
+  static void logout() {}
 }

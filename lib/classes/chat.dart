@@ -11,15 +11,11 @@ import '../constants.dart';
 import '../widgets/back_button_widget.dart';
 import 'event.dart';
 
-class Chat extends ApplicationObject{
+class Chat extends ApplicationObject {
   int eventId;
   List<Message> messages;
 
-  Chat({
-    required this.eventId,
-    required this.messages,
-  });
-
+  Chat({required this.eventId, required this.messages});
 }
 
 class VisualizeChatScreen extends StatefulWidget {
@@ -66,8 +62,7 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
     }
     for (var message in widget.chat.messages) {
       message.color = userColors[message.senderId] ?? AppConstants.textColor;
-      }
-
+    }
   }
 
   @override
@@ -90,9 +85,7 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
           width: AppConstants.mainContainerWidth(context),
           height: AppConstants.mainContainerHeight(context),
           child: Center(
-            child: CircularProgressIndicator(
-              color: AppConstants.textColor,
-            ),
+            child: CircularProgressIndicator(color: AppConstants.textColor),
           ),
         ),
       );
@@ -100,24 +93,27 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
 
     String eventTitle = event!.title;
     List<User> eventParticipantsList = event!.participants;
-    String eventParticipants = eventParticipantsList.map((participant) => participant.username).toList().join(', ');
+    String eventParticipants = eventParticipantsList
+        .map((participant) => participant.username)
+        .toList()
+        .join(', ');
     return Padding(
-        padding: EdgeInsets.only(
-          left: AppConstants.paddingSmall(context),
-          right: AppConstants.paddingSmall(context),
-          bottom: 0.0,
-          top: AppConstants.paddingLarge(context) * 3.5,
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppConstants.primaryColor,
-            borderRadius: BorderRadius.circular(
-              AppConstants.borderRadiusMedium(context),
-            ),
+      padding: EdgeInsets.only(
+        left: AppConstants.paddingSmall(context),
+        right: AppConstants.paddingSmall(context),
+        bottom: 0.0,
+        top: AppConstants.paddingLarge(context) * 3.5,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppConstants.primaryColor,
+          borderRadius: BorderRadius.circular(
+            AppConstants.borderRadiusMedium(context),
           ),
-          width: AppConstants.mainContainerWidth(context),
-          height: AppConstants.mainContainerHeight(context),
-          child:  Column(
+        ),
+        width: AppConstants.mainContainerWidth(context),
+        height: AppConstants.mainContainerHeight(context),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
@@ -139,66 +135,84 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
                 ),
                 color: AppConstants.secondaryColor,
               ),
-              child: Flexible(
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        BackButtonWidget(),
-                        SizedBox(
-                          width: AppConstants.mainContainerWidth(context) * 0.01,
+              child: Row(
+                children: [
+                  BackButtonWidget(),
+                  SizedBox(
+                    width: AppConstants.mainContainerWidth(context) * 0.01,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        eventTitle,
+                        style: TextStyle(
+                          color: AppConstants.textColor,
+                          fontSize: () {
+                            final baseFontSize =
+                                AppConstants.fontSizeXLargeResponsive(
+                                      context,
+                                    ) +
+                                    2;
+                            final titleLength = eventTitle.length;
+                            if (titleLength <= 15) return baseFontSize;
+                            if (titleLength <= 25) return baseFontSize - 2;
+                            if (titleLength <= 35) return baseFontSize - 4;
+                            return (baseFontSize - 6).clamp(
+                              AppConstants.fontSizeMediumResponsive(context),
+                              baseFontSize,
+                            );
+                          }(),
+                          fontWeight: FontWeight.bold,
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              eventTitle,
-                              style: TextStyle(
-                                color: AppConstants.textColor,
-                                fontSize: () {
-                                  final baseFontSize =
-                                      AppConstants.fontSizeXLargeResponsive(
-                                        context,
-                                      ) +
-                                      2;
-                                  final titleLength = eventTitle.length;
-                                  if (titleLength <= 15) return baseFontSize;
-                                  if (titleLength <= 25) return baseFontSize - 2;
-                                  if (titleLength <= 35) return baseFontSize - 4;
-                                  return (baseFontSize - 6).clamp(
-                                    AppConstants.fontSizeMediumResponsive(context),
-                                    baseFontSize,
-                                  );
-                                }(),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxWidth: AppConstants.mainContainerWidth(context) * 0.7,
-                              ),
-                              child: ClipRect(
-                                clipBehavior: Clip.hardEdge,
-                                child: Text(
-                                  eventParticipants,
-                                  style: TextStyle(
-                                    color: AppConstants.semitransparentTextColor,
-                                    fontSize: AppConstants.fontSizeMediumResponsive(context),
-                                    fontWeight: FontWeight.normal,  
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  ),
-                              ),
-                            ),
-                          ],
+                      ),
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth:
+                              AppConstants.mainContainerWidth(context) * 0.7,
                         ),
-                      ],
+                        child: ClipRect(
+                          clipBehavior: Clip.hardEdge,
+                          child: Text(
+                            eventParticipants,
+                            style: TextStyle(
+                              color: AppConstants.semitransparentTextColor,
+                              fontSize:
+                                  AppConstants.fontSizeMediumResponsive(
+                                context,
+                              ),
+                              fontWeight: FontWeight.normal,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                      width: AppConstants.mainContainerWidth(context) * 0.35),
+                  InkWell(
+                    child: Image.asset(
+                      "assets/icons/Space ship.png",
+                      width: AppConstants.iconSizeMedium(context),
+                      height: AppConstants.iconSizeMedium(context),
                     ),
-                    
-                  ],
-                ),
+                    onTap: () {
+                      NexusAppState.instance!.returnScreenParams.add([
+                        widget.chat,
+                      ]);
+                      NexusAppState.instance!.returnScreenPath.add(
+                        'Chat',
+                      );
+                      NexusAppState.instance!.updateState(
+                        'Event',
+                        params: [event!],
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
             //print all messages from bottom to top
@@ -208,12 +222,14 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
                 padding: EdgeInsets.all(AppConstants.paddingMedium(context)),
                 itemCount: widget.chat.messages.length,
                 itemBuilder: (context, index) {
-                  final message = widget.chat.messages[widget.chat.messages.length - 1 - index];
+                  final message = widget
+                      .chat
+                      .messages[widget.chat.messages.length - 1 - index];
                   return Padding(
                     padding: EdgeInsets.only(
                       bottom: AppConstants.paddingSmall(context),
                     ),
-                    child: VisualizeMessagePreview(message: message),
+                    child: VisualizeMessagePreview(message: message, chat: widget.chat),
                   );
                 },
               ),
@@ -237,7 +253,9 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
                     child: TextField(
                       style: TextStyle(
                         color: AppConstants.textColor,
-                        fontSize: AppConstants.fontSizeMediumResponsive(context),
+                        fontSize: AppConstants.fontSizeMediumResponsive(
+                          context,
+                        ),
                       ),
                       decoration: InputDecoration(
                         hintText: 'Type a message...',
@@ -267,7 +285,7 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
                     icon: Icon(
                       Icons.send,
                       color: AppConstants.textColor,
-                      size: AppConstants.iconSizeMedium(context)*0.8,
+                      size: AppConstants.iconSizeMedium(context) * 0.8,
                     ),
                     style: IconButton.styleFrom(
                       backgroundColor: AppConstants.accentColor2,
@@ -373,7 +391,7 @@ class _VisualizeChatPreviewState extends State<VisualizeChatPreview> {
                       fontSize: AppConstants.fontSizeMediumResponsive(context),
                       color: AppConstants.semitransparentTextColor,
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
