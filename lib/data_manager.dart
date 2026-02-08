@@ -19,7 +19,6 @@ class DataManager {
   static List<int> _myFriendRequests = [];
 
   static List<Event>? _events;
-  static List<Event>? _eventsInvolved;
   static Event? _currentEvent;  
   static List<Chat>? _chats;
 
@@ -215,7 +214,7 @@ class DataManager {
 
   static Future<List<Message>> getMessagesForEvent(int eventId) async{
     if (isOfflineMode){
-      return _chats?.firstWhere((chat) => chat.eventId == eventId)?.messages ?? [];
+      return _chats?.firstWhere((chat) => chat.eventId == eventId).messages ?? [];
     }
     return await WebInterfaceService.fetchChatMessages(eventId);
   }
@@ -490,7 +489,6 @@ class DataManager {
     List<Event> createdEvents = [];
     DateTime currentDate = newEvent.date;
     DateTime endDate;
-    int cyceles = 0;
     if (recurrenceTime == '1 week') {
       endDate = newEvent.date.add(Duration(days: 7));
     } else if (recurrenceTime == '1 month') {
@@ -531,7 +529,6 @@ class DataManager {
       currentDate = currentDate.add(Duration(days: 1));
       } // Adjust this based on your periodicity logic
       }
-    cyceles = 0;
      for (var event in createdEvents) {
       Event savedEvent = await editAndGetEvent(event); // Save event and get assigned ID
       event.id = savedEvent.id;

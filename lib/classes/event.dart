@@ -1,15 +1,14 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nexus_app/classes/chat.dart';
 import 'package:nexus_app/data_manager.dart';
 import 'package:nexus_app/main.dart';
-import 'visual_link.dart';
 import '../constants.dart';
 import 'user.dart';
 import 'application_object.dart';
 import '../widgets/back_button_widget.dart';
+import '../widgets/base_screen_container.dart';
+import '../widgets/header_container.dart';
 import '../widgets/number_selector.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -93,27 +92,12 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: AppConstants.paddingSmall(context),
-        right: AppConstants.paddingSmall(context),
-        bottom: 0.0,
-        top: AppConstants.paddingLarge(context) * 3.5,
-      ),
-      child: Container(
-        width: AppConstants.mainContainerWidth(context),
-        height: AppConstants.mainContainerHeight(context),
-        //padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: AppConstants.primaryColor,
-          borderRadius: BorderRadius.circular(
-            AppConstants.borderRadiusMedium(context),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
+    return BaseScreenContainer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Custom height (1.1x) needed for event menu buttons
+          Container(
               width: AppConstants.mainContainerWidth(context),
               height: AppConstants.headerHeight(context) * 1.1,
               padding: EdgeInsets.only(
@@ -1187,7 +1171,6 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
             ),
           ],
         ),
-      ),
     );
   }
 }
@@ -1355,47 +1338,14 @@ class EditEventScreenState extends State<EditEventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: AppConstants.paddingSmall(context),
-        right: AppConstants.paddingSmall(context),
-        bottom: 0.0,
-        top: AppConstants.paddingLarge(context) * 3.5,
-      ),
-      child: Container(
-        width: AppConstants.mainContainerWidth(context),
-        height: AppConstants.mainContainerHeight(context),
-        decoration: BoxDecoration(
-          color: AppConstants.primaryColor,
-          borderRadius: BorderRadius.circular(
-            AppConstants.borderRadiusMedium(context),
-          ),
-        ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: AppConstants.mainContainerWidth(context),
-                height: AppConstants.headerHeight(context),
-                padding: EdgeInsets.only(
-                  top: (AppConstants.paddingSmall(context) > 3
-                      ? AppConstants.paddingSmall(context) - 3
-                      : 0),
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(
-                      AppConstants.borderRadiusMedium(context),
-                    ),
-                    topRight: Radius.circular(
-                      AppConstants.borderRadiusMedium(context),
-                    ),
-                  ),
-                  color: AppConstants.secondaryColor,
-                ),
-                child: Row(
+    return BaseScreenContainer(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            HeaderContainer(
+              child: Row(
                   children: [
                     BackButtonWidget(),
                     SizedBox(
@@ -2452,7 +2402,6 @@ class EditEventScreenState extends State<EditEventScreen> {
             ],
           ),
         ),
-      ),
     );
   }
 }

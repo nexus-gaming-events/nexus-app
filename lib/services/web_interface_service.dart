@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:nexus_app/classes/group.dart';
 import 'package:nexus_app/classes/friend_request.dart';
-import 'package:nexus_app/classes/chat.dart';
 import '../classes/event.dart';
 import '../classes/user.dart';
 import '../classes/message.dart';
@@ -157,12 +156,12 @@ class WebInterfaceService {
       'discordVoiceLink': event.links!.isNotEmpty ? event.links![0] : '',
       }
       );
-    HttpClientResponse response = await sendRequest(request, body);
+    await sendRequest(request, body);
     }
 
   static Future<void> deleteEvent(int id) async {
     final request = await createRequest('events/$id', 'DELETE');
-    HttpClientResponse response = await sendRequest(request);
+    await sendRequest(request);
   }
 
   static Future<void> joinEvent(int eventId, String role) async {
@@ -170,12 +169,12 @@ class WebInterfaceService {
     final body = jsonEncode({
       'role': role,
     });
-    HttpClientResponse response = await sendRequest(request, body);
+    await sendRequest(request, body);
   }
 
   static Future<void> leaveEvent(int eventId) async {
     final request = await createRequest('events/$eventId/leave', 'POST');
-    HttpClientResponse response = await sendRequest(request);
+    await sendRequest(request);
   }
 
   //Friends
@@ -209,20 +208,17 @@ class WebInterfaceService {
     final body = jsonEncode({
       'targetUserId': userId,
     });
-    HttpClientResponse response = await sendRequest(request, body);
+    await sendRequest(request, body);
   }
 
   static Future<void> acceptFriendRequest(int userId) async {
     final request = await createRequest('friend/accept', 'POST');
-    final body = jsonEncode({
-      'requesterId': userId,
-    });
-    HttpClientResponse response = await sendRequest(request);
+    await sendRequest(request);
   } 
 
   static Future<void> deleteFriend(int userId) async {
     final request = await createRequest('friend/${userId}', 'POST');
-    HttpClientResponse response = await sendRequest(request);
+    await sendRequest(request);
   }
   // Groups
 
@@ -266,12 +262,12 @@ class WebInterfaceService {
     final body = jsonEncode({
       'name': group.name,
     });
-    HttpClientResponse response = await sendRequest(request, body);
+    await sendRequest(request, body);
   }
 
   static Future<void> deleteGroup(int id) async {
     final request = await createRequest('groups/$id', 'DELETE');
-    HttpClientResponse response = await sendRequest(request);
+    await sendRequest(request);
   }
 
   static Future<void> addFriendToGroup(int groupId, int friendId) async {
@@ -279,7 +275,7 @@ class WebInterfaceService {
     final body = jsonEncode({
       'userId': friendId,
     });
-    HttpClientResponse response = await sendRequest(request, body);
+    await sendRequest(request, body);
   }
 
   static Future<List<User>> fetchGroupFriends(int groupId) async {
@@ -296,12 +292,12 @@ class WebInterfaceService {
 
   static Future<void> removeFriendFromGroup(int groupId, int friendId) async {
     final request = await createRequest('groups/$groupId/members/$friendId', 'DELETE');
-    HttpClientResponse response = await sendRequest(request);
+    await sendRequest(request);
   }
 
   static Future<void> leaveGroup(int groupId) async {
     final request = await createRequest('groups/$groupId/leave', 'POST');
-    HttpClientResponse response = await sendRequest(request);
+    await sendRequest(request);
   }
 
   // Chats

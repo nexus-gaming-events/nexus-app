@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:nexus_app/classes/application_object.dart';
-import 'package:nexus_app/classes/friend_request.dart';
-import 'package:nexus_app/classes/message.dart';
-import 'constants.dart';
 import 'widgets/custom_navbar.dart';
 import 'widgets/galaxy_background.dart';
 import 'screens/screens.dart';  
 import 'classes/event.dart';
-import 'classes/application_object.dart';
 import 'classes/user.dart';
 import 'screens/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';

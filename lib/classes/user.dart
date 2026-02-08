@@ -7,6 +7,7 @@ import 'visual_link.dart';
 import '../constants.dart';
 import 'event.dart';
 import '../widgets/back_button_widget.dart';
+import '../widgets/base_screen_container.dart';
 
 class User extends ApplicationObject {
   final String _token;
@@ -48,26 +49,11 @@ class VisualizeUserScreen {
     bool hasSentRequest = DataManager.hasSentFriendRequest(user.id); //If sent them a request
     bool hasPendingFriendRequest = DataManager.hasPendingFriendRequest(user.id); //If they sent me a request
     return Builder(
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          left: AppConstants.paddingSmall(context),
-          right: AppConstants.paddingSmall(context),
-          bottom: 0.0,
-          top: AppConstants.paddingLarge(context) * 3.5,
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppConstants.primaryColor,
-            borderRadius: BorderRadius.circular(
-              AppConstants.borderRadiusMedium(context),
-            ),
-          ),
-          width: AppConstants.mainContainerWidth(context),
-          height: AppConstants.mainContainerHeight(context),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
+      builder: (context) => BaseScreenContainer(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
               Stack(
                 alignment: Alignment.topCenter,
                 clipBehavior: Clip.none,
@@ -550,7 +536,6 @@ class VisualizeUserScreen {
             ],
           ),
         ),
-      ),
     );
   }
 }

@@ -9,6 +9,8 @@ import 'message.dart';
 import 'package:flutter/material.dart';
 import '../constants.dart';
 import '../widgets/back_button_widget.dart';
+import '../widgets/base_screen_container.dart';
+import '../widgets/header_container.dart';
 import 'event.dart';
 
 class Chat extends ApplicationObject {
@@ -68,25 +70,9 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
   @override
   Widget build(BuildContext context) {
     if (isLoading || event == null) {
-      return Padding(
-        padding: EdgeInsets.only(
-          left: AppConstants.paddingSmall(context),
-          right: AppConstants.paddingSmall(context),
-          bottom: 0.0,
-          top: AppConstants.paddingLarge(context) * 3.5,
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppConstants.primaryColor,
-            borderRadius: BorderRadius.circular(
-              AppConstants.borderRadiusMedium(context),
-            ),
-          ),
-          width: AppConstants.mainContainerWidth(context),
-          height: AppConstants.mainContainerHeight(context),
-          child: Center(
-            child: CircularProgressIndicator(color: AppConstants.textColor),
-          ),
+      return BaseScreenContainer(
+        child: Center(
+          child: CircularProgressIndicator(color: AppConstants.textColor),
         ),
       );
     }
@@ -97,45 +83,12 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
         .map((participant) => participant.username)
         .toList()
         .join(', ');
-    return Padding(
-      padding: EdgeInsets.only(
-        left: AppConstants.paddingSmall(context),
-        right: AppConstants.paddingSmall(context),
-        bottom: 0.0,
-        top: AppConstants.paddingLarge(context) * 3.5,
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppConstants.primaryColor,
-          borderRadius: BorderRadius.circular(
-            AppConstants.borderRadiusMedium(context),
-          ),
-        ),
-        width: AppConstants.mainContainerWidth(context),
-        height: AppConstants.mainContainerHeight(context),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              width: AppConstants.mainContainerWidth(context),
-              height: AppConstants.headerHeight(context),
-              padding: EdgeInsets.only(
-                top: (AppConstants.paddingSmall(context) > 3
-                    ? AppConstants.paddingSmall(context) - 3
-                    : 0),
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(
-                    AppConstants.borderRadiusMedium(context),
-                  ),
-                  topRight: Radius.circular(
-                    AppConstants.borderRadiusMedium(context),
-                  ),
-                ),
-                color: AppConstants.secondaryColor,
-              ),
-              child: Row(
+    return BaseScreenContainer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          HeaderContainer(
+            child: Row(
                 children: [
                   BackButtonWidget(),
                   SizedBox(
@@ -296,7 +249,6 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
             ),
           ],
         ),
-      ),
     );
   }
 }
@@ -354,7 +306,6 @@ class _VisualizeChatPreviewState extends State<VisualizeChatPreview> {
 
     String eventTitle = event!.title;
     List<User> eventParticipantsList = event!.participants;
-    double iconSize = AppConstants.iconSizeLarge(context);
     return Card(
       color: AppConstants.secondaryColor,
       margin: EdgeInsets.symmetric(

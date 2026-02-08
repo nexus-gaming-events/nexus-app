@@ -34,11 +34,7 @@ class DiscordAuthService {
         ),
       );
 
-      if (authResult == null || authResult.accessToken == null) {
-        throw Exception('Authorization failed or was cancelled');
-      }
-
-      final accessToken = authResult.accessToken!;
+      final accessToken = authResult.accessToken;
       final refreshToken = authResult.refreshToken;
 
       // Fetch user info

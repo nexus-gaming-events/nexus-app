@@ -4,7 +4,7 @@ import '../constants.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../classes/event.dart';
 import '../main.dart';
-import '../classes/user.dart';
+import '../widgets/base_screen_container.dart';
 
 class ExpeditionsScreen extends StatefulWidget {
   @override
@@ -12,14 +12,10 @@ class ExpeditionsScreen extends StatefulWidget {
 }
 
 class ExpeditionsScreenState extends State<ExpeditionsScreen> {
-  static CalendarFormat _calendarFormat = CalendarFormat.month;
   static DateTime _focusedDay = DateTime.now();
   static DateTime? _selectedDay;
   static List<Event> _focusedEvents = [];
 
-  // Inline details state
-  static Event? _activeEvent;
-  static bool _showingEventDetails = false;
   static List<Event> _getEventsForDay(DateTime day) {
     try {
       if (DataManager.getEvents().isEmpty) return <Event>[];
@@ -40,32 +36,11 @@ class ExpeditionsScreenState extends State<ExpeditionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: AppConstants.paddingSmall(context),
-        right: AppConstants.paddingSmall(context),
-        bottom: 0.0,
-        top: AppConstants.paddingLarge(context) * 3.5,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+    return BaseScreenContainer(
+      child: Stack(
+        alignment: Alignment.topCenter,
         children: [
-          Stack(
-            alignment: Alignment.topCenter,
-            children: [
-              // Background container
-              Container(
-                alignment: Alignment.topCenter,
-                width: AppConstants.mainContainerWidth(context),
-                height: AppConstants.mainContainerHeight(context),
-                decoration: BoxDecoration(
-                  color: AppConstants.primaryColor,
-                  borderRadius: BorderRadius.circular(
-                    AppConstants.borderRadiusMedium(context),
-                  ),
-                ),
-              ),
-              TableCalendar(
+          TableCalendar(
                 calendarBuilders: CalendarBuilders(
                   markerBuilder: (context, date, events) {
                     if (events.isEmpty) return null;
@@ -213,17 +188,6 @@ class ExpeditionsScreenState extends State<ExpeditionsScreen> {
               ),
             ],
           ),
-        ],
-      ),
     );
   }
-
-  // Full details view that substitutes the calendar area
 }
-
-/*class _CalendarPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}*/

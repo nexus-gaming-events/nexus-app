@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:nexus_app/classes/application_object.dart';
-import 'package:nexus_app/classes/user_settings.dart';
 import 'package:nexus_app/main.dart';
 import 'package:nexus_app/data_manager.dart';
-import 'visual_link.dart';
 import '../constants.dart';
 import 'user.dart';
-import '../main.dart';
 import '../widgets/back_button_widget.dart';
+import '../widgets/base_screen_container.dart';
+import '../widgets/header_container.dart';
 import '../widgets/user_stack.dart';
 
 class Group extends ApplicationObject {
@@ -54,45 +53,11 @@ class VisualizeGroupScreen {
       );
     }
     return StatefulBuilder(
-      builder: (context, setState) => Padding(
-        padding: EdgeInsets.only(
-          left: AppConstants.paddingSmall(context),
-          right: AppConstants.paddingSmall(context),
-          bottom: 0.0,
-          top: AppConstants.paddingLarge(context) * 3.5,
-        ),
-        child: Container(
-        width: AppConstants.mainContainerWidth(context),
-        height: AppConstants.mainContainerHeight(context),
-        //padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: AppConstants.primaryColor,
-          borderRadius: BorderRadius.circular(
-            AppConstants.borderRadiusMedium(context),
-          ),
-        ),
+      builder: (context, setState) => BaseScreenContainer(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              width: AppConstants.mainContainerWidth(context),
-              height: AppConstants.headerHeight(context),
-              padding: EdgeInsets.only(
-                top: (AppConstants.paddingSmall(context) > 3
-                    ? AppConstants.paddingSmall(context) - 3
-                    : 0),
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(
-                    AppConstants.borderRadiusMedium(context),
-                  ),
-                  topRight: Radius.circular(
-                    AppConstants.borderRadiusMedium(context),
-                  ),
-                ),
-                color: AppConstants.secondaryColor,
-              ),
+            HeaderContainer(
               child: Row(
                 children: [
                   BackButtonWidget(),
@@ -241,7 +206,6 @@ class VisualizeGroupScreen {
                     )
           ],
         ),
-      ),
     ),
   );
   }
