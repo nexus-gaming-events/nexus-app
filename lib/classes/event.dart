@@ -24,6 +24,8 @@ class Event extends ApplicationObject {
   List<User>? spectators;
   List<String>? games;
   List<String>? links;
+  int? numPlayers;
+  int? numSpectators;
   late Chat? chat;
   late List<User> participants;
 
@@ -39,6 +41,8 @@ class Event extends ApplicationObject {
     this.spectators,
     this.games,
     this.links,
+    this.numPlayers,
+    this.numSpectators,
   }) {
     chat = Chat(eventId: id, messages: []);
 
@@ -50,8 +54,8 @@ class Event extends ApplicationObject {
       participants.addAll(spectators!);
     }
   }
-  int get currentPlayers => players?.length ?? 0;
-  int get currentSpectators => spectators?.length ?? 0;
+  int get currentPlayers => players?.length ?? numPlayers ?? 0;
+  int get currentSpectators => spectators?.length ?? numSpectators ?? 0;
 }
 
 class VisualizeEventScreen extends StatefulWidget {
@@ -64,9 +68,9 @@ class VisualizeEventScreen extends StatefulWidget {
 }
 
 class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
-  late bool isUserInPlayers;
-  late bool isUserInSpectators;
-  late bool isUserAuthor;
+  bool isUserInPlayers = false;
+  bool isUserInSpectators = false;
+  bool isUserAuthor = false;
   late Event event;
 
   @override
@@ -75,19 +79,26 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
     _updateUserStatus();
   }
 
-  void _updateUserStatus() {
-    isUserInPlayers = DataManager.isUserInPlayers(
+  void _updateUserStatus() async {
+    debugPrint('Updating user status for event: ${widget.event?.title}');
+    final players = await DataManager.isUserInPlayers(
       DataManager.getSelfUser()!.id,
       widget.event?.id ?? -1,
     );
-    isUserInSpectators = DataManager.isUserInSpectators(
+    final spectators = await DataManager.isUserInSpectators(
       DataManager.getSelfUser()!.id,
       widget.event?.id ?? -1,
     );
-    isUserAuthor = DataManager.isAuthor(
+    final author = await DataManager.isAuthor(
       DataManager.getSelfUser()!.id,
       widget.event?.id ?? -1,
     );
+    
+    setState(() {
+      isUserInPlayers = players;
+      isUserInSpectators = spectators;
+      isUserAuthor = author;
+    });
   }
 
   @override
@@ -588,10 +599,11 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                   left: AppConstants.paddingSmall(context),
                                   right: AppConstants.paddingSmall(context),
                                   child:
-                                      isUserInSpectators ||
-                                          isUserAuthor ||
-                                          widget.event!.players!.length >=
-                                              widget.event!.maxPlayers
+                                      isUserAuthor ||
+                                          isUserInSpectators ||
+                                          (!isUserInPlayers &&
+                                              widget.event!.players!.length >=
+                                                  widget.event!.maxPlayers)
                                       ? Container()
                                       : Container(
                                           alignment: Alignment.bottomCenter,
@@ -624,9 +636,11 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                             child: InkWell(
                                               onTap: () async {
                                                 if (isUserInPlayers) {
+                                                  debugPrint('Player button tapped: User is currently a player, attempting to leave event');
                                                   await DataManager.leaveEvent(
                                                     widget.event!.id,
                                                   );
+                                                  debugPrint('Left event as player, updating state');
                                                   setState(() {
                                                     isUserInPlayers = false;
                                                     widget.event!.players!
@@ -877,10 +891,11 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                   left: AppConstants.paddingSmall(context),
                                   right: AppConstants.paddingSmall(context),
                                   child:
-                                      isUserInPlayers ||
-                                          isUserAuthor ||
-                                          widget.event!.players!.length >=
-                                              widget.event!.maxPlayers
+                                      isUserAuthor ||
+                                          isUserInPlayers ||
+                                          (!isUserInSpectators &&
+                                              widget.event!.spectators!.length >=
+                                                  widget.event!.maxSpectators)
                                       ? Container()
                                       : Container(
                                           alignment: Alignment.bottomCenter,
@@ -1242,7 +1257,7 @@ class VisualizeEventPreview extends StatelessWidget {
                 left: AppConstants.paddingMedium(context),
               ),
               child: Text(
-                "${event.players == null ? 0 : event.players!.length}/${event.maxPlayers}",
+                "${event.numPlayers}/${event.maxPlayers}",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: AppConstants.fontSizeSmallResponsive(context),

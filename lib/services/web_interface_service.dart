@@ -54,8 +54,9 @@ class WebInterfaceService {
     final request = await createRequest('me', 'GET');
     HttpClientResponse response = await sendRequest(request);
     final responseBody = await response.transform(utf8.decoder).join();
+    debugPrint('Fetch self user response body: $responseBody');
     final data = jsonDecode(responseBody);
-    final selfUser = User(id: data['id'], username: data['username'], avatarUrl: data['avatarUrl'], email: data['email'], bannerGradient: data['bannerGradient'] as Map<String, dynamic>? ?? {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0});
+    final selfUser = User(id: data['id'], username: data['username'] ?? 'Unknown', avatarUrl: data['avatarUrl'] ?? '', email: data['email'] ?? '', bannerGradient: data['bannerGradient'] as Map<String, dynamic>? ?? {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0});
     return selfUser;
     }
 
@@ -66,7 +67,7 @@ class WebInterfaceService {
     final data = jsonDecode(responseBody) as Map<String, dynamic>;
     List<User> users = [];
     for (var userData in data['data']) {
-      users.add(User(id: userData['id'], username: userData['username'], avatarUrl: userData['avatarUrl'], email: userData['email'], bannerGradient: userData['bannerGradient'] as Map<String, dynamic>? ?? {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0}));
+      users.add(User(id: userData['id'], username: userData['username'] ?? 'Unknown', avatarUrl: userData['avatarUrl'] ?? '', email: userData['email'] ?? '', bannerGradient: userData['bannerGradient'] as Map<String, dynamic>? ?? {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0}));
     }
     return users;
   }
@@ -76,7 +77,7 @@ class WebInterfaceService {
     HttpClientResponse response = await sendRequest(request);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody);
-    return User(id: data['id'], username: data['username'], avatarUrl: data['avatarUrl'], email: data['email'], bannerGradient: data['bannerGradient'] as Map<String, dynamic>? ?? {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0});
+    return User(id: data['id'], username: data['username'] ?? 'Unknown', avatarUrl: data['avatarUrl'] ?? '', email: data['email'] ?? '', bannerGradient: data['bannerGradient'] as Map<String, dynamic>? ?? {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0});
   }
 
   // Events
@@ -100,6 +101,8 @@ class WebInterfaceService {
         maxSpectators: eventData['maxSpectators'],
         games: [eventData['game']],
         links: [eventData['discordVoiceLink'] ?? ''],
+        numPlayers: eventData['playerCount'] ?? 0,
+        numSpectators: eventData['spectatorCount'] ?? 0,
         ));
     }
     return events;
@@ -113,13 +116,22 @@ class WebInterfaceService {
     User author = await fetchUserById(data['hostId']);
     List<User> players = [];
     List<User> spectators = [];
-    for (var eventPlayerId in data['participants']){
+    debugPrint('Particpants data: ${data['participants']}');
+    for (var eventPlayerId in (data['participants'] as List<dynamic>)) {
       if(eventPlayerId['role'] == 'player'){
-        players.add(User(id: eventPlayerId['user']['id'], username: eventPlayerId['user']['username'], avatarUrl: eventPlayerId['user']['avatarUrl']));
+        players.add(User(id: eventPlayerId['userId'], username: eventPlayerId['user']['username'], avatarUrl: eventPlayerId['user']['avatarUrl'] ?? ''));
       } else if(eventPlayerId['role'] == 'spectator'){
-        spectators.add(User(id: eventPlayerId['user']['id'], username: eventPlayerId['user']['username'], avatarUrl: eventPlayerId['user']['avatarUrl']));
+        spectators.add(User(id: eventPlayerId['userId'], username: eventPlayerId['user']['username'], avatarUrl: eventPlayerId['user']['avatarUrl'] ?? ''));
       }
     }
+    debugPrint('Fetched event: ${data['title']} (ID: ${data['id']})');
+    debugPrint('  Author: ${author.username} (ID: ${author.id})');
+    debugPrint('  Players: ${players.map((p) => p.username).join(', ')}');
+    debugPrint('  Spectators: ${spectators.map((s) => s.username).join(', ')}');
+    debugPrint('  Date: ${data['startTime']}');
+    debugPrint('  Max Players: ${data['maxPlayers']}');
+    debugPrint('  Max Spectators: ${data['maxSpectators']}');
+
     return Event(
       id: data['id'],
       title: data['title'],
@@ -236,7 +248,8 @@ class WebInterfaceService {
 
   static Future<void> leaveEvent(int eventId) async {
     final request = await createRequest('events/$eventId/leave', 'POST');
-    await sendRequest(request);
+    final body = jsonEncode({});
+    await sendRequest(request, body);
   }
 
   //Friends
@@ -396,6 +409,7 @@ class WebInterfaceService {
     final body = jsonEncode({
       'bannerGradient': gradientJson,
     });
+    debugPrint('Save user banner request body: $body');
     final response = await sendRequest(request, body);
     debugPrint('Save user banner response status: ${response.statusCode}');
     debugPrint('Saved banner gradient');

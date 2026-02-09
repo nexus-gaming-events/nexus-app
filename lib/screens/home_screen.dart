@@ -73,7 +73,7 @@ class HomeScreen extends StatelessWidget {
                         .take(5)
                         .map(
                           (item) => InkWell(
-                            onTap: () {
+                            onTap: () async{
                               NexusAppState.instance!.returnScreenParams.add(
                                 [],
                               );
@@ -82,7 +82,7 @@ class HomeScreen extends StatelessWidget {
                               );
                               NexusAppState.instance!.updateState(
                                 'Event',
-                                params: [item],
+                                params: [(await DataManager.getEventById(item.id))!],
                               );
                             },
                             child: VisualizeEventPreview(event: item),

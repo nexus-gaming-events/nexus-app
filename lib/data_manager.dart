@@ -401,7 +401,7 @@ class DataManager {
     return _myFriendRequests.contains(id);
   }
 
-  static bool isAuthor(int userId, int eventId) {
+  static Future<bool> isAuthor(int userId, int eventId) async {
     try {
       Event event = _events!.firstWhere((e) => e.id == eventId);
       return event.author.id == userId;
@@ -410,7 +410,7 @@ class DataManager {
         if (isOfflineMode){
           return false;
         }
-        Event event = WebInterfaceService.fetchEventById(eventId) as Event;
+        Event event = await WebInterfaceService.fetchEventById(eventId) as Event;
         return event.author.id == userId;
       } catch (e){
         return false;
@@ -418,26 +418,31 @@ class DataManager {
     }
   }
 
-  static bool isUserInPlayers(int userId, int eventId) {
+  static Future<bool> isUserInPlayers(int userId, int eventId) async {
    try{
         if (isOfflineMode){
           Event event = _events!.firstWhere((e) => e.id == eventId);
           return event.players!.any((player) => player.id == userId);
         }
-        Event event = WebInterfaceService.fetchEventById(eventId) as Event;
+
+        Event event = await WebInterfaceService.fetchEventById(eventId) as Event;
+        debugPrint('Checking if user $userId is in players for event ${event.title}');
+        for (var player in event.players ?? []) {
+          debugPrint('Player in event: ${player.username} (ID: ${player.id})');
+        }
         return event.players!.any((player) => player.id == userId);
       } catch (e){
         return false;
       }
     }
 
-  static bool isUserInSpectators(int userId, int eventId) {
+  static Future<bool> isUserInSpectators(int userId, int eventId) async {
    try{
         if (isOfflineMode){
           Event event = _events!.firstWhere((e) => e.id == eventId);
           return event.spectators!.any((spectator) => spectator.id == userId);
         }
-        Event event = WebInterfaceService.fetchEventById(eventId) as Event;
+        Event event = await WebInterfaceService.fetchEventById(eventId) as Event;
         return event.spectators!.any((spectator) => spectator.id == userId);
       } catch (e){
         return false;
