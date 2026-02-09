@@ -20,7 +20,10 @@ class WebInterfaceService {
       String endpoint, String method) async {
     final uri = Uri.parse('$webInterfaceUrl$endpoint');
     final request = await httpClient.openUrl(method, uri);
-    request.headers.set('Content-Type', 'application/json');
+    // Only set Content-Type for methods that typically have a body
+    if (method != 'GET' && method != 'DELETE') {
+      request.headers.set('Content-Type', 'application/json');
+    }
     if (token != null) {
       request.headers.set('Authorization', 'Bearer $token');
     }
@@ -34,7 +37,8 @@ class WebInterfaceService {
   }
   final response = await request.close();
 
-  if (response.statusCode != 200) {
+  // Accept all 2xx status codes as success
+  if (response.statusCode < 200 || response.statusCode >= 300) {
     final responseBody = await response.transform(utf8.decoder).join();
     throw Exception('HTTP Error ${response.statusCode}: $responseBody');
   }
@@ -95,7 +99,7 @@ class WebInterfaceService {
         maxPlayers: eventData['maxPlayers'],
         maxSpectators: eventData['maxSpectators'],
         games: [eventData['game']],
-        links: [eventData['discordVoiceLink']],
+        links: [eventData['discordVoiceLink'] ?? ''],
         ));
     }
     return events;
@@ -125,7 +129,7 @@ class WebInterfaceService {
       maxPlayers: data['maxPlayers'],
       maxSpectators: data['maxSpectators'],
       games: [data['game']],
-      links: [data['discordVoiceLink']],
+      links: [data['discordVoiceLink'] ?? ''],
       players: players,
       spectators: spectators,
       );
@@ -133,15 +137,54 @@ class WebInterfaceService {
 
     static Future<int> postEvent(Event event) async {
     final request = await createRequest('events', 'POST');
-    final body = jsonEncode({
+    
+    // Convert date to UTC and format
+    final utcDate = event.date.toUtc();
+    final formattedDate = utcDate.toIso8601String();
+    
+    // Build the body with required fields
+    final Map<String, dynamic> bodyMap = {
       'title': event.title,
-      'description': event.description,
-      'startTime': event.date.toIso8601String(),
-      'maxPlayers': event.maxPlayers,
-      'maxSpectators': event.maxSpectators,
-      'game': event.games!.isNotEmpty ? event.games![0] : '',
-      'discordVoiceLink': event.links!.isNotEmpty ? event.links![0] : '',
+      'game': event.games != null && event.games!.isNotEmpty ? event.games![0] : '',
+      'startTime': formattedDate,
+    };
+    
+    // Add optional fields only if they have valid values
+    if (event.description != null && event.description!.isNotEmpty) {
+      bodyMap['description'] = event.description;
+    }
+    
+    // Only include discordVoiceLink if it looks like a valid URL
+    if (event.links != null && event.links!.isNotEmpty && event.links![0].isNotEmpty) {
+      final link = event.links![0];
+      if (link.startsWith('http://') || link.startsWith('https://')) {
+        bodyMap['discordVoiceLink'] = link;
+      }
+    }
+    
+    if (event.maxPlayers != null) {
+      bodyMap['maxPlayers'] = event.maxPlayers;
+    }
+    
+    if (event.maxSpectators != null) {
+      bodyMap['maxSpectators'] = event.maxSpectators;
+    }
+    
+    final body = jsonEncode(bodyMap);
+    
+    // Log the request details
+    print('=== POST Event Request ===');
+    print('URL: ${webInterfaceUrl}events');
+    print('Original date: ${event.date} (isUtc: ${event.date.isUtc})');
+    print('UTC date: $utcDate (isUtc: ${utcDate.isUtc})');
+    print('Formatted: $formattedDate');
+    print('Body JSON: $body');
+    print('\nBody Map Contents:');
+    bodyMap.forEach((key, value) {
+      print('  $key: $value (${value.runtimeType})');
     });
+    print('========================');
+    
     HttpClientResponse response = await sendRequest(request, body);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody);
@@ -153,7 +196,7 @@ class WebInterfaceService {
     final body = jsonEncode({
       'title': event.title,
       'description': event.description,
-      'startTime': event.date.toIso8601String(),
+      'startTime': event.date.toUtc().toIso8601String(),
       'maxPlayers': event.maxPlayers,
       'maxSpectators': event.maxSpectators,
       'game': event.games!.isNotEmpty ? event.games![0] : '',
@@ -164,8 +207,22 @@ class WebInterfaceService {
     }
 
   static Future<void> deleteEvent(int id) async {
+    debugPrint('=== DELETE Event Request ===');
+    debugPrint('Deleting event with ID: $id');
+    debugPrint('URL: ${webInterfaceUrl}events/$id');
+    debugPrint('Token present: ${token != null}');
+    debugPrint('Token value: ${token != null ? token!.substring(0, 20) + "..." : "null"}');
     final request = await createRequest('events/$id', 'DELETE');
-    await sendRequest(request);
+    debugPrint('Request headers: ${request.headers}');
+    try {
+      final response = await sendRequest(request);
+      debugPrint('Delete response status: ${response.statusCode}');
+      debugPrint('========================');
+    } catch (e) {
+      debugPrint('Delete failed with error: $e');
+      debugPrint('========================');
+      rethrow;
+    }
   }
 
   static Future<void> joinEvent(int eventId, String role) async {
@@ -173,7 +230,8 @@ class WebInterfaceService {
     final body = jsonEncode({
       'role': role,
     });
-    await sendRequest(request, body);
+    final response = await sendRequest(request, body);
+    debugPrint('Join event response status: ${response.statusCode}');
   }
 
   static Future<void> leaveEvent(int eventId) async {

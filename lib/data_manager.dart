@@ -114,6 +114,11 @@ class DataManager {
 
   static Future<void> loadEvents() async{
     _events = await WebInterfaceService.fetchEvents();
+    for (var event in _events!) {
+      for (var player in event.players ?? []) {
+        debugPrint('Event ${event.title} has player: ${player.username}');
+      }
+    }
   }
 
   static List<Event> getEvents() {
@@ -439,8 +444,9 @@ class DataManager {
     if (event.id == -1) {
       debugPrint('Creating new event: ${event.title}');
       id = await createEvent(event);
+      //joinEvent(id, "player"); // Refresh events to get the new event with its assigned ID
       debugPrint('Event created with ID: $id');
-      _currentEvent = Event(id: id, title: event.title, author: event.author, description: event.description, date: event.date, maxPlayers: event.maxPlayers, maxSpectators: event.maxSpectators);
+      _currentEvent = await getEventById(id);
       debugPrint('Current event set to: ${_currentEvent!.title} with ID: ${_currentEvent!.id}');
     } else {
       await patchEvent(event);
