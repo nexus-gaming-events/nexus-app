@@ -79,12 +79,20 @@ class VisualizeFriendRequestPreview extends StatelessWidget {
                     color: AppConstants.semitransparentTextColor,
                   )),
               IconButton(
-                onPressed: () => {/* Accept friend request logic here */},
+                onPressed: () async {
+                  debugPrint('Accepting friend request from ${friendRequest.username} (ID: ${friendRequest.id})');
+                  await DataManager.acceptFriendRequest(friendRequest.id);
+                  debugPrint('Accepted friend request from ${friendRequest.username} (ID: ${friendRequest.id})');
+                  NexusAppState.instance!.reloadCurrentScreen(); // Reload the screen to update the friend requests list
+                },
                 icon: Icon(Icons.check, color: AppConstants.successColor),
                 ),
               SizedBox(width: AppConstants.paddingSmall(context)),
               IconButton(
-                onPressed: () => {/* Decline friend request logic here */},
+                onPressed: () async {
+                  await DataManager.removeFriendRequest(friendRequest.id);
+                  NexusAppState.instance!.reloadCurrentScreen(); // Remove the request from the list after rejecting
+                },
                 icon: Icon(Icons.close, color: AppConstants.errorColor),
                 ),
             ],

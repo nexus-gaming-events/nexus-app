@@ -622,9 +622,9 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                               ),
                                             ),
                                             child: InkWell(
-                                              onTap: () {
+                                              onTap: () async {
                                                 if (isUserInPlayers) {
-                                                  DataManager.leaveEvent(
+                                                  await DataManager.leaveEvent(
                                                     widget.event!.id,
                                                   );
                                                   setState(() {
@@ -637,8 +637,9 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                                                   .id,
                                                         );
                                                   });
+                                                  NexusAppState.instance!.reloadCurrentScreen();
                                                 } else {
-                                                  DataManager.joinEvent(
+                                                  await DataManager.joinEvent(
                                                     widget.event!.id,
                                                     "player",
                                                   );
@@ -648,6 +649,7 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                                       DataManager.getSelfUser()!,
                                                     );
                                                   });
+                                                  NexusAppState.instance!.reloadCurrentScreen();
                                                 }
                                               },
                                               child: Row(
@@ -909,9 +911,9 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                               ),
                                             ),
                                             child: InkWell(
-                                              onTap: () {
+                                              onTap: () async {
                                                 if (isUserInSpectators) {
-                                                  DataManager.leaveEvent(
+                                                  await DataManager.leaveEvent(
                                                     widget.event!.id,
                                                   );
                                                   setState(() {
@@ -920,12 +922,13 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                                         .removeWhere(
                                                           (user) =>
                                                               user.id ==
-                                                              DataManager.getSelfUser()!
+                                                             DataManager.getSelfUser()!
                                                                   .id,
                                                         );
                                                   });
+                                                  NexusAppState.instance!.reloadCurrentScreen();
                                                 } else {
-                                                  DataManager.joinEvent(
+                                                  await DataManager.joinEvent(
                                                     widget.event!.id,
                                                     "spectator",
                                                   );
@@ -935,6 +938,7 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                                                       DataManager.getSelfUser()!,
                                                     );
                                                   });
+                                                  NexusAppState.instance!.reloadCurrentScreen();
                                                 }
                                               },
                                               child: Row(

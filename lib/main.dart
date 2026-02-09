@@ -108,6 +108,12 @@ class NexusAppState extends State<NexusApp> {
     });
   }
 
+  void reloadCurrentScreen() {
+    setState(() {
+      updateState(_currentScreenTitle, params: currentParams);
+    });
+  }
+
   void _mapIndexToTitle(int index) {
     if(index == 0){
       updateState('User', params: [/*findUser(selfId)*/]);

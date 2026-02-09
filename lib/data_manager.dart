@@ -80,7 +80,14 @@ class DataManager {
       return;
     }
 
+  try{
     await loadSelfUser();
+  }catch (e){
+    SecureStorageService().deleteAllTokens();
+    NexusAppState.instance!.updateState('Login');
+    return;
+  }
+    
     await loadFriends();
     await loadFriendRequests();
     await loadEvents();
@@ -92,6 +99,15 @@ class DataManager {
 
   static Future<void> loadSelfUser() async{
     _selfUser = await WebInterfaceService.fetchSelfUser();
+    debugPrint("=====Loaded self user=====");
+    debugPrint('ID: ${_selfUser?.id}');
+    debugPrint('Username: ${_selfUser?.username}');
+    debugPrint('Email: ${_selfUser?.email}');
+    debugPrint('Avatar URL: ${_selfUser?.avatarUrl}');
+    debugPrint('Banner Gradient:');
+    debugPrint('  Type: ${_selfUser?.bannerGradient?['type']}');
+    debugPrint('  Colors: ${_selfUser?.bannerGradient?['colors']}');
+    debugPrint('  Parameter: ${_selfUser?.bannerGradient?['parameter']}');
   }
 
   static User? getSelfUser() {
@@ -280,7 +296,7 @@ class DataManager {
     return await loadEventById(eventId);
   }
 
-  static void joinEvent(int eventId, String role) async {
+  static Future<void> joinEvent(int eventId, String role) async {
     if (isOfflineMode){
       return;
     }
@@ -289,7 +305,7 @@ class DataManager {
     loadEvents();
   }
 
-  static void leaveEvent(int eventId) async {
+  static Future<void> leaveEvent(int eventId) async {
     if (isOfflineMode){
       return;
     }
@@ -352,7 +368,7 @@ class DataManager {
     return await loadUserbyId(userId);
   }
 
-  static void sendFriendRequest(int id) async {
+  static Future<void> sendFriendRequest(int id) async {
     if (isOfflineMode){
       _myFriendRequests.add(id);
       return;
@@ -361,7 +377,7 @@ class DataManager {
     _myFriendRequests.add(id);
   }
 
-  static void deleteFriend(int id) async {
+  static Future<void> deleteFriend(int id) async {
     if (isOfflineMode){
       _friends?.removeWhere((friend) => friend.id == id);
       return;
@@ -460,11 +476,12 @@ class DataManager {
     return await editEvent(event);
   }
 
-  static void acceptFriendRequest(int id) async {
+  static Future<void> acceptFriendRequest(int id) async {
     await WebInterfaceService.acceptFriendRequest(id);
+    debugPrint('Accepted friend request with ID: $id');
     // Optionally refresh friends and friend requests list
-    loadFriends();
-    loadFriendRequests();
+    await loadFriends();
+    await loadFriendRequests();
   }
 
   // Helper method to add months accounting for varying month lengths
@@ -552,7 +569,7 @@ class DataManager {
     return createdEvents;
   }
 
-  static void saveUserBanner(Gradient gradient, double parameter){
+  static Future<void> saveUserBanner(Gradient gradient, double parameter) async {
     Map<String, dynamic> gradientJson;
     if (gradient is LinearGradient) {
       gradientJson = {
@@ -582,7 +599,8 @@ class DataManager {
       };
     }
     else gradientJson = {'type': 'linear', 'colors': ['ff0000ff', 'ffff00ff'], 'parameter': parameter};
-    WebInterfaceService.saveUserBanner(gradientJson);
+    await WebInterfaceService.saveUserBanner(gradientJson);
+    await loadSelfUser(); // Refresh self user to get updated banner
   }
 
   static Color _parseColorFromJson(dynamic colorValue) {
@@ -672,5 +690,14 @@ class DataManager {
     NexusAppState.instance!.updateState('Login');
   }
 
+  static Future<void> removeFriendRequest(int id) async {
+    if (isOfflineMode){
+      _friendRequests?.removeWhere((request) => request.id == id);
+      return;
+    }
+    await WebInterfaceService.deleteFriendRequest(id);
+    // Optionally refresh friend requests list
+    await loadFriendRequests();
+  }
 
 }

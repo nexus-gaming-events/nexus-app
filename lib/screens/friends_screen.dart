@@ -21,6 +21,15 @@ class _FriendsScreenState extends State<FriendsScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    await DataManager.loadFriends();
+    await DataManager.loadGroups();
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override

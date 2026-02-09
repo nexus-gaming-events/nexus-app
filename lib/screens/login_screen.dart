@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final loginResponse = await WebInterfaceService.loginWithProvider(result.accessToken!, 'discord');
       SecureStorageService().saveNexusToken(loginResponse.token);
       await DataManager.initialize();
-
+      
       final me = await WebInterfaceService.fetchMe();
 
       debugPrint('Logged in as: ${me.username}');

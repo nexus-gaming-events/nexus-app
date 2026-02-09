@@ -56,12 +56,40 @@ class VisualizeUserScreen {
   static Widget buildFullDetails(
     BuildContext context,
   ) {
-    bool isSelf = user.id == DataManager.getSelfUser()!.id;
-    bool isFriend = DataManager.isFriend(user.id);
-    bool hasSentRequest = DataManager.hasSentFriendRequest(user.id); //If sent them a request
-    bool hasPendingFriendRequest = DataManager.hasPendingFriendRequest(user.id); //If they sent me a request
-    return Builder(
-      builder: (context) => BaseScreenContainer(
+    return FutureBuilder(
+      future: Future.wait([
+        DataManager.loadSelfUser(),
+        DataManager.loadFriends(),
+        DataManager.loadFriendRequests(),
+      ]),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return BaseScreenContainer(
+            child: Center(
+              child: CircularProgressIndicator(
+                color: AppConstants.textColor,
+              ),
+            ),
+          );
+        }
+        
+        if (snapshot.hasError) {
+          return BaseScreenContainer(
+            child: Center(
+              child: Text(
+                'Error loading user data',
+                style: TextStyle(color: AppConstants.errorColor),
+              ),
+            ),
+          );
+        }
+        
+        bool isSelf = user.id == DataManager.getSelfUser()!.id;
+        bool isFriend = DataManager.isFriend(user.id);
+        bool hasSentRequest = DataManager.hasSentFriendRequest(user.id);
+        bool hasPendingFriendRequest = DataManager.hasPendingFriendRequest(user.id);
+        
+        return BaseScreenContainer(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -109,7 +137,16 @@ class VisualizeUserScreen {
                         borderRadius: BorderRadius.circular(
                           AppConstants.borderRadiusMax,
                         ),
-                        child: Image.network(
+                        child: 
+                        user.avatarUrl.isEmpty
+                            ? Image.asset(
+                                'assets/icons/Neil.png',
+                                width: AppConstants.iconSizeLarge(context) * 2,
+                                height: AppConstants.iconSizeLarge(context) * 2,
+                                fit: BoxFit.contain,
+                              )
+                            :
+                        Image.network(
                           user.avatarUrl,
                           width: AppConstants.iconSizeLarge(context) * 2,
                           height: AppConstants.iconSizeLarge(context) * 2,
@@ -339,8 +376,9 @@ class VisualizeUserScreen {
               ):
               isFriend ?
               InkWell(
-                onTap: () {
-                 DataManager.deleteFriend(user.id);
+                onTap: () async {
+                 await DataManager.deleteFriend(user.id);
+                 NexusAppState.instance!.reloadCurrentScreen();
                 },
                 child: Container(
                 width: AppConstants.mainContainerWidth(context),
@@ -374,8 +412,9 @@ class VisualizeUserScreen {
               :
               hasPendingFriendRequest ?
               InkWell(
-                onTap: () {
-                 DataManager.acceptFriendRequest(user.id);
+                onTap: () async {
+                 await DataManager.acceptFriendRequest(user.id);
+                 NexusAppState.instance!.reloadCurrentScreen();
                 },
                 child: Container(
                 width: AppConstants.mainContainerWidth(context),
@@ -435,8 +474,9 @@ class VisualizeUserScreen {
               )
               :
               InkWell(
-                onTap: () {
-                 DataManager.sendFriendRequest(user.id);
+                onTap: () async {
+                 await DataManager.sendFriendRequest(user.id);
+                NexusAppState.instance!.reloadCurrentScreen();
                 },
                 child: Container(
                 width: AppConstants.mainContainerWidth(context),
@@ -561,7 +601,8 @@ class VisualizeUserScreen {
               ),
             ],
           ),
-        ),
+        );
+      },
     );
   }
 }

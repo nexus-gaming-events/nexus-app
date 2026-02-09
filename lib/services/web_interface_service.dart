@@ -55,7 +55,7 @@ class WebInterfaceService {
     HttpClientResponse response = await sendRequest(request);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody);
-    final selfUser = User(id: data['id'], username: data['username'], avatarUrl: data['avatarUrl'], email: data['email'], bannerGradient: data['bannerGradient'] as Map<String, dynamic>?);
+    final selfUser = User(id: data['id'], username: data['username'], avatarUrl: data['avatarUrl'], email: data['email'], bannerGradient: data['bannerGradient'] as Map<String, dynamic>? ?? {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0});
     return selfUser;
     }
 
@@ -66,7 +66,7 @@ class WebInterfaceService {
     final data = jsonDecode(responseBody) as Map<String, dynamic>;
     List<User> users = [];
     for (var userData in data['data']) {
-      users.add(User(id: userData['id'], username: userData['username'], avatarUrl: userData['avatarUrl'], email: userData['email'], bannerGradient: userData['bannerGradient'] as Map<String, dynamic>?));
+      users.add(User(id: userData['id'], username: userData['username'], avatarUrl: userData['avatarUrl'], email: userData['email'], bannerGradient: userData['bannerGradient'] as Map<String, dynamic>? ?? {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0}));
     }
     return users;
   }
@@ -76,7 +76,7 @@ class WebInterfaceService {
     HttpClientResponse response = await sendRequest(request);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody);
-    return User(id: data['id'], username: data['username'], avatarUrl: data['avatarUrl'], email: data['email'], bannerGradient: data['bannerGradient'] as Map<String, dynamic>?);
+    return User(id: data['id'], username: data['username'], avatarUrl: data['avatarUrl'], email: data['email'], bannerGradient: data['bannerGradient'] as Map<String, dynamic>? ?? {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0});
   }
 
   // Events
@@ -248,7 +248,9 @@ class WebInterfaceService {
     final data = jsonDecode(responseBody) as Map<String, dynamic>;
     List<User> friends = [];
     for (var friendData in data['data']) {
-      friends.add(User(id: friendData['id'], username: friendData['username'], avatarUrl: friendData['avatarUrl'], email: friendData['email']));
+      debugPrint('Processing friend request: ${friendData['username'] ?? 'Unknown'} (ID: ${friendData['id']})');
+      debugPrint('  Avatar URL: ${friendData['avatarUrl'] ?? ''}');
+      friends.add(User(id: friendData['id'], username: friendData['username'] ?? 'Unknown', avatarUrl: friendData['avatarUrl'] ?? ''));
     }
     return friends;
   }
@@ -260,7 +262,10 @@ class WebInterfaceService {
     final data = jsonDecode(responseBody) as List<dynamic>;
     List<FriendRequest> friendRequests = [];
     for (var requestData in data) {
-      friendRequests.add(FriendRequest(id: requestData['id'], username: requestData['username'], imageUrl: requestData['avatarUrl'], date: DateTime.parse(requestData['sentAt'])));
+      debugPrint('Processing friend request: ${requestData['username'] ?? 'Unknown'} (ID: ${requestData['requesterId']})');
+      debugPrint('  Avatar URL: ${requestData['avatarUrl'] ?? ''}');
+      debugPrint('  Sent at: ${requestData['sentAt'] ?? ''}');
+      friendRequests.add(FriendRequest(id: requestData['requesterId'] , username: requestData['username'] ?? 'Unknown', imageUrl: requestData['avatarUrl'] ?? '', date: DateTime.parse(requestData['sentAt'] ?? DateTime.now().toIso8601String())));
     }
     return friendRequests;
   }
@@ -275,11 +280,15 @@ class WebInterfaceService {
 
   static Future<void> acceptFriendRequest(int userId) async {
     final request = await createRequest('friends/accept', 'POST');
-    await sendRequest(request);
+    final body = jsonEncode({
+      'requesterId': userId,
+    });
+    final response = await sendRequest(request, body);
+    debugPrint('Accept friend request response status: ${response.statusCode}');
   }
 
   static Future<void> deleteFriend(int userId) async {
-    final request = await createRequest('friends/${userId}', 'POST');
+    final request = await createRequest('friends/${userId}', 'DELETE');
     await sendRequest(request);
   }
   // Groups
@@ -333,7 +342,7 @@ class WebInterfaceService {
   }
 
   static Future<void> addFriendToGroup(int groupId, int friendId) async {
-    final request = await createRequest('groups/$groupId/memebers', 'POST');
+    final request = await createRequest('groups/$groupId/members', 'POST');
     final body = jsonEncode({
       'userId': friendId,
     });
@@ -387,7 +396,12 @@ class WebInterfaceService {
     final body = jsonEncode({
       'bannerGradient': gradientJson,
     });
-    await sendRequest(request, body);
+    final response = await sendRequest(request, body);
+    debugPrint('Save user banner response status: ${response.statusCode}');
+    debugPrint('Saved banner gradient');
+    debugPrint('  Type: ${gradientJson['type']}');
+    debugPrint('  Colors: ${gradientJson['colors']}');
+    debugPrint('  Parameter: ${gradientJson['parameter']}');
   }
 
   static Future<LoginResponse> loginWithProvider(String idToken, String provider) async {
@@ -408,7 +422,12 @@ class WebInterfaceService {
     HttpClientResponse response = await sendRequest(request);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody);
-    return User(id: data['id'], username: data['username'], avatarUrl: data['avatarUrl'], email: data['email'], bannerGradient: data['bannerGradient'] as Map<String, dynamic>?);
+    return User(id: data['id'], username: data['username'], avatarUrl: data['avatarUrl'], email: data['email'], bannerGradient: data['bannerGradient'] as Map<String, dynamic>? ?? {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0});
+  }
+
+  static Future<void> deleteFriendRequest(int id) async {
+    final request = await createRequest('friends/requests/$id', 'DELETE');
+    await sendRequest(request);
   }
 
 }

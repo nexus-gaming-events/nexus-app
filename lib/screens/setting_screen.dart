@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nexus_app/classes/user.dart';
 import 'package:nexus_app/data_manager.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:nexus_app/main.dart';
 import '../constants.dart';
 import '../classes/user_settings.dart';
 import 'dart:math' as math;
@@ -396,6 +397,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: ElevatedButton(
               onPressed: () {
                 DataManager.saveUserBanner(selectedGradient, sliderValue);
+                NexusAppState.instance!.updateState('User');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
