@@ -103,6 +103,8 @@ class WebInterfaceService {
         links: [eventData['discordVoiceLink'] ?? ''],
         numPlayers: eventData['playerCount'] ?? 0,
         numSpectators: eventData['spectatorCount'] ?? 0,
+        groupId: eventData['groupId'] ?? 0,
+        onlyFriends: eventData['onlyFriends'] ?? false,
         ));
     }
     return events;
@@ -146,6 +148,8 @@ class WebInterfaceService {
       spectators: spectators,
       numPlayers: data['playerCount'] ?? 0,
       numSpectators: data['spectatorCount'] ?? 0,
+      groupId: data['groupId'] ?? 0,
+      onlyFriends: data['onlyFriends'] ?? false,
       );
     }
 
@@ -161,6 +165,8 @@ class WebInterfaceService {
       'title': event.title,
       'game': event.games != null && event.games!.isNotEmpty ? event.games![0] : '',
       'startTime': formattedDate,
+      'groupId': event.groupId,
+      'onlyFriends': event.onlyFriends,
     };
     
     // Add optional fields only if they have valid values
@@ -215,8 +221,12 @@ class WebInterfaceService {
       'maxSpectators': event.maxSpectators,
       'game': event.games!.isNotEmpty ? event.games![0] : '',
       'discordVoiceLink': event.links!.isNotEmpty ? event.links![0] : '',
+      'groupId': event.groupId,
+      'onlyFriends': event.onlyFriends,
       }
       );
+      debugPrint("=== PATCH Event Request ===");
+      debugPrint(body);
     await sendRequest(request, body);
     }
 

@@ -11,6 +11,7 @@ import '../widgets/base_screen_container.dart';
 import '../widgets/header_container.dart';
 import '../widgets/number_selector.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'group.dart';
 
 class Event extends ApplicationObject {
   int id;
@@ -28,6 +29,8 @@ class Event extends ApplicationObject {
   int? numSpectators;
   late Chat? chat;
   late List<User> participants;
+  int groupId;
+  bool onlyFriends;
 
   Event({
     required this.id,
@@ -37,6 +40,8 @@ class Event extends ApplicationObject {
     required this.date,
     required this.maxPlayers,
     required this.maxSpectators,
+    required this.groupId,
+    required this.onlyFriends,
     this.players,
     this.spectators,
     this.games,
@@ -1307,7 +1312,9 @@ class EditEventScreenState extends State<EditEventScreen> {
   bool _isRecurrent = false;
   late String _periodicity;
   late String _recurrenceTime;
-  late String friendGroup;
+  int? selectedGroupId;
+  bool _onlyFriends = false;
+  int _groupId = -1;
 
   @override
   void initState() {
@@ -1342,16 +1349,26 @@ class EditEventScreenState extends State<EditEventScreen> {
       date: DateTime.now(),
       maxPlayers: 0,
       maxSpectators: 0,
+      groupId: -1,
+      onlyFriends: false,
     );
     _selectedDay = _focusedDay;
-    // Initialize time from existing event if available
     if (widget.event != null) {
       _selectedTime = TimeOfDay(
         hour: widget.event!.date.hour,
         minute: widget.event!.date.minute,
       );
     }
-    friendGroup = 'All';
+    _onlyFriends = widget.event?.onlyFriends ?? false;
+    _groupId = widget.event?.groupId ?? 0;
+    // Seleziona -1 se onlyFriends è false (Public), 0 se groupId==0 (All Friends), altrimenti groupId
+    if (!_onlyFriends) {
+      selectedGroupId = -1;
+    } else if (_groupId == 0) {
+      selectedGroupId = 0;
+    } else {
+      selectedGroupId = _groupId;
+    }
     _periodicity = "Daily";
     _recurrenceTime = "1 week";
   }
@@ -2171,7 +2188,6 @@ class EditEventScreenState extends State<EditEventScreen> {
                   ),
                   color: AppConstants.secondaryColor,
                 ),
-
                 child: Row(
                   children: [
                     Text(
@@ -2183,8 +2199,8 @@ class EditEventScreenState extends State<EditEventScreen> {
                       ),
                     ),
                     SizedBox(width: AppConstants.paddingLarge(context) * 12),
-                    DropdownButton<String>(
-                      value: friendGroup,
+                    DropdownButton<int?>(
+                      value: selectedGroupId,
                       isExpanded: false,
                       underline: SizedBox(),
                       dropdownColor: AppConstants.secondaryColor,
@@ -2198,33 +2214,43 @@ class EditEventScreenState extends State<EditEventScreen> {
                         Icons.arrow_drop_down,
                         color: AppConstants.textColor,
                       ),
-                      items:
-                          DataManager.getGroups().map((group) {
-                            return DropdownMenuItem<String>(
-                              value: group.name,
-                              child: Text(
-                                group.name,
-                                style: TextStyle(
-                                  color: AppConstants.textColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            );
-                          }).toList()..add(
-                            DropdownMenuItem<String>(
-                              value: "All",
-                              child: Text(
-                                "All",
-                                style: TextStyle(
-                                  color: AppConstants.textColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                      items: [
+                        DropdownMenuItem<int?>(
+                          value: -1,
+                          child: Text(
+                            "Public",
+                            style: TextStyle(
+                              color: AppConstants.textColor,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
+                        ),
+                        DropdownMenuItem<int?>(
+                          value: 0,
+                          child: Text(
+                            "All Friends",
+                            style: TextStyle(
+                              color: AppConstants.textColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        ...DataManager.getGroups().where((g) => g.id != 0).map((group) {
+                          return DropdownMenuItem<int?>(
+                            value: group.id,
+                            child: Text(
+                              group.name,
+                              style: TextStyle(
+                                color: AppConstants.textColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ],
                       onChanged: (value) {
                         setState(() {
-                          friendGroup = value!;
+                          selectedGroupId = value;
                         });
                       },
                     ),
@@ -2255,6 +2281,13 @@ class EditEventScreenState extends State<EditEventScreen> {
                     newEvent.links = [_linkController.text];
                     newEvent.players = widget.event?.players ?? [];
                     newEvent.spectators = widget.event?.spectators ?? [];
+                    if (selectedGroupId == -1) {
+                      newEvent.groupId = 0;
+                      newEvent.onlyFriends = false;
+                    } else {
+                      newEvent.groupId = selectedGroupId ?? 0;
+                      newEvent.onlyFriends = true;
+                    }
                     bool titleEmpty = newEvent.title.isEmpty;
                     bool descriptionEmpty = newEvent.description.isEmpty;
                     bool dateInvalid = !newEvent.date.isAfter(DateTime.now());

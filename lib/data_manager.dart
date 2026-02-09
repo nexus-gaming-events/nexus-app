@@ -48,6 +48,8 @@ class DataManager {
           links: ['https://www.example.com'],
           players: [_selfUser!],
           spectators: [User(id: 1, username: 'Friend1', email: 'friend1@example.com', avatarUrl: 'https://imgur.com/N4Q6fcZ.png', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0})],
+          groupId: 0,
+          onlyFriends: false,
           ),
         Event(
           id: 1,
@@ -61,6 +63,8 @@ class DataManager {
           links: ['https://www.example2.com'],
           players: [_friends!.first, User(id: 2, username: 'Requester1', avatarUrl: 'https://imgur.com/BVayEBY.png', email: '', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0})],
           spectators: [User(id: 3, username: 'Spectator1', email: 'spectator1@example.com', avatarUrl: 'https://imgur.com/JEnJCBW.png', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0})],
+          groupId: 0,
+          onlyFriends: true,
         )
           ];
           _friendGroups = [
@@ -573,6 +577,8 @@ class DataManager {
         spectators: newEvent.spectators,
         games: newEvent.games,
         links: newEvent.links,
+        groupId: newEvent.groupId,
+        onlyFriends: newEvent.onlyFriends,
       );
       createdEvents.add(eventCopy);
       if (periodicity == 'Daily') {
