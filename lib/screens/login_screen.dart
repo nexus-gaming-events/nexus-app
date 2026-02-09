@@ -6,6 +6,7 @@ import 'package:nexus_app/services/google_auth_service.dart';
 import 'package:nexus_app/services/secure_storage_service.dart';
 import 'package:nexus_app/services/web_interface_service.dart';
 import '../constants.dart';
+import '../widgets/galaxy_background.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -113,12 +114,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppConstants.primaryBackgroundColor,
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppConstants.paddingLarge(context) + 8),
-          child: Column(
+    return GalaxyBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(
+          child: Padding(
+            padding: EdgeInsets.all(AppConstants.paddingLarge(context) + 8),
+            child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // App Logo/Title
@@ -135,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: AppConstants.paddingLarge(context)),
               Text(
-                'Connect with your community',
+                'Explore a galaxy of connections',
                 style: TextStyle(
                   fontSize: 16,
                   color: AppConstants.textColor.withOpacity(0.7),
@@ -212,6 +214,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 }

@@ -13,14 +13,21 @@ import 'classes/group.dart';
 import '../classes/chat.dart';
 import 'screens/friend_requests_screen.dart';
 import 'data_manager.dart';
+import 'services/web_interface_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await UserSettings.loadFromJson();
-  if (await SecureStorageService().hasNexusToken()) {
+  
+  // Load token from secure storage if it exists
+  final secureStorage = SecureStorageService();
+  if (await secureStorage.hasNexusToken()) {
+    final token = await secureStorage.getNexusToken();
+    WebInterfaceService.token = token;
     await DataManager.initialize();
   }
+  
   runApp(NexusApp());
 }
 
