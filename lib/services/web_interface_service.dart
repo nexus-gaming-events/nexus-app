@@ -336,10 +336,7 @@ class WebInterfaceService {
     HttpClientResponse response = await sendRequest(request);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody);
-    List<User> groupFriends = [];
-    for (var friendData in data['friends']) {
-      groupFriends.add(User(id: friendData['id'], username: friendData['username'], avatarUrl: friendData['avatarUrl'], email: friendData['email']));
-    }
+    List<User> groupFriends = await fetchGroupFriends(data['id']);
     return Group(id: data['id'], name: data['name'], friends: groupFriends);
   }
 
@@ -361,7 +358,9 @@ class WebInterfaceService {
     final body = jsonEncode({
       'userId': friendId,
     });
-    await sendRequest(request, body);
+    debugPrint('Add friend to group request body: $body');
+    final response = await sendRequest(request, body);
+    debugPrint('Add friend to group response status: ${response.statusCode}');
   }
 
   static Future<List<User>> fetchGroupFriends(int groupId) async {
@@ -370,8 +369,9 @@ class WebInterfaceService {
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody) as Map<String, dynamic>;
     List<User> groupFriends = [];
-    for (var friendData in data['data']) {
-      groupFriends.add(User(id: friendData['id'], username: friendData['username'], avatarUrl: friendData['avatarUrl']));
+    for (var friendData in data['data'] ?? []) {
+      debugPrint('  Friend: ${friendData['username']} (ID: ${friendData['id']})');
+      groupFriends.add(User(id: friendData['id'], username: friendData['username'] ?? '', avatarUrl: friendData['avatarUrl'] ?? ''));
     }
     return groupFriends;
   }

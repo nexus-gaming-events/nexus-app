@@ -98,46 +98,47 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           HeaderContainer(
-            child: Row(
-                children: [
-                  BackButtonWidget(),
-                  SizedBox(
-                    width: AppConstants.mainContainerWidth(context) * 0.01,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        eventTitle,
-                        style: TextStyle(
-                          color: AppConstants.textColor,
-                          fontSize: () {
-                            final baseFontSize =
-                                AppConstants.fontSizeXLargeResponsive(
-                                      context,
-                                    ) +
-                                    2;
-                            final titleLength = eventTitle.length;
-                            if (titleLength <= 15) return baseFontSize;
-                            if (titleLength <= 25) return baseFontSize - 2;
-                            if (titleLength <= 35) return baseFontSize - 4;
-                            return (baseFontSize - 6).clamp(
-                              AppConstants.fontSizeMediumResponsive(context),
-                              baseFontSize,
-                            );
-                          }(),
-                          fontWeight: FontWeight.bold,
-                        ),
+            child: Stack(
+              children: [
+                Row(
+                  children: [
+                    BackButtonWidget(),
+                    SizedBox(
+                      width: AppConstants.mainContainerWidth(context) * 0.01,
+                    ),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: AppConstants.mainContainerWidth(context) * 0.65,
                       ),
-                      ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth:
-                              AppConstants.mainContainerWidth(context) * 0.7,
-                        ),
-                        child: ClipRect(
-                          clipBehavior: Clip.hardEdge,
-                          child: Text(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            eventTitle,
+                            style: TextStyle(
+                              color: AppConstants.textColor,
+                              fontSize: () {
+                                final baseFontSize =
+                                    AppConstants.fontSizeXLargeResponsive(
+                                          context,
+                                        ) +
+                                        2;
+                                final titleLength = eventTitle.length;
+                                if (titleLength <= 15) return baseFontSize;
+                                if (titleLength <= 25) return baseFontSize - 2;
+                                if (titleLength <= 35) return baseFontSize - 4;
+                                return (baseFontSize - 6).clamp(
+                                  AppConstants.fontSizeMediumResponsive(context),
+                                  baseFontSize,
+                                );
+                              }(),
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
                             eventParticipants,
                             style: TextStyle(
                               color: AppConstants.semitransparentTextColor,
@@ -150,34 +151,40 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                  SizedBox(
-                      width: AppConstants.mainContainerWidth(context) * 0.35),
-                  InkWell(
-                    child: Image.asset(
-                      "assets/icons/Space ship.png",
-                      width: AppConstants.iconSizeMedium(context),
-                      height: AppConstants.iconSizeMedium(context),
                     ),
-                    onTap: () {
-                      NexusAppState.instance!.returnScreenParams.add([
-                        widget.chat,
-                      ]);
-                      NexusAppState.instance!.returnScreenPath.add(
-                        'Chat',
-                      );
-                      NexusAppState.instance!.updateState(
-                        'Event',
-                        params: [event!],
-                      );
-                    },
+                  ],
+                ),
+                Positioned(
+                  right: AppConstants.paddingLarge(context),
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: InkWell(
+                      child: Image.asset(
+                        "assets/icons/Space ship.png",
+                        width: AppConstants.iconSizeMedium(context),
+                        height: AppConstants.iconSizeMedium(context),
+                      ),
+                      onTap: () {
+                        NexusAppState.instance!.returnScreenParams.add([
+                          widget.chat,
+                        ]);
+                        NexusAppState.instance!.returnScreenPath.add(
+                          'Chat',
+                        );
+                        NexusAppState.instance!.updateState(
+                          'Event',
+                          params: [event!],
+                        );
+                      },
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
             //print all messages from bottom to top
             Expanded(
               child: ListView.builder(

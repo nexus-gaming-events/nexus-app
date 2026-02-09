@@ -218,7 +218,7 @@ class DataManager {
     loadGroups();
   }
 
-  static void addFriendsToGroup(int groupId, List<User> friends) async{
+  static Future<void> addFriendsToGroup(int groupId, List<User> friends) async{
     for (var friend in friends) {
       await addFriendToGroup(groupId, friend.id);
     }
@@ -237,7 +237,7 @@ class DataManager {
     loadGroups();
   }
 
-  static void removeFriendsFromGroup(int groupId, List<User> friends) async{
+  static Future<void> removeFriendsFromGroup(int groupId, List<User> friends) async{
     for (var friend in friends) {
       await removeFriendFromGroup(groupId, friend.id);
     }

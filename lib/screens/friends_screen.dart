@@ -16,6 +16,9 @@ class FriendsScreen extends StatefulWidget {
 class _FriendsScreenState extends State<FriendsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  List<User> _friends = [];
+  List<Group> _groups = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -27,8 +30,16 @@ class _FriendsScreenState extends State<FriendsScreen>
   Future<void> _loadData() async {
     await DataManager.loadFriends();
     await DataManager.loadGroups();
+    
+    final friends = DataManager.getFriends();
+    final groups = DataManager.getGroups();
+    
     if (mounted) {
-      setState(() {});
+      setState(() {
+        _friends = friends;
+        _groups = groups;
+        _isLoading = false;
+      });
     }
   }
 
@@ -78,11 +89,11 @@ class _FriendsScreenState extends State<FriendsScreen>
               ),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (groupNameController.text.trim().isNotEmpty) {
-                  DataManager.createGroup(groupNameController.text.trim());
+                  await DataManager.createGroup(groupNameController.text.trim());
                   Navigator.of(context).pop();
-                  setState(() {}); // Refresh the UI
+                  await _loadData(); // Properly refresh the UI with new data
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -98,6 +109,16 @@ class _FriendsScreenState extends State<FriendsScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return BaseScreenContainer(
+        child: Center(
+          child: CircularProgressIndicator(
+            color: AppConstants.textColor,
+          ),
+        ),
+      );
+    }
+
     return BaseScreenContainer(
       alignment: Alignment.topCenter,
       decoration:
@@ -170,7 +191,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                             AppConstants.mainContainerHeight(context) * 0.821,
                         child: SingleChildScrollView(
                           child: Column(
-                            children: DataManager.getFriends()
+                            children: _friends
                                 .map(
                                   (friend) => InkWell(
                                     onTap: () {
@@ -220,7 +241,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                             AppConstants.mainContainerHeight(context) * 0.821,
                         child: SingleChildScrollView(
                           child: Column(
-                            children: DataManager.getGroups()
+                            children: _groups
                                 .map(
                                   (group) => InkWell(
                                     onTap: () {

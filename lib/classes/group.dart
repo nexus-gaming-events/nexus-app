@@ -23,25 +23,62 @@ class Group extends ApplicationObject {
 
 }
 
-class VisualizeGroupScreen {
-  static late Group? group;
+class VisualizeGroupScreen extends StatefulWidget {
+  final int groupId;
+  const VisualizeGroupScreen({Key? key, required this.groupId}) : super(key: key);
 
-  static void _showManageMembersDialog(BuildContext context, Function() onUpdate) {
+  @override
+  State<VisualizeGroupScreen> createState() => _VisualizeGroupScreenState();
+}
+
+class _VisualizeGroupScreenState extends State<VisualizeGroupScreen> {
+  Group? _group;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGroup();
+  }
+
+  Future<void> _loadGroup() async {
+    setState(() {
+      _isLoading = true;
+    });
+    // If you have async loading, use await. Otherwise, just get from DataManager
+    final group = await DataManager.getGroupById(widget.groupId);
+    setState(() {
+      _group = group;
+      _isLoading = false;
+    });
+  }
+
+  void _showManageMembersDialog() {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return _ManageMembersDialog(
-          group: group!,
-          onUpdate: onUpdate,
+          group: _group!,
+          onUpdate: () async {
+            await _loadGroup();
+          },
         );
       },
     );
   }
 
-  static Widget buildFullDetails(
-    BuildContext context,
-  ) {
-    if (group == null) {
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return BaseScreenContainer(
+        child: Center(
+          child: CircularProgressIndicator(
+            color: AppConstants.textColor,
+          ),
+        ),
+      );
+    }
+    if (_group == null) {
       return Center(
         child: Text(
           'Group not found',
@@ -52,161 +89,156 @@ class VisualizeGroupScreen {
         ),
       );
     }
-    return StatefulBuilder(
-      builder: (context, setState) => BaseScreenContainer(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            HeaderContainer(
-              child: Row(
-                children: [
-                  BackButtonWidget(),
-                  SizedBox(
-                    width: AppConstants.mainContainerWidth(context) * 0.01,
-                  ),
-                  Expanded(
-                    child: Text(
-                      group!.name,
-                      style: TextStyle(
-                        color: AppConstants.textColor,
-                        fontSize: () {
-                          final baseFontSize =
-                              AppConstants.fontSizeXLargeResponsive(
-                                context,
-                              ) +
-                              2;
-                          final titleLength = group!.name.length;
-                          if (titleLength <= 15) return baseFontSize;
-                          if (titleLength <= 25) return baseFontSize - 2;
-                          if (titleLength <= 35) return baseFontSize - 4;
-                          return (baseFontSize - 6).clamp(
-                            AppConstants.fontSizeMediumResponsive(context),
-                            baseFontSize,
-                          );
-                        }(),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      // Show delete confirmation dialog
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext dialogContext) {
-                          return AlertDialog(
-                            backgroundColor: AppConstants.primaryColor,
-                            title: Text(
-                              'Delete Group',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            content: Text(
-                              'Are you sure you want to delete this group?',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(dialogContext).pop();
-                                },
-                                child: Text(
-                                  'Cancel',
-                                  style:
-                                      TextStyle(color: Colors.white.withOpacity(0.6)),
-                                ),
-                              ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  DataManager.deleteGroup(group!.id);
-                                  Navigator.of(dialogContext).pop(); // Close dialog
-                                  NexusAppState.instance!.returnScreenParams.clear();
-                                  NexusAppState.instance!.returnScreenPath.clear();
-                                  NexusAppState.instance!.updateState('Friends');
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppConstants.accentColor2,
-                                ),
-                                child: Text(
-                                  'Delete',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                    icon: Icon(Icons.delete,),),
-          ],),
-            ),
-            SizedBox(height: AppConstants.paddingMedium(context),),
-            Container(
-                padding: EdgeInsets.only(
-                  left: AppConstants.paddingMedium(context),
+    final group = _group!;
+    return BaseScreenContainer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          HeaderContainer(
+            child: Row(
+              children: [
+                BackButtonWidget(),
+                SizedBox(
+                  width: AppConstants.mainContainerWidth(context) * 0.01,
                 ),
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Members',
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    color: AppConstants.textColor,
-                    fontSize: AppConstants.fontSizeLargeResponsive(context),
-                  ),
-                ),
-              ),
-            SizedBox(height: AppConstants.paddingMedium(context),),
-            Container(
-                width: AppConstants.mainContainerWidth(context)*0.95,
-                height: AppConstants.mainContainerHeight(context)*0.7265,
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                      color: AppConstants.semitransparentTextColor,
-                      width: 1.0,
+                Expanded(
+                  child: Text(
+                    group.name,
+                    style: TextStyle(
+                      color: AppConstants.textColor,
+                      fontSize: () {
+                        final baseFontSize =
+                            AppConstants.fontSizeXLargeResponsive(
+                              context,
+                            ) +
+                            2;
+                        final titleLength = group.name.length;
+                        if (titleLength <= 15) return baseFontSize;
+                        if (titleLength <= 25) return baseFontSize - 2;
+                        if (titleLength <= 35) return baseFontSize - 4;
+                        return (baseFontSize - 6).clamp(
+                          AppConstants.fontSizeMediumResponsive(context),
+                          baseFontSize,
+                        );
+                      }(),
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: Column(
-                    children: group!.friends
-                        .map(
-                          (friend) => InkWell(
-                            onTap: () {
-                              NexusAppState.instance!.returnScreenParams.add([group!]);
-                              NexusAppState.instance!.returnScreenPath.add('Group');
-                              NexusAppState.instance!.updateState(
-                                'User',
-                                params: [friend],
-                              );
-                            },
-                            child: VisualizeUserPreview(user: friend),
+                IconButton(
+                  onPressed: () {
+                    // Show delete confirmation dialog
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext dialogContext) {
+                        return AlertDialog(
+                          backgroundColor: AppConstants.primaryColor,
+                          title: Text(
+                            'Delete Group',
+                            style: TextStyle(color: Colors.white),
                           ),
-                        )
-                        .toList()
+                          content: Text(
+                            'Are you sure you want to delete this group?',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(dialogContext).pop();
+                              },
+                              child: Text(
+                                'Cancel',
+                                style:
+                                    TextStyle(color: Colors.white.withOpacity(0.6)),
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                DataManager.deleteGroup(group.id);
+                                Navigator.of(dialogContext).pop(); // Close dialog
+                                NexusAppState.instance!.returnScreenParams.clear();
+                                NexusAppState.instance!.returnScreenPath.clear();
+                                NexusAppState.instance!.updateState('Friends');
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppConstants.accentColor2,
+                              ),
+                              child: Text(
+                                'Delete',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  icon: Icon(Icons.delete,),),
+        ],),
+          ),
+          SizedBox(height: AppConstants.paddingMedium(context),),
+          Container(
+              padding: EdgeInsets.only(
+                left: AppConstants.paddingMedium(context),
+              ),
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Members',
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  color: AppConstants.textColor,
+                  fontSize: AppConstants.fontSizeLargeResponsive(context),
+                ),
+              ),
+            ),
+          SizedBox(height: AppConstants.paddingMedium(context),),
+          Container(
+              width: AppConstants.mainContainerWidth(context)*0.95,
+              height: AppConstants.mainContainerHeight(context)*0.7265,
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: AppConstants.semitransparentTextColor,
+                    width: 1.0,
                   ),
                 ),
               ),
-            Container(
-                            height: AppConstants.iconSizeLarge(context)*1.1,
-                    alignment: Alignment.bottomRight,
-                    child: IconButton(
-                      onPressed: () {
-                        _showManageMembersDialog(context, () {
-                          setState(() {});
-                        });
-                      },
-                      icon: Icon(
-                        Icons.add_circle,
-                        color: AppConstants.accentColor2,
-                        size: AppConstants.iconSizeLarge(context),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  children: group.friends
+                      .map(
+                        (friend) => InkWell(
+                          onTap: () {
+                            NexusAppState.instance!.returnScreenParams.add([group]);
+                            NexusAppState.instance!.returnScreenPath.add('Group');
+                            NexusAppState.instance!.updateState(
+                              'User',
+                              params: [friend],
+                            );
+                          },
+                          child: VisualizeUserPreview(user: friend),
+                        ),
+                      )
+                      .toList()
+                ),
+              ),
+            ),
+          Container(
+                          height: AppConstants.iconSizeLarge(context)*1.1,
+                  alignment: Alignment.bottomRight,
+                  child: IconButton(
+                    onPressed: _showManageMembersDialog,
+                    icon: Icon(
+                      Icons.add_circle,
+                      color: AppConstants.accentColor2,
+                      size: AppConstants.iconSizeLarge(context),
 
-                      ),
-                    )
-                    )
-          ],
-        ),
-    ),
+                    ),
+                  )
+                  )
+        ],
+      ),
   );
   }
 }
@@ -325,7 +357,9 @@ class _ManageMembersDialogState extends State<_ManageMembersDialog> {
                   final isSelected = selectedFriends.any((u) => u.id == friend.id);
                   return CheckboxListTile(
                     secondary: CircleAvatar(
-                      backgroundImage: NetworkImage(friend.avatarUrl),
+                      backgroundImage: (friend.avatarUrl == null || friend.avatarUrl.isEmpty)
+                          ? AssetImage('assets/pfps/Neil.png')
+                          : NetworkImage(friend.avatarUrl) as ImageProvider,
                       radius: 20,
                     ),
                     title: Text(
@@ -375,7 +409,9 @@ class _ManageMembersDialogState extends State<_ManageMembersDialog> {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        backgroundImage: NetworkImage(friend.avatarUrl),
+                        backgroundImage: (friend.avatarUrl == null || friend.avatarUrl.isEmpty)
+                            ? AssetImage('assets/pfps/Neil.png')
+                            : NetworkImage(friend.avatarUrl) as ImageProvider,
                         radius: 12,
                       ),
                       SizedBox(width: 8),
@@ -411,7 +447,9 @@ class _ManageMembersDialogState extends State<_ManageMembersDialog> {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        backgroundImage: NetworkImage(friend.avatarUrl),
+                        backgroundImage: (friend.avatarUrl == null || friend.avatarUrl.isEmpty)
+                            ? AssetImage('assets/pfps/Neil.png')
+                            : NetworkImage(friend.avatarUrl) as ImageProvider,
                         radius: 12,
                       ),
                       SizedBox(width: 8),
@@ -437,13 +475,13 @@ class _ManageMembersDialogState extends State<_ManageMembersDialog> {
           ),
         ),
         ElevatedButton(
-          onPressed: () {
+          onPressed: () async{
             // Get the lists of added and removed friends
             final added = addedFriends;
             final removed = removedFriends;
 
-           DataManager.addFriendsToGroup(widget.group.id, added);
-           DataManager.removeFriendsFromGroup(widget.group.id, removed);
+           await DataManager.addFriendsToGroup(widget.group.id, added);
+           await DataManager.removeFriendsFromGroup(widget.group.id, removed);
            Navigator.of(context).pop();
            widget.onUpdate();
           },

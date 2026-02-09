@@ -151,8 +151,7 @@ class NexusAppState extends State<NexusApp> {
       case 'FriendRequests':
         return FriendRequestsScreen();
       case 'Group':
-        VisualizeGroupScreen.group = params.isNotEmpty? params[0] as Group : null;
-        return VisualizeGroupScreen.buildFullDetails(context);
+        return VisualizeGroupScreen(groupId: params.isNotEmpty ? (params[0] as Group).id : 0);
       case 'Calendar':
         return ExpeditionsScreen();
       case 'Event':
