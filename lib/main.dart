@@ -17,7 +17,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await UserSettings.loadFromJson();
-  await DataManager.initialize();
   runApp(NexusApp());
 }
 
@@ -84,6 +83,7 @@ class NexusAppState extends State<NexusApp> {
   }
 
   void updateState(String screenTitle, {List<ApplicationObject> params = const []}) {
+    isLoggedIn = DataManager.getSelfUser() != null;
     debugPrint('Params length: ${params.length}');
     setState(() {
       debugPrint('Updating state to screen: $screenTitle with params: $params');

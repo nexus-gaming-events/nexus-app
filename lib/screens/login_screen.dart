@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nexus_app/data_manager.dart';
+import 'package:nexus_app/main.dart';
 import 'package:nexus_app/services/discord_auth_service.dart';
 import 'package:nexus_app/services/google_auth_service.dart';
 import 'package:nexus_app/services/web_interface_service.dart';
@@ -27,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // TODO: Save the token securely (use flutter_secure_storage)
 
       final loginResponse = await WebInterfaceService.loginWithProvider(result.accessToken!, 'discord');
-      await DataManager.loadSelfUser();
+      await DataManager.initialize();
 
       final me = await WebInterfaceService.fetchMe();
 
@@ -45,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       // Navigate to home screen after successful login
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeScreen()));
+      NexusAppState.instance!.updateState('Home');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -73,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // TODO: Save the token securely (use flutter_secure_storage)
 
       final loginResponse = await WebInterfaceService.loginWithProvider(idToken, 'google');
-      await DataManager.loadSelfUser();
+      await DataManager.initialize();
 
       final me = await WebInterfaceService.fetchMe();
 
@@ -92,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       // Navigate to home screen after successful login
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeScreen()));
+      NexusAppState.instance!.updateState('Home');
     } else {
       debugPrint('Login failed: ${result['error']}');
       ScaffoldMessenger.of(context).showSnackBar(

@@ -77,8 +77,11 @@ class DataManager {
     }
 
     await loadSelfUser();
+    await loadFriends();
     await loadFriendRequests();
     await loadEvents();
+
+    debugPrint('DataManager initialized. Self user: ${_selfUser?.username}, Friends: ${_friends?.length}, Friend Requests: ${_friendRequests?.length}, Events: ${_events?.length}');
   }
 
   static Future<void> loadSelfUser() async{
