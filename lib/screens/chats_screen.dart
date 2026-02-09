@@ -7,11 +7,47 @@ import '../widgets/header_container.dart';
 import '../classes/chat.dart';
 import '../main.dart';
 
-class ChatsScreen extends StatelessWidget {
+class ChatsScreen extends StatefulWidget {
   const ChatsScreen({Key? key}) : super(key: key);
 
   @override
+  State<ChatsScreen> createState() => _ChatsScreenState();
+}
+
+class _ChatsScreenState extends State<ChatsScreen> {
+  List<Chat> _chats = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    // Load chats
+    await DataManager.ensureChatsLoaded();
+    final chats = DataManager.getChats();
+
+    if (mounted) {
+    setState(() {
+      _chats = chats;
+      _isLoading = false;
+    });
+  }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return BaseScreenContainer(
+        child: Center(
+          child: CircularProgressIndicator(
+            color: AppConstants.textColor,
+          ),
+        ),
+       );
+    }
     return BaseScreenContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -52,25 +88,31 @@ class ChatsScreen extends StatelessWidget {
             alignment: Alignment.topCenter,
             width: AppConstants.mainContainerWidth(context) * 0.9,
             height: AppConstants.mainContainerHeight(context) * 0.821,
-            child: SingleChildScrollView(
-              child: Column(
-                children: DataManager.getChats()
-                    .map(
-                      (chat) => InkWell(
-                        onTap: () {
-                          NexusAppState.instance!.returnScreenParams.add([]);
-                          NexusAppState.instance!.returnScreenPath.add('Chats');
-                          NexusAppState.instance!.updateState(
-                            'Chat',
-                            params: [chat],
-                          );
-                        },
-                        child: VisualizeChatPreview(chat: chat),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
+            child: _isLoading
+                ? Center(
+                    child: CircularProgressIndicator(
+                      color: AppConstants.textColor,
+                    ),
+                  )
+                : SingleChildScrollView(
+                    child: Column(
+                      children: _chats
+                          .map(
+                            (chat) => InkWell(
+                              onTap: () {
+                                NexusAppState.instance!.returnScreenParams.add([]);
+                                NexusAppState.instance!.returnScreenPath.add('Chats');
+                                NexusAppState.instance!.updateState(
+                                  'Chat',
+                                  params: [chat],
+                                );
+                              },
+                              child: VisualizeChatPreview(chat: chat),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
           ),
         ],
       ),

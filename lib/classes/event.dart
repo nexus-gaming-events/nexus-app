@@ -71,6 +71,7 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
   bool isUserInPlayers = false;
   bool isUserInSpectators = false;
   bool isUserAuthor = false;
+  bool _isLoading = true;
   late Event event;
 
   @override
@@ -98,11 +99,22 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
       isUserInPlayers = players;
       isUserInSpectators = spectators;
       isUserAuthor = author;
+      _isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return BaseScreenContainer(
+        child: Center(
+          child: CircularProgressIndicator(
+            color: AppConstants.textColor,
+          ),
+        ),
+      );
+    }
+    
     return BaseScreenContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,

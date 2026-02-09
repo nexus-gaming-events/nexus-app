@@ -250,20 +250,37 @@ class DataManager {
     return await WebInterfaceService.fetchChatMessages(eventId);
   }
 
+  static void insertMessagesIntoChat(int eventId, List<Message> messages) {
+    Chat? chat;
+    try {
+      chat = _chats?.firstWhere((chat) => chat.eventId == eventId);
+    } catch (e) {
+      chat = null;
+    }
+    if (chat != null) {
+      chat.messages.addAll(messages);
+      chat.messages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    }
+    else {
+      _chats ??= [];
+      _chats!.add(Chat(eventId: eventId, messages: messages));
+    }
+  }
+
   static Future<void> loadChat(int eventId) async{
-    _chats ??= [];
-    _chats?.add(Chat(eventId: eventId, messages: await getMessagesForEvent(eventId)));
+    insertMessagesIntoChat(eventId, await getMessagesForEvent(eventId));
+  }
+
+  static Future<void> ensureChatsLoaded() async {
+    if (isOfflineMode || _chats != null) {
+      return;
+    }
+    for (var event in _events ?? []) {
+      await loadChat(event.id);
+    }
   }
 
   static List<Chat> getChats() {
-    if (isOfflineMode){
-      return _chats ?? [];
-    }
-    if (_chats == null){
-      for (var event in _events ?? []) {
-        loadChat(event.id);
-      }
-    }
     return _chats ?? [];
   }
 
@@ -271,6 +288,7 @@ class DataManager {
     if (isOfflineMode){
       return _chats!.firstWhere((chat) => chat.eventId == eventId);
     }
+    await ensureChatsLoaded();
     try {
       return getChats().firstWhere((chat) => chat.eventId == eventId);
     } catch (e) {

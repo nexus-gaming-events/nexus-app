@@ -144,6 +144,8 @@ class WebInterfaceService {
       links: [data['discordVoiceLink'] ?? ''],
       players: players,
       spectators: spectators,
+      numPlayers: data['playerCount'] ?? 0,
+      numSpectators: data['spectatorCount'] ?? 0,
       );
     }
 

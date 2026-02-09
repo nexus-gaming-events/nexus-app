@@ -144,14 +144,14 @@ class ExpeditionsScreenState extends State<ExpeditionsScreen> {
                           children: _focusedEvents
                               .map(
                                 (item) => InkWell(
-                                  onTap: () {
+                                  onTap: () async{
                                     NexusAppState.instance!.returnScreenParams
                                         .add([]);
                                     NexusAppState.instance!.returnScreenPath
                                         .add('Calendar');
                                     NexusAppState.instance!.updateState(
                                       'Event',
-                                      params: [item],
+                                      params: [await DataManager.getEventById(item.id) ?? item],
                                     );
                                   },
                                   child: VisualizeEventPreview(event: item),

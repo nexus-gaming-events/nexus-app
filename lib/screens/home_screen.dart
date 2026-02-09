@@ -7,11 +7,64 @@ import '../classes/friend_request.dart';
 import '../widgets/base_screen_container.dart';
 import '../widgets/header_container.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  List<Event> _upcomingEvents = [];
+  List<FriendRequest> _friendRequests = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    // Load events and friend requests
+    final events = DataManager.getEvents();
+    final friendRequests = DataManager.getFriendRequests();
+
+    // Filter and sort events
+
+    final filteredEvents = (await Future.wait(events.map((e) async => await DataManager.getEventById(e.id))))
+        .where((event) => event?.date.isAfter(DateTime.now()) ?? false)
+        .where((event) => event != null && event.maxPlayers > event.currentPlayers)
+        .where((event) => event != null && !event.participants.any((p) => p.id == DataManager.getSelfUser()!.id))
+        .take(5)
+        .toList();
+
+    // Sort friend requests
+    final sortedFriendRequests = (friendRequests..sort((a, b) => b.date.compareTo(a.date)))
+        .take(5)
+        .toList();
+
+    if (mounted) {
+      setState(() {
+        _upcomingEvents = filteredEvents?.cast<Event>() ?? [];
+        _friendRequests = sortedFriendRequests;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return BaseScreenContainer(
+        child: Center(
+          child: CircularProgressIndicator(
+            color: AppConstants.textColor,
+          ),
+        ),
+      );
+    }
+
     return BaseScreenContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -58,37 +111,25 @@ class HomeScreen extends StatelessWidget {
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Column(
-                children:
-                    (DataManager.getEvents()
-                          ..sort((a, b) => a.date.compareTo(b.date)))
-                        .where((event) => event.date.isAfter(DateTime.now()))
-                        .where(
-                          (event) => event.maxPlayers > event.currentPlayers,
-                        )
-                        .where(
-                          (event) => !event.participants.contains(
-                            DataManager.getSelfUser(),
-                          ),
-                        )
-                        .take(5)
-                        .map(
-                          (item) => InkWell(
-                            onTap: () async{
-                              NexusAppState.instance!.returnScreenParams.add(
-                                [],
-                              );
-                              NexusAppState.instance!.returnScreenPath.add(
-                                'Home',
-                              );
-                              NexusAppState.instance!.updateState(
-                                'Event',
-                                params: [(await DataManager.getEventById(item.id))!],
-                              );
-                            },
-                            child: VisualizeEventPreview(event: item),
-                          ),
-                        )
-                        .toList(),
+                children: _upcomingEvents
+                    .map(
+                      (item) => InkWell(
+                        onTap: () async {
+                          NexusAppState.instance!.returnScreenParams.add(
+                            [],
+                          );
+                          NexusAppState.instance!.returnScreenPath.add(
+                            'Home',
+                          );
+                          NexusAppState.instance!.updateState(
+                            'Event',
+                            params: [(await DataManager.getEventById(item.id))!],
+                          );
+                        },
+                        child: VisualizeEventPreview(event: item),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
           ),
@@ -119,19 +160,16 @@ class HomeScreen extends StatelessWidget {
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Column(
-                children:
-                    (DataManager.getFriendRequests()
-                          ..sort((a, b) => b.date.compareTo(a.date)))
-                        .take(5)
-                        .map(
-                          (item) => InkWell(
-                            //onTap: () {},
-                            child: VisualizeFriendRequestPreview(
-                              friendRequest: item,
-                            ),
-                          ),
-                        )
-                        .toList(),
+                children: _friendRequests
+                    .map(
+                      (item) => InkWell(
+                        //onTap: () {},
+                        child: VisualizeFriendRequestPreview(
+                          friendRequest: item,
+                        ),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
           ),

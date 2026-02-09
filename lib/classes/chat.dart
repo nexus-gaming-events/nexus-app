@@ -41,7 +41,17 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
   }
 
   Future<void> _loadEvent() async {
-    event = await DataManager.getEventById(widget.chat.eventId);
+    try {
+      event = await DataManager.getEventById(widget.chat.eventId);
+    } catch (e) {
+      event = null;
+    }
+    if (event == null) {
+      NexusAppState.instance!.returnScreenPath.clear();
+      NexusAppState.instance!.returnScreenParams.clear();
+      NexusAppState.instance!.updateState('Chats');
+      event = null;
+    }
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -273,7 +283,12 @@ class _VisualizeChatPreviewState extends State<VisualizeChatPreview> {
   }
 
   Future<void> _loadEvent() async {
-    event = await DataManager.getEventById(widget.chat.eventId);
+    try {
+      event = await DataManager.getEventById(widget.chat.eventId);
+    } catch (e) {
+      // Handle error, e.g. show a message or use a placeholder
+      event = null;
+    }
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -283,7 +298,7 @@ class _VisualizeChatPreviewState extends State<VisualizeChatPreview> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading || event == null) {
+    if (isLoading) {
       return Card(
         color: AppConstants.secondaryColor,
         margin: EdgeInsets.symmetric(
@@ -303,7 +318,9 @@ class _VisualizeChatPreviewState extends State<VisualizeChatPreview> {
         ),
       );
     }
-
+    else if (event == null) {
+      return Card();
+    }
     String eventTitle = event!.title;
     List<User> eventParticipantsList = event!.participants;
     return Card(

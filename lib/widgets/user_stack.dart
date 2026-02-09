@@ -28,7 +28,15 @@ class UserStackIcon extends StatelessWidget {
     if (users.length == 1) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
-        child: Image.network(
+        child: 
+        users[0].avatarUrl.isEmpty
+        ? Image.asset(
+            'assets/icons/Neil.png',
+            width: iconSize,
+            height: iconSize,
+          )
+          :
+        Image.network(
           users[0].avatarUrl,
           width: iconSize,
           height: iconSize,
@@ -48,12 +56,18 @@ class UserStackIcon extends StatelessWidget {
               right: 0,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
-                child: Image.network(
-                  users[0].avatarUrl,
-                  width: iconSize * 0.6,
-                  height: iconSize * 0.6,
-                  fit: BoxFit.cover,
-                ),
+                child: users[0].avatarUrl.isEmpty
+                    ? Image.asset(
+                        'assets/icons/Neil.png',
+                        width: iconSize * 0.6,
+                        height: iconSize * 0.6,
+                      )
+                    : Image.network(
+                        users[0].avatarUrl,
+                        width: iconSize * 0.6,
+                        height: iconSize * 0.6,
+                        fit: BoxFit.cover,
+                      ),
               ),
             ),
             Positioned(
@@ -61,9 +75,15 @@ class UserStackIcon extends StatelessWidget {
               left: 0,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
-                child: Image.network(
-                  users[1].avatarUrl,
-                  width: iconSize * 0.6,
+                child: users[1].avatarUrl.isEmpty
+                    ? Image.asset(
+                        'assets/icons/Neil.png',
+                        width: iconSize * 0.6,
+                        height: iconSize * 0.6,
+                      )
+                    : Image.network(
+                        users[1].avatarUrl,
+                        width: iconSize * 0.6,
                   height: iconSize * 0.6,
                   fit: BoxFit.cover,
                 ),
@@ -85,12 +105,18 @@ class UserStackIcon extends StatelessWidget {
             left: iconSize * 0.2,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
-              child: Image.network(
-                users[0].avatarUrl,
-                width: iconSize * 0.5,
-                height: iconSize * 0.5,
-                fit: BoxFit.cover,
-              ),
+              child: users[0].avatarUrl.isEmpty
+                  ? Image.asset(
+                      'assets/icons/Neil.png',
+                      width: iconSize * 0.5,
+                      height: iconSize * 0.5,
+                    )
+                  : Image.network(
+                      users[0].avatarUrl,
+                      width: iconSize * 0.5,
+                      height: iconSize * 0.5,
+                      fit: BoxFit.cover,
+                    ),
             ),
           ),
           Positioned(
@@ -98,9 +124,15 @@ class UserStackIcon extends StatelessWidget {
             right: 0,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
-              child: Image.network(
-                users[1].avatarUrl,
-                width: iconSize * 0.5,
+              child: users[1].avatarUrl.isEmpty
+                  ? Image.asset(
+                      'assets/icons/Neil.png',
+                      width: iconSize * 0.5,
+                      height: iconSize * 0.5,
+                    )
+                  : Image.network(
+                      users[1].avatarUrl,
+                      width: iconSize * 0.5,
                 height: iconSize * 0.5,
                 fit: BoxFit.cover,
               ),
@@ -111,12 +143,18 @@ class UserStackIcon extends StatelessWidget {
             left: 0,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
-              child: Image.network(
-                users[2].avatarUrl,
-                width: iconSize * 0.5,
-                height: iconSize * 0.5,
-                fit: BoxFit.cover,
-              ),
+              child: users[2].avatarUrl.isEmpty
+                  ? Image.asset(
+                      'assets/icons/Neil.png',
+                      width: iconSize * 0.5,
+                      height: iconSize * 0.5,
+                    )
+                  : Image.network(
+                      users[2].avatarUrl,
+                      width: iconSize * 0.5,
+                      height: iconSize * 0.5,
+                      fit: BoxFit.cover,
+                    ),
             ),
           ),
         ],
