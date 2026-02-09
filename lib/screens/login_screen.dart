@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:nexus_app/data_manager.dart';
 import 'package:nexus_app/services/discord_auth_service.dart';
 import 'package:nexus_app/services/google_auth_service.dart';
+import 'package:nexus_app/services/web_interface_service.dart';
 import '../constants.dart';
+import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -20,31 +23,33 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (!mounted) return;
 
-    if (result['success']) {
-      final user = result['user'];
-      final accessToken = result['accessToken'];
-
+    if (result != null && result.accessToken != null) {
       // TODO: Save the token securely (use flutter_secure_storage)
-      // TODO: Update your app state with the logged-in user
 
-      debugPrint('Logged in as: ${user['username']}#${user['discriminator']}');
-      debugPrint('User ID: ${user['id']}');
-      debugPrint('Email: ${user['email']}');
-      debugPrint('Access Token: $accessToken');
+      final loginResponse = await WebInterfaceService.loginWithProvider(result.accessToken!, 'discord');
+      await DataManager.loadSelfUser();
+
+      final me = await WebInterfaceService.fetchMe();
+
+      debugPrint('Logged in as: ${me.username}');
+      debugPrint('Email: ${me.email}');
+      debugPrint('Photo URL: ${me.avatarUrl}');
+      debugPrint('Discord Access Token: ${result.accessToken}');
+      debugPrint('Nexus Access Token: ${loginResponse.token}');
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Welcome, ${user['username']}!'),
+          content: Text('Welcome, ${me.username}!'),
           backgroundColor: Colors.green,
         ),
       );
 
       // Navigate to home screen after successful login
-      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeScreen()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeScreen()));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Login failed: ${result['error']}'),
+          content: Text('Login failed'),
           backgroundColor: Colors.red,
         ),
       );
@@ -66,13 +71,18 @@ class _LoginScreenState extends State<LoginScreen> {
       final accessToken = result['accessToken'];
 
       // TODO: Save the token securely (use flutter_secure_storage)
-      // TODO: Update your app state with the logged-in user
 
-      debugPrint('Logged in as: ${user['name']}');
-      debugPrint('Email: ${user['email']}');
-      debugPrint('Photo URL: ${user['photoUrl']}');
-      debugPrint('ID Token: $idToken');
-      debugPrint('Access Token: $accessToken');
+      final loginResponse = await WebInterfaceService.loginWithProvider(idToken, 'google');
+      await DataManager.loadSelfUser();
+
+      final me = await WebInterfaceService.fetchMe();
+
+      debugPrint('Logged in as: ${me.username}');
+      debugPrint('Email: ${me.email}');
+      debugPrint('Photo URL: ${me.avatarUrl}');
+      debugPrint('Google ID Token: $idToken');
+      debugPrint('Google Access Token: $accessToken');
+      debugPrint('Nexus Access Token: ${loginResponse.token}');
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -82,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       // Navigate to home screen after successful login
-      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeScreen()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeScreen()));
     } else {
       debugPrint('Login failed: ${result['error']}');
       ScaffoldMessenger.of(context).showSnackBar(

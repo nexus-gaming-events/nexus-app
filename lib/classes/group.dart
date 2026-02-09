@@ -20,7 +20,7 @@ class Group extends ApplicationObject {
     required List<User> friends,
   }) : friends = friends.toList();
 
-  
+
 }
 
 class VisualizeGroupScreen {
@@ -135,7 +135,7 @@ class VisualizeGroupScreen {
                           );
                         },
                       );
-                    }, 
+                    },
                     icon: Icon(Icons.delete,),),
           ],),
             ),
@@ -200,7 +200,7 @@ class VisualizeGroupScreen {
                         Icons.add_circle,
                         color: AppConstants.accentColor2,
                         size: AppConstants.iconSizeLarge(context),
-                        
+
                       ),
                     )
                     )
@@ -325,7 +325,7 @@ class _ManageMembersDialogState extends State<_ManageMembersDialog> {
                   final isSelected = selectedFriends.any((u) => u.id == friend.id);
                   return CheckboxListTile(
                     secondary: CircleAvatar(
-                      backgroundImage: NetworkImage(friend.imageUrl),
+                      backgroundImage: NetworkImage(friend.avatarUrl),
                       radius: 20,
                     ),
                     title: Text(
@@ -375,7 +375,7 @@ class _ManageMembersDialogState extends State<_ManageMembersDialog> {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        backgroundImage: NetworkImage(friend.imageUrl),
+                        backgroundImage: NetworkImage(friend.avatarUrl),
                         radius: 12,
                       ),
                       SizedBox(width: 8),
@@ -411,7 +411,7 @@ class _ManageMembersDialogState extends State<_ManageMembersDialog> {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        backgroundImage: NetworkImage(friend.imageUrl),
+                        backgroundImage: NetworkImage(friend.avatarUrl),
                         radius: 12,
                       ),
                       SizedBox(width: 8),
@@ -441,7 +441,7 @@ class _ManageMembersDialogState extends State<_ManageMembersDialog> {
             // Get the lists of added and removed friends
             final added = addedFriends;
             final removed = removedFriends;
-            
+
            DataManager.addFriendsToGroup(widget.group.id, added);
            DataManager.removeFriendsFromGroup(widget.group.id, removed);
            Navigator.of(context).pop();

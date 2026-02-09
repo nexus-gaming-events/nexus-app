@@ -20,15 +20,15 @@ class DataManager {
   static List<int> _myFriendRequests = [];
 
   static List<Event>? _events;
-  static Event? _currentEvent;  
+  static Event? _currentEvent;
   static List<Chat>? _chats;
 
-  static final bool isOfflineMode = true;
-  
+  static final bool isOfflineMode = false;
+
   static Future<void> initialize() async {
     if (isOfflineMode) {
-      _selfUser = User(id: 0, username: 'OfflineUser', email: 'offline@example.com', imageUrl: 'https://imgur.com/Fjiw4cX.png', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0});
-      _friends = [User(id: 1, username: 'Friend1', email: 'friend1@example.com', imageUrl: 'https://imgur.com/N4Q6fcZ.png', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0})];
+      _selfUser = User(id: 0, username: 'OfflineUser', email: 'offline@example.com', avatarUrl: 'https://imgur.com/Fjiw4cX.png', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0});
+      _friends = [User(id: 1, username: 'Friend1', email: 'friend1@example.com', avatarUrl: 'https://imgur.com/N4Q6fcZ.png', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0})];
       _friendRequests = [FriendRequest(id: 2, username: 'Requester1', imageUrl: 'https://imgur.com/BVayEBY.png', date: DateTime(2025,1,7))];
       _myFriendRequests = [3];
       _events = [
@@ -43,7 +43,7 @@ class DataManager {
           games: ['Metal Gear Solid'],
           links: ['https://www.example.com'],
           players: [_selfUser!],
-          spectators: [User(id: 1, username: 'Friend1', email: 'friend1@example.com', imageUrl: 'https://imgur.com/N4Q6fcZ.png', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0})],
+          spectators: [User(id: 1, username: 'Friend1', email: 'friend1@example.com', avatarUrl: 'https://imgur.com/N4Q6fcZ.png', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0})],
           ),
         Event(
           id: 1,
@@ -55,8 +55,8 @@ class DataManager {
           maxSpectators: 3,
           games: ['The Legend of Zelda'],
           links: ['https://www.example2.com'],
-          players: [_friends!.first, User(id: 2, username: 'Requester1', imageUrl: 'https://imgur.com/BVayEBY.png', email: '', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0})],
-          spectators: [User(id: 3, username: 'Spectator1', email: 'spectator1@example.com', imageUrl: 'https://imgur.com/JEnJCBW.png', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0})],
+          players: [_friends!.first, User(id: 2, username: 'Requester1', avatarUrl: 'https://imgur.com/BVayEBY.png', email: '', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0})],
+          spectators: [User(id: 3, username: 'Spectator1', email: 'spectator1@example.com', avatarUrl: 'https://imgur.com/JEnJCBW.png', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0})],
         )
           ];
           _friendGroups = [
@@ -70,6 +70,12 @@ class DataManager {
           ];
       return;
     }
+
+    if (WebInterfaceService.token == null) {
+      debugPrint('No token found, skipping self user load');
+      return;
+    }
+
     await loadSelfUser();
     await loadFriendRequests();
     await loadEvents();
@@ -113,7 +119,7 @@ class DataManager {
 
   static Future<void> loadFriends() async{
     _friends = await WebInterfaceService.fetchFriends();
-  } 
+  }
 
   static List<User> getFriends() {
     if (isOfflineMode){
@@ -213,7 +219,7 @@ class DataManager {
     }
     return await WebInterfaceService.fetchChatMessages(eventId);
   }
-  
+
   static Future<void> loadChat(int eventId) async{
     _chats ??= [];
     _chats?.add(Chat(eventId: eventId, messages: await getMessagesForEvent(eventId)));
@@ -247,7 +253,7 @@ class DataManager {
     }
   }
 
-    
+
   static Future<Event?> loadEventById(int eventId) async{
     _currentEvent = await WebInterfaceService.fetchEventById(eventId);
     return _currentEvent;
@@ -324,7 +330,7 @@ class DataManager {
       }
       for (var request in _friendRequests ?? []) {
         if (request.id == userId){
-          return User(id: request.id, username: request.username, email: '', imageUrl: request.imageUrl);
+          return User(id: request.id, username: request.username, email: '', avatarUrl: request.avatarUrl);
         }
       }
       return null;
@@ -433,7 +439,7 @@ class DataManager {
     }
     return _currentEvent!;
   }
-  
+
   static Future<Event> editAndGetEvent(Event event) async {
     debugPrint('Editing event: ${event.title} with ID: ${event.id}');
     return await editEvent(event);
@@ -450,7 +456,7 @@ class DataManager {
   static DateTime addMonths(DateTime date, int months) {
     int newYear = date.year;
     int newMonth = date.month + months;
-    
+
     // Handle year overflow/underflow
     while (newMonth > 12) {
       newMonth -= 12;
@@ -460,14 +466,14 @@ class DataManager {
       newMonth += 12;
       newYear -= 1;
     }
-    
+
     // Handle day overflow (e.g., Jan 31 + 1 month = Feb 28/29)
     int newDay = date.day;
     int maxDayInMonth = DateTime(newYear, newMonth + 1, 0).day;
     if (newDay > maxDayInMonth) {
       newDay = maxDayInMonth;
     }
-    
+
     return DateTime(
       newYear,
       newMonth,
@@ -491,7 +497,7 @@ class DataManager {
     } else if (recurrenceTime == '3 month') {
       endDate = addMonths(newEvent.date, 3);
     } else if (recurrenceTime == '6 month') {
-      endDate = addMonths(newEvent.date, 6); 
+      endDate = addMonths(newEvent.date, 6);
     } else if (recurrenceTime == '1 year') {
       endDate = addMonths(newEvent.date, 12);
     }
@@ -580,18 +586,18 @@ class DataManager {
 
   static Gradient? getGradientFromJson(Map<String, dynamic>? bannerGradient) {
     if (bannerGradient == null) return null;
-    
+
     try {
       String selectedBlendMode = bannerGradient['type'] ?? 'linear';
       List<Color> colors = (bannerGradient['colors'] as List)
           .map((c) => _parseColorFromJson(c))
           .toList();
       double paramter = (bannerGradient['parameter'] as num?)?.toDouble() ?? 0.0;
-      
+
       if (colors.length < 2) {
         colors = [Colors.blue, Colors.purple];
       }
-      
+
       Gradient selectedGradient;
       if (selectedBlendMode == 'linear') {
         selectedGradient = LinearGradient(
@@ -634,5 +640,5 @@ class DataManager {
 
   static void logout() {}
 
- 
+
 }

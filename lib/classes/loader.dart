@@ -16,7 +16,7 @@ class Loader {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           {
-            "provider": "google", 
+            "provider": "google",
             "token": token
           },
         }),
@@ -28,11 +28,11 @@ class Loader {
           id: data['id'],
           username: data['username'],
           email: data['email'],
-          imageUrl: data['avatarUrl'] ?? '',
+          avatarUrl: data['avatarUrl'] ?? '',
         );
         selfUser!.setToken(data['token']);
         // Save token, navigate to home
-        
+
       } else {
         throw Exception('Login failed');
       }

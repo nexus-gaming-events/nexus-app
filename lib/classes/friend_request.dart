@@ -16,7 +16,7 @@ class FriendRequest extends ApplicationObject {
     required this.username,
     required this.imageUrl,
     required this.date,
-  }); 
+  });
 }
 
 class VisualizeFriendRequestPreview extends StatelessWidget {
@@ -44,7 +44,7 @@ class VisualizeFriendRequestPreview extends StatelessWidget {
                       );
                       NexusAppState.instance!.updateState(
                         'User',
-                        params: [await DataManager.getUserById(friendRequest.id) ?? User(id: 0, username: 'Unknown', email: '', imageUrl: '', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0})],
+                        params: [await DataManager.getUserById(friendRequest.id) ?? User(id: 0, username: 'Unknown', email: '', avatarUrl: '', bannerGradient: {'type': 'linear', 'colors': ['0xFF0000FF', '0xFFFF00FF'], 'parameter': 0.0})],
                       );
             },
           child: Row(

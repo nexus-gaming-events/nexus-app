@@ -14,7 +14,7 @@ class User extends ApplicationObject {
   final int id;
   final String username;
   final String email;
-  final String imageUrl;
+  final String avatarUrl;
   final List<VisualLink>? games;
   final List<Event>? organizedEvents;
   final List<Event>? recentEvents;
@@ -27,7 +27,7 @@ class User extends ApplicationObject {
     this.organizedEvents,
     this.recentEvents,
     this.email = '',
-    this.imageUrl = '',
+    this.avatarUrl = '',
     this.bannerGradient,
   }) : _token = '';
 
@@ -37,6 +37,16 @@ class User extends ApplicationObject {
 
   String getToken() {
     return _token;
+  }
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'],
+      username: json['username'],
+      email: json['email'] ?? '',
+      avatarUrl: json['avatarUrl'] ?? '',
+      bannerGradient: json['bannerGradient'],
+    );
   }
 }
 
@@ -64,7 +74,7 @@ class VisualizeUserScreen {
                     width: AppConstants.mainContainerWidth(context),
                     height: AppConstants.mainContainerHeight(context) * 0.2,
                     decoration: BoxDecoration(
-                      gradient: DataManager.getGradientFromJson(user.bannerGradient) ?? 
+                      gradient: DataManager.getGradientFromJson(user.bannerGradient) ??
                           LinearGradient(
                             colors: [Colors.blue, Colors.purple],
                             begin: Alignment(-1, 0.0),
@@ -100,7 +110,7 @@ class VisualizeUserScreen {
                           AppConstants.borderRadiusMax,
                         ),
                         child: Image.network(
-                          user.imageUrl,
+                          user.avatarUrl,
                           width: AppConstants.iconSizeLarge(context) * 2,
                           height: AppConstants.iconSizeLarge(context) * 2,
                           fit: BoxFit.contain,
@@ -259,11 +269,11 @@ class VisualizeUserScreen {
                             }
                           },
                         )
-                
+
                       : Container(),
                     ],
                   ),
-                  
+
                 ],
               ),
               SizedBox(
@@ -317,7 +327,7 @@ class VisualizeUserScreen {
                     ),
                   ],),
                               ),
-              ): 
+              ):
               isFriend ?
               InkWell(
                 onTap: () {
@@ -386,7 +396,7 @@ class VisualizeUserScreen {
                     ),
                   ],),
                               ),
-              )            
+              )
               :
               hasSentRequest ?
               InkWell(
@@ -570,14 +580,14 @@ class VisualizeUserPreview extends StatelessWidget {
         padding: EdgeInsets.all(AppConstants.paddingLarge(context)),
         child: Row(
           children: [
-            user.imageUrl.isEmpty
+            user.avatarUrl.isEmpty
                 ? Image.asset(
                     'assets/icons/Neil.png',
                     width: iconSize,
                     height: iconSize,
                   )
                 : Image.network(
-                    user.imageUrl,
+                    user.avatarUrl,
                     width: iconSize,
                     height: iconSize,
                   ),

@@ -3,7 +3,7 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services") 
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -29,7 +29,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        manifestPlaceholders["appAuthRedirectScheme"] = "com.example.nexus_app"
+        manifestPlaceholders["appAuthRedirectScheme"] = "nexusapp"
     }
 
     buildTypes {

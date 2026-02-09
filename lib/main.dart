@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nexus_app/classes/application_object.dart';
 import 'widgets/custom_navbar.dart';
 import 'widgets/galaxy_background.dart';
-import 'screens/screens.dart';  
+import 'screens/screens.dart';
 import 'classes/event.dart';
 import 'classes/user.dart';
 import 'screens/login_screen.dart';
@@ -33,7 +33,7 @@ class NexusAppState extends State<NexusApp> {
   String _currentScreenTitle = 'Home';
   int _selectedIndex = 2;
   List<ApplicationObject> currentParams = [];
-  bool isLoggedIn = true;
+  bool isLoggedIn = false;
   List<String> returnScreenPath = [];
   List<List<ApplicationObject>> returnScreenParams = [];
 
@@ -47,8 +47,10 @@ class NexusAppState extends State<NexusApp> {
   @override
   void initState() {
     super.initState();
-    
-    if(!isLoggedIn){
+
+    isLoggedIn = DataManager.getSelfUser() != null;
+
+    if (!isLoggedIn) {
       _currentScreenTitle = 'Login';
       _selectedIndex = 2;
     } else {
@@ -91,7 +93,7 @@ class NexusAppState extends State<NexusApp> {
       debugPrint('Return params: $returnScreenParams');
     });
   }
-  
+
   void _mapIndexToTitle(int index) {
     if(index == 0){
       updateState('User', params: [/*findUser(selfId)*/]);
@@ -143,5 +145,5 @@ class NexusAppState extends State<NexusApp> {
         return Center(child: Text('Screen not found: $currentScreenTitle'));
     }
   }
-  
+
 }

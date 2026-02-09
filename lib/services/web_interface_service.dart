@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:nexus_app/classes/group.dart';
 import 'package:nexus_app/classes/friend_request.dart';
+import 'package:nexus_app/classes/login.dart';
 import '../classes/event.dart';
 import '../classes/user.dart';
 import '../classes/message.dart';
@@ -20,6 +21,9 @@ class WebInterfaceService {
     final uri = Uri.parse('$webInterfaceUrl$endpoint');
     final request = await httpClient.openUrl(method, uri);
     request.headers.set('Content-Type', 'application/json');
+    if (token != null) {
+      request.headers.set('Authorization', 'Bearer $token');
+    }
     return request;
   }
 
@@ -29,25 +33,25 @@ class WebInterfaceService {
     request.add(utf8.encode(body));
   }
   final response = await request.close();
-  
+
   if (response.statusCode != 200) {
     final responseBody = await response.transform(utf8.decoder).join();
     throw Exception('HTTP Error ${response.statusCode}: $responseBody');
   }
-  
+
   return response;
   }
 
   // Objects
   static String? token;
- 
+
   // Users
   static Future<User> fetchSelfUser() async {
     final request = await createRequest('me', 'GET');
     HttpClientResponse response = await sendRequest(request);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody);
-    final selfUser = User(id: data['id'], username: data['username'], imageUrl: data['avatarUrl'], email: data['email'], bannerGradient: data['bannerGradient'] as Map<String, dynamic>?);
+    final selfUser = User(id: data['id'], username: data['username'], avatarUrl: data['avatarUrl'], email: data['email'], bannerGradient: data['bannerGradient'] as Map<String, dynamic>?);
     return selfUser;
     }
 
@@ -58,17 +62,17 @@ class WebInterfaceService {
     final data = jsonDecode(responseBody) as Map<String, dynamic>;
     List<User> users = [];
     for (var userData in data['data']) {
-      users.add(User(id: userData['id'], username: userData['username'], imageUrl: userData['avatarUrl'], email: userData['email'], bannerGradient: userData['bannerGradient'] as Map<String, dynamic>?));
+      users.add(User(id: userData['id'], username: userData['username'], avatarUrl: userData['avatarUrl'], email: userData['email'], bannerGradient: userData['bannerGradient'] as Map<String, dynamic>?));
     }
     return users;
   }
-  
+
   static Future<User> fetchUserById(int id) async {
     final request = await createRequest('users/$id', 'GET');
     HttpClientResponse response = await sendRequest(request);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody);
-    return User(id: data['id'], username: data['username'], imageUrl: data['avatarUrl'], email: data['email'], bannerGradient: data['bannerGradient'] as Map<String, dynamic>?);
+    return User(id: data['id'], username: data['username'], avatarUrl: data['avatarUrl'], email: data['email'], bannerGradient: data['bannerGradient'] as Map<String, dynamic>?);
   }
 
   // Events
@@ -107,9 +111,9 @@ class WebInterfaceService {
     List<User> spectators = [];
     for (var eventPlayerId in data['participants']){
       if(eventPlayerId['role'] == 'player'){
-        players.add(User(id: eventPlayerId['user']['id'], username: eventPlayerId['user']['username'], imageUrl: eventPlayerId['user']['avatarUrl']));
+        players.add(User(id: eventPlayerId['user']['id'], username: eventPlayerId['user']['username'], avatarUrl: eventPlayerId['user']['avatarUrl']));
       } else if(eventPlayerId['role'] == 'spectator'){
-        spectators.add(User(id: eventPlayerId['user']['id'], username: eventPlayerId['user']['username'], imageUrl: eventPlayerId['user']['avatarUrl']));
+        spectators.add(User(id: eventPlayerId['user']['id'], username: eventPlayerId['user']['username'], avatarUrl: eventPlayerId['user']['avatarUrl']));
       }
     }
     return Event(
@@ -186,13 +190,13 @@ class WebInterfaceService {
     final data = jsonDecode(responseBody) as Map<String, dynamic>;
     List<User> friends = [];
     for (var friendData in data['data']) {
-      friends.add(User(id: friendData['id'], username: friendData['username'], imageUrl: friendData['avatarUrl'], email: friendData['email']));
+      friends.add(User(id: friendData['id'], username: friendData['username'], avatarUrl: friendData['avatarUrl'], email: friendData['email']));
     }
     return friends;
   }
 
   static Future<List<FriendRequest>> fetchFriendRequests() async {
-    final request = await createRequest('friend/requests', 'GET');
+    final request = await createRequest('friends/requests', 'GET');
     HttpClientResponse response = await sendRequest(request);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody) as List<dynamic>;
@@ -204,7 +208,7 @@ class WebInterfaceService {
   }
 
   static Future<void> sendFriendRequest(int userId) async {
-    final request = await createRequest('friend/request', 'POST');
+    final request = await createRequest('friends/request', 'POST');
     final body = jsonEncode({
       'targetUserId': userId,
     });
@@ -212,12 +216,12 @@ class WebInterfaceService {
   }
 
   static Future<void> acceptFriendRequest(int userId) async {
-    final request = await createRequest('friend/accept', 'POST');
+    final request = await createRequest('friends/accept', 'POST');
     await sendRequest(request);
-  } 
+  }
 
   static Future<void> deleteFriend(int userId) async {
-    final request = await createRequest('friend/${userId}', 'POST');
+    final request = await createRequest('friends/${userId}', 'POST');
     await sendRequest(request);
   }
   // Groups
@@ -232,7 +236,7 @@ class WebInterfaceService {
     final data = jsonDecode(responseBody);
     return data['id'];
     }
-  
+
   static Future<List<Group>> fetchGroups() async {
     final request = await createRequest('groups', 'GET');
     HttpClientResponse response = await sendRequest(request);
@@ -252,7 +256,7 @@ class WebInterfaceService {
     final data = jsonDecode(responseBody);
     List<User> groupFriends = [];
     for (var friendData in data['friends']) {
-      groupFriends.add(User(id: friendData['id'], username: friendData['username'], imageUrl: friendData['avatarUrl'], email: friendData['email']));
+      groupFriends.add(User(id: friendData['id'], username: friendData['username'], avatarUrl: friendData['avatarUrl'], email: friendData['email']));
     }
     return Group(id: data['id'], name: data['name'], friends: groupFriends);
   }
@@ -285,7 +289,7 @@ class WebInterfaceService {
     final data = jsonDecode(responseBody) as Map<String, dynamic>;
     List<User> groupFriends = [];
     for (var friendData in data['data']) {
-      groupFriends.add(User(id: friendData['id'], username: friendData['username'], imageUrl: friendData['avatarUrl']));
+      groupFriends.add(User(id: friendData['id'], username: friendData['username'], avatarUrl: friendData['avatarUrl']));
     }
     return groupFriends;
   }
@@ -328,5 +332,25 @@ class WebInterfaceService {
     await sendRequest(request, body);
   }
 
+  static Future<LoginResponse> loginWithProvider(String idToken, String provider) async {
+    final request = await createRequest('auth/login', 'POST');
+    final body = jsonEncode({
+      'provider': provider,
+      'token': idToken,
+    });
+    HttpClientResponse response = await sendRequest(request, body);
+    final responseBody = await response.transform(utf8.decoder).join();
+    final data = jsonDecode(responseBody);
+    token = data['token'];
+    return LoginResponse.fromJson(data);
+  }
+
+  static Future<User> fetchMe() async {
+    final request = await createRequest('me', 'GET');
+    HttpClientResponse response = await sendRequest(request);
+    final responseBody = await response.transform(utf8.decoder).join();
+    final data = jsonDecode(responseBody);
+    return User(id: data['id'], username: data['username'], avatarUrl: data['avatarUrl'], email: data['email'], bannerGradient: data['bannerGradient'] as Map<String, dynamic>?);
+  }
 
 }

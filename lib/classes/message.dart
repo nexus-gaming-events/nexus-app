@@ -83,7 +83,7 @@ class _VisualizeMessagePreviewState extends State<VisualizeMessagePreview> {
                 ),
                 child: InkWell(
                   child: Image.network(
-                    sender!.imageUrl,
+                    sender!.avatarUrl,
                     width: AppConstants.iconSizeMedium(context),
                     height: AppConstants.iconSizeMedium(context),
                     fit: BoxFit.cover,
@@ -154,7 +154,7 @@ class _VisualizeMessagePreviewState extends State<VisualizeMessagePreview> {
                 ),
                 child: InkWell(
                   child: Image.network(
-                    sender!.imageUrl,
+                    sender!.avatarUrl,
                     width: AppConstants.iconSizeMedium(context),
                     height: AppConstants.iconSizeMedium(context),
                     fit: BoxFit.cover,

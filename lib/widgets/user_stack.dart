@@ -15,7 +15,7 @@ class UserStackIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final iconSize = size ?? AppConstants.iconSizeLarge(context);
-    
+
     if (users.isEmpty) {
       return Image.asset(
         'assets/icons/Friends.png',
@@ -24,19 +24,19 @@ class UserStackIcon extends StatelessWidget {
         color: AppConstants.textColor,
       );
     }
-    
+
     if (users.length == 1) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
         child: Image.network(
-          users[0].imageUrl,
+          users[0].avatarUrl,
           width: iconSize,
           height: iconSize,
           fit: BoxFit.cover,
         ),
       );
     }
-    
+
     if (users.length == 2) {
       return SizedBox(
         width: iconSize,
@@ -49,7 +49,7 @@ class UserStackIcon extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
                 child: Image.network(
-                  users[0].imageUrl,
+                  users[0].avatarUrl,
                   width: iconSize * 0.6,
                   height: iconSize * 0.6,
                   fit: BoxFit.cover,
@@ -62,7 +62,7 @@ class UserStackIcon extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
                 child: Image.network(
-                  users[1].imageUrl,
+                  users[1].avatarUrl,
                   width: iconSize * 0.6,
                   height: iconSize * 0.6,
                   fit: BoxFit.cover,
@@ -73,7 +73,7 @@ class UserStackIcon extends StatelessWidget {
         ),
       );
     }
-    
+
     // 3 or more users
     return SizedBox(
       width: iconSize,
@@ -86,7 +86,7 @@ class UserStackIcon extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
               child: Image.network(
-                users[0].imageUrl,
+                users[0].avatarUrl,
                 width: iconSize * 0.5,
                 height: iconSize * 0.5,
                 fit: BoxFit.cover,
@@ -99,7 +99,7 @@ class UserStackIcon extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
               child: Image.network(
-                users[1].imageUrl,
+                users[1].avatarUrl,
                 width: iconSize * 0.5,
                 height: iconSize * 0.5,
                 fit: BoxFit.cover,
@@ -112,7 +112,7 @@ class UserStackIcon extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppConstants.borderRadiusMax),
               child: Image.network(
-                users[2].imageUrl,
+                users[2].avatarUrl,
                 width: iconSize * 0.5,
                 height: iconSize * 0.5,
                 fit: BoxFit.cover,
