@@ -229,17 +229,26 @@ class VisualizeUserScreen {
                                                         context,
                                                       ).pop();
 
-                                                      NexusAppState.instance!
-                                                          .updateState(
-                                                            NexusAppState
-                                                                .instance!
-                                                                .returnScreenPath
-                                                                .removeLast(),
-                                                            params: NexusAppState
-                                                                .instance!
-                                                                .returnScreenParams
-                                                                .removeLast(),
-                                                          );
+                                                      if (NexusAppState
+                                                              .instance!
+                                                              .returnScreenPath
+                                                              .isNotEmpty &&
+                                                          NexusAppState
+                                                              .instance!
+                                                              .returnScreenParams
+                                                              .isNotEmpty) {
+                                                        NexusAppState.instance!
+                                                            .updateState(
+                                                              NexusAppState
+                                                                  .instance!
+                                                                  .returnScreenPath
+                                                                  .removeLast(),
+                                                              params: NexusAppState
+                                                                  .instance!
+                                                                  .returnScreenParams
+                                                                  .removeLast(),
+                                                            );
+                                                      }
                                                     },
                                                     child: Text(
                                                       'OK',

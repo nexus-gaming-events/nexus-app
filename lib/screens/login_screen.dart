@@ -3,6 +3,7 @@ import 'package:nexus_app/data_manager.dart';
 import 'package:nexus_app/main.dart';
 import 'package:nexus_app/services/discord_auth_service.dart';
 import 'package:nexus_app/services/google_auth_service.dart';
+import 'package:nexus_app/services/secure_storage_service.dart';
 import 'package:nexus_app/services/web_interface_service.dart';
 import '../constants.dart';
 import 'home_screen.dart';
@@ -25,9 +26,10 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (result != null && result.accessToken != null) {
-      // TODO: Save the token securely (use flutter_secure_storage)
+      SecureStorageService().saveDiscordToken(result.accessToken!);
 
       final loginResponse = await WebInterfaceService.loginWithProvider(result.accessToken!, 'discord');
+      SecureStorageService().saveNexusToken(loginResponse.token);
       await DataManager.initialize();
 
       final me = await WebInterfaceService.fetchMe();
@@ -71,9 +73,11 @@ class _LoginScreenState extends State<LoginScreen> {
       final idToken = result['idToken'];
       final accessToken = result['accessToken'];
 
-      // TODO: Save the token securely (use flutter_secure_storage)
+      SecureStorageService().saveGoogleAccessToken(accessToken);
+      SecureStorageService().saveGoogleIdToken(idToken);
 
       final loginResponse = await WebInterfaceService.loginWithProvider(idToken, 'google');
+      SecureStorageService().saveNexusToken(loginResponse.token);
       await DataManager.initialize();
 
       final me = await WebInterfaceService.fetchMe();

@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'dart:math' as math;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:nexus_app/classes/event.dart';
 import 'package:nexus_app/classes/friend_request.dart';
@@ -7,6 +8,8 @@ import 'package:nexus_app/classes/message.dart';
 import 'package:nexus_app/classes/user.dart';
 import 'package:nexus_app/classes/chat.dart';
 import 'package:nexus_app/classes/group.dart';
+import 'package:nexus_app/main.dart';
+import 'package:nexus_app/services/secure_storage_service.dart';
 import 'services/web_interface_service.dart';
 
 class DataManager {
@@ -24,6 +27,7 @@ class DataManager {
   static List<Chat>? _chats;
 
   static final bool isOfflineMode = false;
+  static bool isLoggedIn = false;
 
   static Future<void> initialize() async {
     if (isOfflineMode) {
@@ -80,6 +84,8 @@ class DataManager {
     await loadFriends();
     await loadFriendRequests();
     await loadEvents();
+
+    isLoggedIn = await SecureStorageService().hasNexusToken();
 
     debugPrint('DataManager initialized. Self user: ${_selfUser?.username}, Friends: ${_friends?.length}, Friend Requests: ${_friendRequests?.length}, Events: ${_events?.length}');
   }
@@ -641,7 +647,24 @@ class DataManager {
     }
   }
 
-  static void logout() {}
+  static bool isLogged() {
+    return isLoggedIn;
+  }
+
+  static void logout() {
+    _selfUser = null;
+    _friends = null;
+    _friendRequests = null;
+    _friendGroups = null;
+    _events = null;
+    _currentEvent = null;
+    _chats = null;
+    isLoggedIn = false;
+    SecureStorageService().deleteAllTokens();
+    NexusAppState.instance!.returnScreenParams.clear();
+    NexusAppState.instance!.returnScreenPath.clear();
+    NexusAppState.instance!.updateState('Login');
+  }
 
 
 }

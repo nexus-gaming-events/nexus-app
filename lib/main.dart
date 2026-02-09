@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nexus_app/classes/application_object.dart';
+import 'package:nexus_app/services/secure_storage_service.dart';
 import 'widgets/custom_navbar.dart';
 import 'widgets/galaxy_background.dart';
 import 'screens/screens.dart';
@@ -17,6 +18,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await UserSettings.loadFromJson();
+  if (await SecureStorageService().hasNexusToken()) {
+    await DataManager.initialize();
+  }
   runApp(NexusApp());
 }
 
@@ -47,7 +51,7 @@ class NexusAppState extends State<NexusApp> {
   void initState() {
     super.initState();
 
-    isLoggedIn = DataManager.getSelfUser() != null;
+    isLoggedIn = DataManager.isLogged();
 
     if (!isLoggedIn) {
       _currentScreenTitle = 'Login';
@@ -83,7 +87,10 @@ class NexusAppState extends State<NexusApp> {
   }
 
   void updateState(String screenTitle, {List<ApplicationObject> params = const []}) {
-    isLoggedIn = DataManager.getSelfUser() != null;
+    isLoggedIn = DataManager.isLogged();
+    if (!isLoggedIn && screenTitle != 'Login') {
+      screenTitle = 'Login';
+    }
     debugPrint('Params length: ${params.length}');
     setState(() {
       debugPrint('Updating state to screen: $screenTitle with params: $params');
