@@ -99,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: EdgeInsets.all(AppConstants.paddingSmall(context)),
             width: AppConstants.mainContainerWidth(context),
-            height: AppConstants.eventListHeight(context) * 1.5,
+            height: AppConstants.eventListHeight(context) * 2,
             decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(
@@ -148,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: EdgeInsets.all(AppConstants.paddingMedium(context)),
             width: AppConstants.mainContainerWidth(context),
-            height: AppConstants.eventListHeight(context) * 1.5,
+            height: AppConstants.eventListHeight(context) * 2,
             decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(

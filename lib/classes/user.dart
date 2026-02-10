@@ -525,7 +525,7 @@ class VisualizeUserScreen {
               ),
               Container(
                 width: AppConstants.mainContainerWidth(context),
-                height: AppConstants.eventListHeight(context) * 0.7,
+                height: AppConstants.mainContainerHeight(context) * 0.23,
                 decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(
@@ -571,7 +571,7 @@ class VisualizeUserScreen {
               ),
               Container(
                 width: AppConstants.mainContainerWidth(context),
-                height: AppConstants.eventListHeight(context) * 0.7,
+                height: AppConstants.mainContainerHeight(context) * 0.23,
                 decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(
