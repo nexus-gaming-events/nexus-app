@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:nexus_app/classes/application_object.dart';
-import 'package:nexus_app/classes/user_settings.dart';
 import 'package:nexus_app/data_manager.dart';
 import 'package:nexus_app/main.dart';
 import 'visual_link.dart';

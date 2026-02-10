@@ -11,7 +11,6 @@ import '../widgets/base_screen_container.dart';
 import '../widgets/header_container.dart';
 import '../widgets/number_selector.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'group.dart';
 
 class Event extends ApplicationObject {
   int id;

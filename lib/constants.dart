@@ -2,6 +2,106 @@ import 'package:flutter/material.dart';
 
 /// App-wide constants for colors, typography, spacing, and other values
 class AppConstants {
+    /// Device type detection
+    /// Returns true if the device is considered a tablet (screen width >= 600 logical pixels)
+    static bool isTablet(BuildContext context) {
+        final width = MediaQuery.of(context).size.shortestSide;
+        return width >= 600;
+    }
+
+    /// Usage example:
+    /// double width = AppConstants.isTablet(context)
+    ///   ? AppConstants.mainContainerWidthTablet(context)
+    ///   : AppConstants.mainContainerWidth(context);
+  // Responsive Component Sizes for Tablet
+  /// Main container dimensions (Tablet)
+  static double mainContainerWidthTablet(BuildContext context) =>
+      screenWidth(context, 0.95).clamp(500.0, 1200.0);
+  static double mainContainerHeightTablet(BuildContext context) =>
+      screenHeight(context, 0.73).clamp(400.0, 1200.0);
+
+  /// Calendar event list height (Tablet)
+  static double eventListHeightTablet(BuildContext context) =>
+      screenHeight(context, 0.18).clamp(180.0, 300.0);
+
+  /// Event detail header height (Tablet)
+  static double headerHeightTablet(BuildContext context) =>
+      screenHeight(context, 0.1).clamp(100.0, 160.0);
+
+  /// Description box dimensions (Tablet)
+  static double descriptionWidthTablet(BuildContext context) =>
+      mainContainerWidthTablet(context) * 0.95;
+  static double descriptionHeightTablet(BuildContext context) =>
+      screenHeight(context, 0.2).clamp(180.0, 300.0);
+
+  /// Players/Spectators box dimensions (Tablet)
+  static double playerBoxWidthTablet(BuildContext context) =>
+      (mainContainerWidthTablet(context) * 0.95 - 40) / 2;
+  static double playerBoxHeightTablet(BuildContext context) =>
+      screenHeight(context, 0.30).clamp(180.0, 350.0);
+
+  /// Section header height (Tablet)
+  static double sectionHeaderHeightTablet(BuildContext context) =>
+      screenHeight(context, 0.037).clamp(40.0, 60.0);
+
+  /// Games/Links box dimensions (Tablet)
+  static double infoBoxWidthTablet(BuildContext context) =>
+      mainContainerWidthTablet(context) * 0.75;
+  static double infoBoxHeightTablet(BuildContext context) =>
+      screenHeight(context, 0.11).clamp(120.0, 180.0);
+
+  /// Button/Badge dimensions (Tablet)
+  static double joinButtonHeightTablet(BuildContext context) =>
+      responsiveSize(context, 0.025).clamp(28.0, 40.0);
+  static double joinButtonWidthTablet(BuildContext context) =>
+      (playerBoxWidthTablet(context) > 32 ? playerBoxWidthTablet(context) - 32 : 0);
+
+  /// Icon dimensions for visual links (Tablet)
+  static double linkIconSizeTablet(BuildContext context) =>
+      responsiveSize(context, 0.065).clamp(70.0, 100.0);
+
+  /// Responsive padding and margins (Tablet)
+  static double paddingSmallTablet(BuildContext context) =>
+      responsiveSize(context, 0.01).clamp(8.0, 16.0);
+  static double paddingMediumTablet(BuildContext context) =>
+      responsiveSize(context, 0.015).clamp(16.0, 24.0);
+  static double paddingLargeTablet(BuildContext context) =>
+      responsiveSize(context, 0.02).clamp(24.0, 32.0);
+
+  /// Responsive border radius (Tablet)
+  static double borderRadiusSmallTablet(BuildContext context) =>
+      responsiveSize(context, 0.015).clamp(16.0, 24.0);
+  static double borderRadiusMediumTablet(BuildContext context) =>
+      responsiveSize(context, 0.02).clamp(24.0, 32.0);
+  static double borderRadiusMaxTablet = 512.0;
+
+  /// Navbar icon sizes (Tablet)
+  static double navbarIconSizeTablet(BuildContext context) =>
+      responsiveSize(context, 0.05).clamp(60.0, 80.0);
+  static double navbarIconSizeSelectedTablet(BuildContext context) =>
+      responsiveSize(context, 0.1).clamp(120.0, 160.0);
+
+  /// Responsive icon sizes (Tablet)
+  static double iconSizeExtraSmallTablet(BuildContext context) =>
+      responsiveSize(context, 0.04).clamp(40.0, 60.0);
+  static double iconSizeSmallTablet(BuildContext context) =>
+      responsiveSize(context, 0.05).clamp(60.0, 80.0);
+  static double iconSizeMediumTablet(BuildContext context) =>
+      responsiveSize(context, 0.07).clamp(80.0, 120.0);
+  static double iconSizeLargeTablet(BuildContext context) =>
+      responsiveSize(context, 0.09).clamp(120.0, 160.0);
+
+  /// Responsive font sizes (Tablet)
+  static double fontSizeSmallResponsiveTablet(BuildContext context) =>
+      responsiveSize(context, 0.03).clamp(18.0, 22.0);
+  static double fontSizeMediumResponsiveTablet(BuildContext context) =>
+      responsiveSize(context, 0.032).clamp(22.0, 26.0);
+  static double fontSizeLargeResponsiveTablet(BuildContext context) =>
+      responsiveSize(context, 0.035).clamp(28.0, 32.0);
+  static double fontSizeXLargeResponsiveTablet(BuildContext context) =>
+      responsiveSize(context, 0.04).clamp(34.0, 40.0);
+
+  // The existing methods are for phone format
   // Colors
   static const Color primaryColor = Color.fromRGBO(36, 36, 36, 0.70);
   static const Color secondaryColor = Color.fromRGBO(24, 24, 24, 1);
@@ -165,88 +265,146 @@ class AppConstants {
   // Responsive Component Sizes
   /// Main container dimensions
   static double mainContainerWidth(BuildContext context) =>
-      screenWidth(context, 0.95).clamp(300.0, 600.0);
+      isTablet(context)
+          ? mainContainerWidthTablet(context)
+          : screenWidth(context, 0.95).clamp(300.0, 600.0);
   static double mainContainerHeight(BuildContext context) =>
-      screenHeight(context, 0.82).clamp(400.0, 800.0);
+      isTablet(context)
+          ? mainContainerHeightTablet(context)
+          : screenHeight(context, 0.82).clamp(400.0, 800.0);
 
   /// Calendar event list height
   static double eventListHeight(BuildContext context) =>
-      screenHeight(context, 0.18).clamp(120.0, 150.0);
+      isTablet(context)
+          ? eventListHeightTablet(context)
+          : screenHeight(context, 0.18).clamp(120.0, 150.0);
 
   /// Event detail header height
   static double headerHeight(BuildContext context) =>
-      screenHeight(context, 0.1).clamp(70.0, 80.0);
+      isTablet(context)
+          ? headerHeightTablet(context)
+          : screenHeight(context, 0.1).clamp(70.0, 80.0);
 
   /// Description box dimensions
   static double descriptionWidth(BuildContext context) =>
-      mainContainerWidth(context) * 0.95;
+      isTablet(context)
+          ? mainContainerWidthTablet(context) * 0.95
+          : mainContainerWidth(context) * 0.95;
   static double descriptionHeight(BuildContext context) =>
-      screenHeight(context, 0.2).clamp(110.0, 150.0);
+      isTablet(context)
+          ? descriptionHeightTablet(context)
+          : screenHeight(context, 0.2).clamp(110.0, 150.0);
 
   /// Players/Spectators box dimensions
   static double playerBoxWidth(BuildContext context) =>
-      (mainContainerWidth(context) * 0.95 - 20) / 2;
+      isTablet(context)
+          ? (mainContainerWidthTablet(context) * 0.95 - 40) / 2
+          : (mainContainerWidth(context) * 0.95 - 20) / 2;
   static double playerBoxHeight(BuildContext context) =>
-      screenHeight(context, 0.30).clamp(110.0, 200.0);
+      isTablet(context)
+          ? playerBoxHeightTablet(context)
+          : screenHeight(context, 0.30).clamp(110.0, 200.0);
 
   /// Section header height
   static double sectionHeaderHeight(BuildContext context) =>
-      screenHeight(context, 0.037).clamp(28.0, 30.0);
+      isTablet(context)
+          ? sectionHeaderHeightTablet(context)
+          : screenHeight(context, 0.037).clamp(28.0, 30.0);
 
   /// Games/Links box dimensions
   static double infoBoxWidth(BuildContext context) =>
-      mainContainerWidth(context) * 0.75;
+      isTablet(context)
+          ? mainContainerWidthTablet(context) * 0.75
+          : mainContainerWidth(context) * 0.75;
   static double infoBoxHeight(BuildContext context) =>
-      screenHeight(context, 0.11).clamp(80.0, 90.0);
+      isTablet(context)
+          ? infoBoxHeightTablet(context)
+          : screenHeight(context, 0.11).clamp(80.0, 90.0);
 
   /// Button/Badge dimensions
   static double joinButtonHeight(BuildContext context) =>
-      responsiveSize(context, 0.025).clamp(18.0, 20.0);
+      isTablet(context)
+          ? joinButtonHeightTablet(context)
+          : responsiveSize(context, 0.025).clamp(18.0, 20.0);
   static double joinButtonWidth(BuildContext context) =>
-      (playerBoxWidth(context) > 16 ? playerBoxWidth(context) - 16 : 0);
+      isTablet(context)
+          ? (playerBoxWidthTablet(context) > 32 ? playerBoxWidthTablet(context) - 32 : 0)
+          : (playerBoxWidth(context) > 16 ? playerBoxWidth(context) - 16 : 0);
 
   /// Icon dimensions for visual links
   static double linkIconSize(BuildContext context) =>
-      responsiveSize(context, 0.065).clamp(45.0, 50.0);
+      isTablet(context)
+          ? linkIconSizeTablet(context)
+          : responsiveSize(context, 0.065).clamp(45.0, 50.0);
 
   /// Responsive padding and margins
   static double paddingSmall(BuildContext context) =>
-      responsiveSize(context, 0.01).clamp(4.0, 8.0);
+      isTablet(context)
+          ? paddingSmallTablet(context)
+          : responsiveSize(context, 0.01).clamp(4.0, 8.0);
   static double paddingMedium(BuildContext context) =>
-      responsiveSize(context, 0.015).clamp(8.0, 12.0);
+      isTablet(context)
+          ? paddingMediumTablet(context)
+          : responsiveSize(context, 0.015).clamp(8.0, 12.0);
   static double paddingLarge(BuildContext context) =>
-      responsiveSize(context, 0.02).clamp(12.0, 16.0);
+      isTablet(context)
+          ? paddingLargeTablet(context)
+          : responsiveSize(context, 0.02).clamp(12.0, 16.0);
 
   /// Responsive border radius
   static double borderRadiusSmall(BuildContext context) =>
-      responsiveSize(context, 0.015).clamp(8.0, 12.0);
+      isTablet(context)
+          ? borderRadiusSmallTablet(context)
+          : responsiveSize(context, 0.015).clamp(8.0, 12.0);
   static double borderRadiusMedium(BuildContext context) =>
-      responsiveSize(context, 0.02).clamp(12.0, 16.0);
-  static double borderRadiusMax = 256.0;
+      isTablet(context)
+          ? borderRadiusMediumTablet(context)
+          : responsiveSize(context, 0.02).clamp(12.0, 16.0);
+    static double borderRadiusMax = 256.0;
 
   /// Navbar icon sizes
   static double navbarIconSize(BuildContext context) =>
-      responsiveSize(context, 0.05).clamp(35.0, 40.0);
+      isTablet(context)
+          ? navbarIconSizeTablet(context)
+          : responsiveSize(context, 0.05).clamp(35.0, 40.0);
   static double navbarIconSizeSelected(BuildContext context) =>
-      responsiveSize(context, 0.1).clamp(75.0, 80.0);
+      isTablet(context)
+          ? navbarIconSizeSelectedTablet(context)
+          : responsiveSize(context, 0.1).clamp(75.0, 80.0);
 
   /// Responsive icon sizes (scaling with screen size)
   static double iconSizeExtraSmall(BuildContext context) =>
-      responsiveSize(context, 0.04).clamp(25.0, 30.0);
+      isTablet(context)
+          ? iconSizeExtraSmallTablet(context)
+          : responsiveSize(context, 0.04).clamp(25.0, 30.0);
   static double iconSizeSmall(BuildContext context) =>
-      responsiveSize(context, 0.05).clamp(35.0, 45.0);
+      isTablet(context)
+          ? iconSizeSmallTablet(context)
+          : responsiveSize(context, 0.05).clamp(35.0, 45.0);
   static double iconSizeMedium(BuildContext context) =>
-      responsiveSize(context, 0.07).clamp(50.0, 60.0);
+      isTablet(context)
+          ? iconSizeMediumTablet(context)
+          : responsiveSize(context, 0.07).clamp(50.0, 60.0);
   static double iconSizeLarge(BuildContext context) =>
-      responsiveSize(context, 0.09).clamp(70.0, 80.0);
+      isTablet(context)
+          ? iconSizeLargeTablet(context)
+          : responsiveSize(context, 0.09).clamp(70.0, 80.0);
 
   /// Responsive font sizes (scaling with screen size)
   static double fontSizeSmallResponsive(BuildContext context) =>
-      responsiveSize(context, 0.03).clamp(11.0, 13.0);
+      isTablet(context)
+          ? fontSizeSmallResponsiveTablet(context)
+          : responsiveSize(context, 0.03).clamp(11.0, 13.0);
   static double fontSizeMediumResponsive(BuildContext context) =>
-      responsiveSize(context, 0.032).clamp(13.0, 14.0);
+      isTablet(context)
+          ? fontSizeMediumResponsiveTablet(context)
+          : responsiveSize(context, 0.032).clamp(13.0, 14.0);
   static double fontSizeLargeResponsive(BuildContext context) =>
-      responsiveSize(context, 0.035).clamp(16.0, 18.0);
+      isTablet(context)
+          ? fontSizeLargeResponsiveTablet(context)
+          : responsiveSize(context, 0.035).clamp(16.0, 18.0);
   static double fontSizeXLargeResponsive(BuildContext context) =>
-      responsiveSize(context, 0.04).clamp(18.0, 22.0);
+      isTablet(context)
+          ? fontSizeXLargeResponsiveTablet(context)
+          : responsiveSize(context, 0.04).clamp(18.0, 22.0);
 }

@@ -23,7 +23,33 @@ class BaseScreenContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    if (AppConstants.isTablet(context)) {
+      return Padding(
+      padding: EdgeInsets.only(
+        left: AppConstants.paddingSmall(context),
+        right: AppConstants.paddingSmall(context),
+        bottom: 0.0,
+        top: AppConstants.paddingSmall(context) * 3.5,
+      ),
+      child: Container(
+        alignment: alignment,
+        width: AppConstants.mainContainerWidth(context),
+        height: AppConstants.mainContainerHeight(context),
+        decoration:
+            decoration ??
+            BoxDecoration(
+              color: AppConstants.primaryColor,
+              borderRadius: BorderRadius.circular(
+                AppConstants.borderRadiusMedium(context),
+              ),
+            ),
+        child: child,
+      ),
+    );
+  
+    }
+    else {
+      return Padding(
       padding: EdgeInsets.only(
         left: AppConstants.paddingSmall(context),
         right: AppConstants.paddingSmall(context),
@@ -45,5 +71,7 @@ class BaseScreenContainer extends StatelessWidget {
         child: child,
       ),
     );
-  }
+  
+    }
+    }
 }

@@ -65,7 +65,140 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    return BaseScreenContainer(
+    if (AppConstants.isTablet(context)){
+      return BaseScreenContainer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          HeaderContainer(
+            child: Container(
+              alignment: Alignment.center,
+              child: Text(
+                'Welcome to the Nexus!',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize:
+                      AppConstants.fontSizeXLargeResponsive(context) * 1.7,
+                  color: AppConstants.textColor,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: AppConstants.mainContainerHeight(context) * 0.01),
+          Row(
+            children: [
+              SizedBox(width: AppConstants.mainContainerWidth(context)*0.02),
+              Container(
+                child: Column(
+                  children: [
+                    Container(
+                       decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: AppConstants.semitransparentTextColor,
+                            width: 1.0,
+                          ),
+                        ),
+                      ),
+                      padding: EdgeInsets.only(left: AppConstants.paddingSmall(context)),
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Upcoming Expeditions',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          color: AppConstants.textColor,
+                          fontSize: AppConstants.fontSizeLargeResponsive(context),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(AppConstants.paddingMedium(context)),
+                      width: AppConstants.mainContainerWidth(context)*0.45,
+                      height: AppConstants.eventListHeight(context) * 2,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: Column(
+                          children: _upcomingEvents
+                              .map(
+                                (item) => InkWell(
+                                  onTap: () async {
+                                    NexusAppState.instance!.returnScreenParams.add(
+                                      [],
+                                    );
+                                    NexusAppState.instance!.returnScreenPath.add(
+                                      'Home',
+                                    );
+                                    NexusAppState.instance!.updateState(
+                                      'Event',
+                                      params: [(await DataManager.getEventById(item.id))!],
+                                    );
+                                  },
+                                  child: VisualizeEventPreview(event: item),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: AppConstants.mainContainerWidth(context)*0.02),
+              Container(
+                child: Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(AppConstants.paddingSmall(context)),
+                      alignment: Alignment.centerLeft,
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: AppConstants.semitransparentTextColor,
+                            width: 1.0,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        'Pending Friend Requests',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          color: AppConstants.textColor,
+                          fontSize: AppConstants.fontSizeLargeResponsive(context),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(AppConstants.paddingMedium(context)),
+                      width: AppConstants.mainContainerWidth(context)*0.45,
+                      height: AppConstants.eventListHeight(context) * 2,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: Column(
+                          children: _friendRequests
+                              .map(
+                                (item) => InkWell(
+                                  //onTap: () {},
+                                  child: VisualizeFriendRequestPreview(
+                                    friendRequest: item,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: AppConstants.mainContainerWidth(context)*0.02),
+            ],
+          ),
+        ],
+      ),
+    );
+  
+    } else{
+      return BaseScreenContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -176,5 +309,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
-  }
+  
+    }
+    }
 }

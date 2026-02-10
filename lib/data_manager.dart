@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:nexus_app/classes/event.dart';
 import 'package:nexus_app/classes/friend_request.dart';
@@ -12,11 +11,9 @@ import 'package:nexus_app/classes/user.dart';
 import 'package:nexus_app/classes/chat.dart';
 import 'package:nexus_app/classes/group.dart';
 import 'package:nexus_app/main.dart';
-import 'package:nexus_app/screens/chats_screen.dart';
 import 'package:nexus_app/services/secure_storage_service.dart';
 import 'package:web_socket_channel/io.dart';
 import 'services/web_interface_service.dart';
-import 'screens/chats_screen.dart';
 
 class DataManager {
   static User? _selfUser;
