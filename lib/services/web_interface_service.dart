@@ -462,10 +462,7 @@ class WebInterfaceService {
 
   static Future<List<User>> searchUsers(String query) async {
     final request = await createRequest('users/search?q=${Uri.encodeComponent(query)}', 'GET');
-    /*final body = jsonEncode({
-      'query': query,
-    });*/
-    HttpClientResponse response = await sendRequest(request/*, body*/);
+    HttpClientResponse response = await sendRequest(request);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody) as List;
     List<User> users = [];
@@ -477,6 +474,21 @@ class WebInterfaceService {
         ));
     }
     return users;
+  }
+
+  static Future<List<FriendRequest>> fetchMyFriendRequests() async {
+    final request = await createRequest('friends/sent', 'GET');
+    HttpClientResponse response = await sendRequest(request);
+    final responseBody = await response.transform(utf8.decoder).join();
+    final data = jsonDecode(responseBody) as List<dynamic>;
+    List<FriendRequest> friendRequests = [];
+    for (var requestData in data) {
+      debugPrint('Processing friend request: ${requestData['username'] ?? 'Unknown'} (ID: ${requestData['requesterId']})');
+      debugPrint('  Avatar URL: ${requestData['avatarUrl'] ?? ''}');
+      debugPrint('  Sent at: ${requestData['sentAt'] ?? ''}');
+      friendRequests.add(FriendRequest(id: requestData['requesterId'] , username: requestData['username'] ?? 'Unknown', imageUrl: requestData['avatarUrl'] ?? '', date: DateTime.parse(requestData['sentAt'] ?? DateTime.now().toIso8601String())));
+    }
+    return friendRequests;
   }
 
 }

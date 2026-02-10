@@ -61,6 +61,7 @@ class VisualizeUserScreen {
         DataManager.loadSelfUser(),
         DataManager.loadFriends(),
         DataManager.loadFriendRequests(),
+        DataManager.loadMyFriendRequests(),
       ]),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {

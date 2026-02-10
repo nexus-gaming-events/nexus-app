@@ -426,8 +426,16 @@ class DataManager {
     return getFriendRequests().any((request) => request.id == id);
   }
 
+  static Future<void> loadMyFriendRequests() async {
+    if (isOfflineMode){
+      return;
+    }
+    final myRequests = await WebInterfaceService.fetchMyFriendRequests();
+    _myFriendRequests = myRequests?.map((request) => request.id).toList() ?? [];
+  }
+
   static bool hasSentFriendRequest(int id) { // If I sent them a request
-    return _myFriendRequests.contains(id);
+    return _myFriendRequests.contains(id);    
   }
 
   static Future<bool> isAuthor(int userId, int eventId) async {
