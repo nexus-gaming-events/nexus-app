@@ -8,6 +8,7 @@ import '../widgets/back_button_widget.dart';
 import '../widgets/base_screen_container.dart';
 import '../widgets/header_container.dart';
 import '../widgets/user_stack.dart';
+import '../widgets/add_circle_icon_button.dart';
 
 class Group extends ApplicationObject {
   final int id;
@@ -194,7 +195,7 @@ class _VisualizeGroupScreenState extends State<VisualizeGroupScreen> {
           SizedBox(height: AppConstants.paddingMedium(context),),
           Container(
               width: AppConstants.mainContainerWidth(context)*0.95,
-              height: AppConstants.mainContainerHeight(context)*0.7265,
+              height: AppConstants.mainContainerHeight(context)*(AppConstants.isTablet(context) ? 0.55 : 0.7265),
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
@@ -224,19 +225,9 @@ class _VisualizeGroupScreenState extends State<VisualizeGroupScreen> {
                 ),
               ),
             ),
-          Container(
-                          height: AppConstants.iconSizeLarge(context)*1.1,
-                  alignment: Alignment.bottomRight,
-                  child: IconButton(
-                    onPressed: _showManageMembersDialog,
-                    icon: Icon(
-                      Icons.add_circle,
-                      color: AppConstants.accentColor2,
-                      size: AppConstants.iconSizeLarge(context),
-
-                    ),
-                  )
-                  )
+          AddCircleIconButton(
+            onPressed: _showManageMembersDialog,
+          ),
         ],
       ),
   );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nexus_app/data_manager.dart';
 import '../constants.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../widgets/add_circle_icon_button.dart';
 import '../classes/event.dart';
 import '../main.dart';
 import '../widgets/base_screen_container.dart';
@@ -161,27 +162,12 @@ class ExpeditionsScreenState extends State<ExpeditionsScreen> {
                         ),
                       ),
                     ),
-                    Container(
-                      height: AppConstants.iconSizeLarge(context) * 1.1,
-                      alignment: Alignment.bottomRight,
-                      child: IconButton(
-                        onPressed: () {
-                          NexusAppState.instance!.returnScreenParams.add([]);
-                          NexusAppState.instance!.returnScreenPath.add(
-                            'Calendar',
-                          );
-                          NexusAppState.instance!.updateState(
-                            'EditEvent',
-                            params: [],
-                          );
-                        },
-
-                        icon: Icon(
-                          Icons.add_circle,
-                          color: AppConstants.accentColor2,
-                          size: AppConstants.iconSizeLarge(context),
-                        ),
-                      ),
+                    AddCircleIconButton(
+                      onPressed: () {
+                        NexusAppState.instance!.returnScreenParams.add([]);
+                        NexusAppState.instance!.returnScreenPath.add('Calendar');
+                        NexusAppState.instance!.updateState('EditEvent', params: []);
+                      },
                     ),
                   ],
                 ),

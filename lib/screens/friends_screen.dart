@@ -5,6 +5,7 @@ import '../main.dart';
 import '../classes/user.dart';
 import '../classes/group.dart';
 import '../widgets/base_screen_container.dart';
+import '../widgets/add_circle_icon_button.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({Key? key}) : super(key: key);
@@ -127,7 +128,7 @@ class _FriendsScreenState extends State<FriendsScreen>
         children: [
           // Chrome-style tab bar
           Container(
-            height: 40,
+            height: AppConstants.mainContainerHeight(context) * 0.1,
             decoration: BoxDecoration(
               color: AppConstants.primaryColor.withOpacity(0.3),
               borderRadius: BorderRadius.only(
@@ -188,7 +189,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                         alignment: Alignment.topCenter,
                         width: AppConstants.mainContainerWidth(context) * 0.9,
                         height:
-                            AppConstants.mainContainerHeight(context) * 0.821,
+                            AppConstants.mainContainerHeight(context) * (AppConstants.isTablet(context) ? 0.7 : 0.78),
                         child: SingleChildScrollView(
                           child: Column(
                             children: _friends
@@ -215,24 +216,12 @@ class _FriendsScreenState extends State<FriendsScreen>
                           ),
                         ),
                       ),
-                      Container(
-                        height: AppConstants.iconSizeLarge(context) * 1.1,
-                        alignment: Alignment.bottomRight,
-                        child: IconButton(
-                          onPressed: () {
-                            NexusAppState.instance!.returnScreenParams.add([]);
-                            NexusAppState.instance!.updateState('SearchUsers');
-                            NexusAppState.instance!.returnScreenPath.add(
-                              'SearchUsers',
-                            );
-                          },
-
-                          icon: Icon(
-                            Icons.add_circle,
-                            color: AppConstants.accentColor2,
-                            size: AppConstants.iconSizeLarge(context),
-                          ),
-                        ),
+                      AddCircleIconButton(
+                        onPressed: () {
+                          NexusAppState.instance!.returnScreenParams.add([]);
+                          NexusAppState.instance!.updateState('SearchUsers');
+                          NexusAppState.instance!.returnScreenPath.add('SearchUsers');
+                        },
                       ),
                     ],
                   ),
@@ -242,7 +231,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                         alignment: Alignment.topCenter,
                         width: AppConstants.mainContainerWidth(context) * 0.9,
                         height:
-                            AppConstants.mainContainerHeight(context) * 0.821,
+                            AppConstants.mainContainerHeight(context) * (AppConstants.isTablet(context) ? 0.7 : 0.78),
                         child: SingleChildScrollView(
                           child: Column(
                             children: _groups
@@ -265,17 +254,8 @@ class _FriendsScreenState extends State<FriendsScreen>
                           ),
                         ),
                       ),
-                      Container(
-                        height: AppConstants.iconSizeLarge(context) * 1.1,
-                        alignment: Alignment.bottomRight,
-                        child: IconButton(
-                          onPressed: _showCreateGroupDialog,
-                          icon: Icon(
-                            Icons.add_circle,
-                            color: AppConstants.accentColor2,
-                            size: AppConstants.iconSizeLarge(context),
-                          ),
-                        ),
+                      AddCircleIconButton(
+                        onPressed: _showCreateGroupDialog,
                       ),
                     ],
                   ),
