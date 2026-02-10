@@ -137,6 +137,314 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
     }
 
+    if (AppConstants.isTablet(context)){
+      return BaseScreenContainer(
+      alignment: Alignment.topCenter,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          HeaderContainer(
+            customPadding: AppConstants.paddingLarge(context),
+            child: Row(
+              children: [
+                BackButtonWidget(),
+                SizedBox(
+                  width: AppConstants.mainContainerWidth(context) * 0.01,
+                ),
+                Expanded(
+                  child: Text(
+                    'Settings',
+                    style: TextStyle(
+                      color: AppConstants.textColor,
+                      fontSize: AppConstants.fontSizeXLargeResponsive(context),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: AppConstants.paddingLarge(context) * 1.5),
+          Container(
+            padding: EdgeInsets.only(left: AppConstants.paddingSmall(context)),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Select the style for the profile banner',
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                color: AppConstants.textColor,
+                fontSize: AppConstants.fontSizeLargeResponsive(context),
+              ),
+            ),
+          ),
+          Container(
+            alignment: Alignment.topLeft,
+            padding: EdgeInsets.only(
+              left: AppConstants.paddingMedium(context),
+              right: AppConstants.paddingMedium(context),
+              top: AppConstants.paddingMedium(context),
+            ),
+            width: AppConstants.mainContainerWidth(context),
+            height: AppConstants.mainContainerHeight(context) * 0.5,
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: AppConstants.semitransparentTextColor,
+                  width: 1.0,
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: SizedBox(
+                    height: AppConstants.mainContainerHeight(context) * 0.75,
+                    child: Column(
+                      children: [
+                        // ...existing code for first column...
+                        Container(
+                          height: AppConstants.mainContainerHeight(context) * 0.1,
+                          width: AppConstants.mainContainerWidth(context) * 0.2,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _openColorPicker(selectedColor1, (color) {
+                                selectedColor1 = color;
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppConstants.secondaryColor,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: AppConstants.paddingSmall(context),
+                                vertical: AppConstants.paddingSmall(context),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppConstants.borderRadiusSmall(context),
+                                ),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: AppConstants.iconSizeSmall(context) * 0.5,
+                                  height: AppConstants.iconSizeSmall(context) * 0.5,
+                                  decoration: BoxDecoration(
+                                    color: selectedColor1,
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 2.0,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: AppConstants.paddingMedium(context),
+                                ),
+                                Text(
+                                  'Color 1',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: AppConstants.fontSizeMediumResponsive(
+                                      context,
+                                    ),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: AppConstants.mainContainerHeight(context) * 0.05,
+                        ),
+                        Container(
+                          height: AppConstants.mainContainerHeight(context) * 0.1,
+                          width: AppConstants.mainContainerWidth(context) * 0.2,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _openColorPicker(selectedColor2, (color) {
+                                selectedColor2 = color;
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppConstants.secondaryColor,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: AppConstants.paddingSmall(context),
+                                vertical: AppConstants.paddingSmall(context),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppConstants.borderRadiusSmall(context),
+                                ),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: AppConstants.iconSizeSmall(context) * 0.5,
+                                  height: AppConstants.iconSizeSmall(context) * 0.5,
+                                  decoration: BoxDecoration(
+                                    color: selectedColor2,
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 2.0,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: AppConstants.paddingMedium(context),
+                                ),
+                                Text(
+                                  'Color 2',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: AppConstants.fontSizeMediumResponsive(
+                                      context,
+                                    ),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: AppConstants.mainContainerHeight(context) * 0.05,
+                        ),
+                        Container(
+                          height: AppConstants.mainContainerHeight(context) * 0.1,
+                          width: AppConstants.mainContainerWidth(context) * 0.2,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: AppConstants.paddingSmall(context),
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppConstants.secondaryColor,
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.borderRadiusSmall(context),
+                            ),
+                          ),
+                          child: DropdownButton<String>(
+                            value: selectedBlendMode,
+                            isExpanded: true,
+                            underline: SizedBox(),
+                            dropdownColor: AppConstants.secondaryColor,
+                            style: TextStyle(
+                              color: AppConstants.textColor,
+                              fontSize: AppConstants.fontSizeMediumResponsive(
+                                context,
+                              ),
+                            ),
+                            icon: Icon(
+                              Icons.arrow_drop_down,
+                              color: AppConstants.textColor,
+                            ),
+                            items: blendModes.map((mode) {
+                              return DropdownMenuItem<String>(
+                                value: mode,
+                                child: Text(
+                                  mode.toUpperCase(),
+                                  style: TextStyle(
+                                    color: AppConstants.textColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedBlendMode = value!;
+                                _updateGradient();
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(width: AppConstants.paddingLarge(context)),
+                Expanded(
+                  flex: 2,
+                  child: SizedBox(
+                    height: AppConstants.mainContainerHeight(context) * 0.75,
+                    child: Column(
+                      children: [
+                        Slider(
+                          value: sliderValue,
+                          min: -1.0,
+                          max: 1.0,
+                          divisions: 100,
+                          label: sliderValue.toStringAsFixed(2),
+                          activeColor: AppConstants.semitransparentTextColor,
+                          inactiveColor: AppConstants.semitransparentTextColor,
+                          onChanged: (double value) {
+                            setState(() {
+                              sliderValue = value;
+                              _updateGradient();
+                            });
+                          },
+                        ),
+                        SizedBox(height: AppConstants.paddingMedium(context)),
+                        Container(
+                          width: AppConstants.mainContainerWidth(context) * 0.4,
+                          height: AppConstants.mainContainerHeight(context) * 0.35,
+                          decoration: BoxDecoration(
+                            gradient: selectedGradient,
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.borderRadiusSmall(context),
+                            ),
+                            border: Border.all(
+                              color: AppConstants.accentColor1,
+                              width: 2.0,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: AppConstants.paddingLarge(context)),
+          Container(
+            height: AppConstants.mainContainerHeight(context) * 0.12,
+            width: AppConstants.mainContainerWidth(context) * 0.3,
+            child: ElevatedButton(
+              onPressed: () {
+                DataManager.saveUserBanner(selectedGradient, sliderValue);
+                NexusAppState.instance!.updateState('User');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppConstants.paddingLarge(context),
+                  vertical: AppConstants.paddingMedium(context),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.borderRadiusSmall(context),
+                  ),
+                ),
+              ),
+              child: Text(
+                'SAVE',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: AppConstants.fontSizeLargeResponsive(context),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  
+    }
+
     return BaseScreenContainer(
       alignment: Alignment.topCenter,
       child: Column(
