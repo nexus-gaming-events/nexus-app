@@ -2581,7 +2581,1205 @@ class EditEventScreenState extends State<EditEventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BaseScreenContainer(
+    if (AppConstants.isTablet(context)) {
+      return BaseScreenContainer(
+      child: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  HeaderContainer(
+                    child: Row(
+                      children: [
+                        BackButtonWidget(),
+                        SizedBox(
+                          width:
+                              AppConstants.mainContainerWidth(context) * 0.01,
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.only(
+                                  right: AppConstants.paddingMedium(context),
+                                ),
+                                height:
+                                    AppConstants.headerHeight(context) * 0.9,
+                                child: TextField(
+                                  controller: _titleController,
+                                  maxLength: 30,
+                                  decoration: InputDecoration(
+                                    labelText: 'Event Title',
+                                    hintText: 'Enter event title...',
+                                    labelStyle: TextStyle(
+                                      color: AppConstants.textColor,
+                                      fontSize:
+                                          AppConstants.fontSizeLargeResponsive(
+                                            context,
+                                          ),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    counterStyle: TextStyle(
+                                      color:
+                                          AppConstants.semitransparentTextColor,
+                                      fontSize:
+                                          AppConstants.fontSizeSmallResponsive(
+                                            context,
+                                          ),
+                                    ),
+                                    hintStyle: TextStyle(
+                                      color:
+                                          AppConstants.semitransparentTextColor,
+                                      fontSize:
+                                          AppConstants.fontSizeSmallResponsive(
+                                            context,
+                                          ),
+                                    ),
+                                  ),
+                                  style: TextStyle(
+                                    color: AppConstants.textColor,
+                                    fontSize: () {
+                                      final baseFontSize =
+                                          AppConstants.fontSizeLargeResponsive(
+                                            context,
+                                          ) +
+                                          2;
+                                      final titleLength = widget.event == null
+                                          ? 0
+                                          : widget.event!.title.length;
+                                      if (titleLength <= 15)
+                                        return baseFontSize;
+                                      if (titleLength <= 25)
+                                        return baseFontSize - 2;
+                                      if (titleLength <= 35)
+                                        return baseFontSize - 4;
+                                      return (baseFontSize - 6).clamp(
+                                        AppConstants.fontSizeMediumResponsive(
+                                          context,
+                                        ),
+                                        baseFontSize,
+                                      );
+                                    }(),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Calendar on the left
+                      Expanded(
+                        flex: 2,
+                        child: TableCalendar(
+                          selectedDayPredicate: (day) {
+                            return isSameDay(_selectedDay, day);
+                          },
+                          onDaySelected: (selectedDay, focusedDay) {
+                            setState(() {
+                              _selectedDay = selectedDay;
+                              _focusedDay = focusedDay;
+                            });
+                          },
+                          firstDay: DateTime.utc(2010, 10, 16),
+                          lastDay: DateTime.utc(2030, 3, 14),
+                          focusedDay: newEvent.date,
+                          calendarStyle: CalendarStyle(
+                            todayDecoration: BoxDecoration(
+                              color: AppConstants.todayColor,
+                              shape: BoxShape.circle,
+                            ),
+                            selectedDecoration: BoxDecoration(
+                              gradient: AppConstants.selectionBackgroundGradient,
+                              shape: BoxShape.circle,
+                            ),
+                            defaultTextStyle: TextStyle(
+                              color: AppConstants.textColor,
+                            ),
+                            weekendTextStyle: TextStyle(
+                              color: AppConstants.textColor,
+                            ),
+                            outsideTextStyle: TextStyle(
+                              color: AppConstants.semitransparentTextColor,
+                            ),
+                            weekNumberTextStyle: TextStyle(
+                              color: AppConstants.textColor,
+                            ),
+                          ),
+                          headerStyle: HeaderStyle(
+                            titleTextStyle: TextStyle(
+                              color: AppConstants.textColor,
+                              fontSize: AppConstants.fontSizeLargeResponsive(context),
+                              fontWeight: FontWeight.bold,
+                            ),
+                            formatButtonVisible: false,
+                            leftChevronIcon: Icon(
+                              Icons.chevron_left,
+                              color: AppConstants.textColor,
+                            ),
+                            rightChevronIcon: Icon(
+                              Icons.chevron_right,
+                              color: AppConstants.textColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: AppConstants.paddingLarge(context) * 1.2),
+                      // Time selection on the right, vertical layout
+                      Expanded(
+                        flex: 1,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(height: AppConstants.mainContainerHeight(context) * 0.10),
+                            Container(
+                              width: AppConstants.descriptionWidth(context) * 0.7,
+                              padding: EdgeInsets.all(AppConstants.paddingMedium(context)),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                  AppConstants.borderRadiusMedium(context),
+                                ),
+                                color: AppConstants.secondaryColor,
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Text(
+                                    'Time',
+                                    style: TextStyle(
+                                      color: AppConstants.textColor,
+                                      fontSize: AppConstants.fontSizeLargeResponsive(context),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  SizedBox(height: AppConstants.paddingLarge(context)),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      final TimeOfDay? picked = await showTimePicker(
+                                        context: context,
+                                        initialTime: _selectedTime,
+                                        builder: (context, child) {
+                                          return Theme(
+                                            data: ThemeData.dark().copyWith(
+                                              colorScheme: ColorScheme.dark(
+                                                primary: AppConstants.textColor,
+                                                surface: AppConstants.secondaryColor,
+                                              ),
+                                            ),
+                                            child: child!,
+                                          );
+                                        },
+                                      );
+                                      if (picked != null && picked != _selectedTime) {
+                                        setState(() {
+                                          _selectedTime = picked;
+                                        });
+                                      }
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: AppConstants.paddingMedium(context),
+                                        vertical: AppConstants.paddingSmall(context),
+                                      ),
+                                      decoration: BoxDecoration(
+                                        gradient: AppConstants.selectionBackgroundGradient,
+                                        borderRadius: BorderRadius.circular(
+                                          AppConstants.borderRadiusSmall(context),
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          _selectedTime.format(context),
+                                          style: TextStyle(
+                                            color: AppConstants.textColor,
+                                            fontSize: AppConstants.fontSizeMediumResponsive(context),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  widget.event == null
+                      ? Column(
+                          children: [
+                            SizedBox(
+                              height: AppConstants.paddingMedium(context) * 1.2,
+                            ),
+                            AnimatedCrossFade(
+                              crossFadeState: _isRecurrent
+                                  ? CrossFadeState.showSecond
+                                  : CrossFadeState.showFirst,
+                              duration: Duration(milliseconds: 250),
+                              firstChild: Container(
+                                width: AppConstants.descriptionWidth(context),
+                                height:
+                                    AppConstants.sectionHeaderHeight(context) *
+                                    2.15,
+                                padding: EdgeInsets.all(
+                                  AppConstants.paddingMedium(context),
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(
+                                    AppConstants.borderRadiusMedium(context),
+                                  ),
+                                  color: AppConstants.secondaryColor,
+                                ),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Is the event recurrent?',
+                                          style: TextStyle(
+                                            color: AppConstants.textColor,
+                                            fontSize:
+                                                AppConstants.fontSizeLargeResponsive(
+                                                  context,
+                                                ),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Switch(
+                                          value: _isRecurrent,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _isRecurrent = value;
+                                            });
+                                          },
+                                          activeColor: AppConstants
+                                              .semitransparentTextColor,
+                                          inactiveThumbColor: AppConstants
+                                              .messageBackgroundColor,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              secondChild: Container(
+                                width: AppConstants.descriptionWidth(context),
+                                height:
+                                    AppConstants.sectionHeaderHeight(context) *
+                                    6,
+                                padding: EdgeInsets.all(
+                                  AppConstants.paddingMedium(context),
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(
+                                    AppConstants.borderRadiusMedium(context),
+                                  ),
+                                  color: AppConstants.secondaryColor,
+                                ),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Is the event recurrent?',
+                                          style: TextStyle(
+                                            color: AppConstants.textColor,
+                                            fontSize:
+                                                AppConstants.fontSizeLargeResponsive(
+                                                  context,
+                                                ),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Switch(
+                                          value: _isRecurrent,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _isRecurrent = value;
+                                            });
+                                          },
+                                          activeColor: AppConstants
+                                              .semitransparentTextColor,
+                                          inactiveThumbColor: AppConstants
+                                              .messageBackgroundColor,
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: AppConstants.paddingMedium(
+                                        context,
+                                      ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "Periodicity:",
+                                          style: TextStyle(
+                                            color: AppConstants.textColor,
+                                            fontSize:
+                                                AppConstants.fontSizeLargeResponsive(
+                                                  context,
+                                                ),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width:
+                                              AppConstants.paddingLarge(
+                                                context,
+                                              ) *
+                                              6,
+                                        ),
+                                        DropdownButton<String>(
+                                          value: _periodicity,
+                                          isExpanded: false,
+                                          underline: SizedBox(),
+                                          dropdownColor:
+                                              AppConstants.secondaryColor,
+                                          style: TextStyle(
+                                            color: AppConstants.textColor,
+                                            fontSize:
+                                                AppConstants.fontSizeLargeResponsive(
+                                                  context,
+                                                ),
+                                          ),
+                                          icon: Icon(
+                                            Icons.arrow_drop_down,
+                                            color: AppConstants.textColor,
+                                          ),
+                                          items: ["Daily", "Weekly", "Monthly"]
+                                              .map((period) {
+                                                return DropdownMenuItem<String>(
+                                                  value: period,
+                                                  child: Text(
+                                                    period,
+                                                    style: TextStyle(
+                                                      color: AppConstants
+                                                          .textColor,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                );
+                                              })
+                                              .toList(),
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _periodicity = value!;
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: AppConstants.paddingMedium(
+                                        context,
+                                      ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "Duration:",
+                                          style: TextStyle(
+                                            color: AppConstants.textColor,
+                                            fontSize:
+                                                AppConstants.fontSizeLargeResponsive(
+                                                  context,
+                                                ),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width:
+                                              AppConstants.paddingLarge(
+                                                context,
+                                              ) *
+                                              6,
+                                        ),
+                                        DropdownButton<String>(
+                                          value: _recurrenceTime,
+                                          isExpanded: false,
+                                          underline: SizedBox(),
+                                          dropdownColor:
+                                              AppConstants.secondaryColor,
+                                          style: TextStyle(
+                                            color: AppConstants.textColor,
+                                            fontSize:
+                                                AppConstants.fontSizeLargeResponsive(
+                                                  context,
+                                                ),
+                                          ),
+                                          icon: Icon(
+                                            Icons.arrow_drop_down,
+                                            color: AppConstants.textColor,
+                                          ),
+                                          items:
+                                              [
+                                                "1 week",
+                                                "1 month",
+                                                "3 months",
+                                                "6 months",
+                                                "1 year",
+                                              ].map((period) {
+                                                return DropdownMenuItem<String>(
+                                                  value: period,
+                                                  child: Text(
+                                                    period,
+                                                    style: TextStyle(
+                                                      color: AppConstants
+                                                          .textColor,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                );
+                                              }).toList(),
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _recurrenceTime = value!;
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Container(),
+                  SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
+                  Container(
+                    width: AppConstants.descriptionWidth(context),
+                    height: AppConstants.descriptionHeight(context) * 2.3,
+                    decoration: BoxDecoration(
+                      color: AppConstants.descriptionPrimaryColor,
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.borderRadiusMedium(context),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          alignment: Alignment.topLeft,
+                          width: AppConstants.descriptionWidth(context),
+                          height: AppConstants.sectionHeaderHeight(context),
+                          padding: EdgeInsets.only(
+                            top: (AppConstants.paddingSmall(context) > 5
+                                ? AppConstants.paddingSmall(context) - 5
+                                : 0),
+                            left: AppConstants.paddingMedium(context),
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(
+                                AppConstants.borderRadiusMedium(context),
+                              ),
+                              topRight: Radius.circular(
+                                AppConstants.borderRadiusMedium(context),
+                              ),
+                            ),
+                            color: AppConstants.descriptionSecondaryColor,
+                          ),
+                          child: Text(
+                            'Description',
+                            style: TextStyle(
+                              color: AppConstants.textColor,
+                              fontSize: AppConstants.fontSizeLargeResponsive(
+                                context,
+                              ),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                            left: AppConstants.paddingMedium(context),
+                            right: AppConstants.paddingMedium(context),
+                            top: AppConstants.paddingSmall(context),
+                            bottom: AppConstants.paddingSmall(context),
+                          ),
+                          child: TextField(
+                            controller: _descriptionController,
+                            maxLength: 250,
+                            maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                            maxLines: null,
+                            minLines: 5,
+                            keyboardType: TextInputType.multiline,
+                            scrollPhysics: NeverScrollableScrollPhysics(),
+                            textAlign: TextAlign.start,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              counterStyle: TextStyle(
+                                color: AppConstants.semitransparentTextColor,
+                                fontSize: AppConstants.fontSizeSmallResponsive(
+                                  context,
+                                ),
+                              ),
+                              hintText: 'Enter event description...',
+                              hintStyle: TextStyle(
+                                color: AppConstants.semitransparentTextColor,
+                              ),
+                            ),
+                            style: TextStyle(
+                              color: AppConstants.textColor,
+                              fontSize: AppConstants.fontSizeSmallResponsive(
+                                context,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: (AppConstants.paddingLarge(context) > 3
+                            ? AppConstants.paddingLarge(context) - 3
+                            : 0),
+                      ),
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        width: AppConstants.playerBoxWidth(context)*2,
+                        height: AppConstants.sectionHeaderHeight(context) * 1.7,
+                        padding: EdgeInsets.only(
+                          top: (AppConstants.paddingSmall(context) > 5
+                              ? AppConstants.paddingSmall(context) - 5
+                              : 0),
+                          left: AppConstants.paddingMedium(context),
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.borderRadiusMax,
+                          ),
+                          color: AppConstants.playersPrimaryColor,
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              textAlign: TextAlign.left,
+                              'Players',
+                              style: TextStyle(
+                                color: AppConstants.textColor,
+                                fontSize: AppConstants.fontSizeLargeResponsive(
+                                  context,
+                                ),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(
+                              width: AppConstants.paddingLarge(context) * 12,
+                            ),
+                            Container(
+                              width: AppConstants.playerBoxWidth(context) * 0.5,
+                              child: NumberSelector(
+                                controller: _maxPlayersController,
+                                minValue: 1,
+                                maxValue: 99,
+                                onChanged: () {
+                                  setState(() {
+                                    newEvent.maxPlayers =
+                                        int.tryParse(
+                                          _maxPlayersController.text,
+                                        ) ??
+                                        1;
+                                  });
+                                },
+                                buttonColor: AppConstants.playersButtonColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: AppConstants.paddingLarge(context) * 1.5),
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        width: AppConstants.playerBoxWidth(context)*2,
+                        height: AppConstants.sectionHeaderHeight(context) * 1.7,
+                        padding: EdgeInsets.only(
+                          top: (AppConstants.paddingSmall(context) > 5
+                              ? AppConstants.paddingSmall(context) - 5
+                              : 0),
+                          left: AppConstants.paddingMedium(context),
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.borderRadiusMax,
+                          ),
+                          color: AppConstants.spectatorsPrimaryColor,
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              textAlign: TextAlign.left,
+                              'Spectators',
+                              style: TextStyle(
+                                color: AppConstants.textColor,
+                                fontSize: AppConstants.fontSizeLargeResponsive(
+                                  context,
+                                ),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(
+                              width: AppConstants.paddingLarge(context) * 10,
+                            ),
+                            Container(
+                              width: AppConstants.playerBoxWidth(context) * 0.5,
+                              child: NumberSelector(
+                                controller: _maxSpectatorsController,
+                                minValue: 0,
+                                maxValue: 99,
+                                onChanged: () {
+                                  setState(() {
+                                    newEvent.maxSpectators =
+                                        int.tryParse(
+                                          _maxSpectatorsController.text,
+                                        ) ??
+                                        1;
+                                  });
+                                },
+                                buttonColor: AppConstants.spectatorsButtonColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
+                  Container(
+                    width: AppConstants.descriptionWidth(context),
+                    height: AppConstants.descriptionHeight(context)*1.5,
+                    decoration: BoxDecoration(
+                      color: AppConstants.gamesPrimaryColor,
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.borderRadiusMedium(context),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          alignment: Alignment.topLeft,
+                          width: AppConstants.descriptionWidth(context),
+                          height: AppConstants.sectionHeaderHeight(context),
+                          padding: EdgeInsets.only(
+                            top: (AppConstants.paddingSmall(context) > 5
+                                ? AppConstants.paddingSmall(context) - 5
+                                : 0),
+                            left: AppConstants.paddingMedium(context),
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(
+                                AppConstants.borderRadiusMedium(context),
+                              ),
+                              topRight: Radius.circular(
+                                AppConstants.borderRadiusMedium(context),
+                              ),
+                            ),
+                            color: AppConstants.gamesSecondaryColor,
+                          ),
+                          child: Text(
+                            'Game',
+                            style: TextStyle(
+                              color: AppConstants.textColor,
+                              fontSize: AppConstants.fontSizeLargeResponsive(
+                                context,
+                              ),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                            left: AppConstants.paddingMedium(context),
+                            right: AppConstants.paddingMedium(context),
+                            top: AppConstants.paddingSmall(context),
+                            bottom: AppConstants.paddingSmall(context),
+                          ),
+                          child: TextField(
+                            controller: _gameController,
+                            maxLength: 60,
+                            maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                            maxLines: null,
+                            minLines: 2,
+                            keyboardType: TextInputType.multiline,
+                            scrollPhysics: NeverScrollableScrollPhysics(),
+                            textAlign: TextAlign.start,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              counterStyle: TextStyle(
+                                color: AppConstants.semitransparentTextColor,
+                                fontSize: AppConstants.fontSizeSmallResponsive(
+                                  context,
+                                ),
+                              ),
+                              hintText: 'Enter game title...',
+                              hintStyle: TextStyle(
+                                color: AppConstants.semitransparentTextColor,
+                              ),
+                            ),
+                            style: TextStyle(
+                              color: AppConstants.textColor,
+                              fontSize: AppConstants.fontSizeSmallResponsive(
+                                context,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
+                  Container(
+                    width: AppConstants.descriptionWidth(context),
+                    height: AppConstants.descriptionHeight(context) * 1.8,
+                    decoration: BoxDecoration(
+                      color: AppConstants.linksPrimaryColor,
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.borderRadiusMedium(context),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          alignment: Alignment.topLeft,
+                          width: AppConstants.descriptionWidth(context),
+                          height: AppConstants.sectionHeaderHeight(context),
+                          padding: EdgeInsets.only(
+                            top: (AppConstants.paddingSmall(context) > 5
+                                ? AppConstants.paddingSmall(context) - 5
+                                : 0),
+                            left: AppConstants.paddingMedium(context),
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(
+                                AppConstants.borderRadiusMedium(context),
+                              ),
+                              topRight: Radius.circular(
+                                AppConstants.borderRadiusMedium(context),
+                              ),
+                            ),
+                            color: AppConstants.linksSecondaryColor,
+                          ),
+                          child: Text(
+                            'Link',
+                            style: TextStyle(
+                              color: AppConstants.textColor,
+                              fontSize: AppConstants.fontSizeLargeResponsive(
+                                context,
+                              ),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                            left: AppConstants.paddingMedium(context),
+                            right: AppConstants.paddingMedium(context),
+                            top: AppConstants.paddingSmall(context),
+                            bottom: AppConstants.paddingSmall(context),
+                          ),
+                          child: TextField(
+                            controller: _linkController,
+                            maxLength: 100,
+                            maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                            maxLines: null,
+                            minLines: 3,
+                            keyboardType: TextInputType.multiline,
+                            scrollPhysics: NeverScrollableScrollPhysics(),
+                            textAlign: TextAlign.start,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              counterStyle: TextStyle(
+                                color: AppConstants.semitransparentTextColor,
+                                fontSize: AppConstants.fontSizeSmallResponsive(
+                                  context,
+                                ),
+                              ),
+                              hintText: 'Enter link...',
+                              hintStyle: TextStyle(
+                                color: AppConstants.semitransparentTextColor,
+                              ),
+                            ),
+                            style: TextStyle(
+                              color: AppConstants.textColor,
+                              fontSize: AppConstants.fontSizeSmallResponsive(
+                                context,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
+                  Container(
+                    padding: EdgeInsets.all(
+                      AppConstants.paddingMedium(context),
+                    ),
+                    width: AppConstants.descriptionWidth(context),
+                    height: AppConstants.sectionHeaderHeight(context) * 2,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.borderRadiusMedium(context),
+                      ),
+                      color: AppConstants.secondaryColor,
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Friends to Invite',
+                          style: TextStyle(
+                            color: AppConstants.textColor,
+                            fontSize: AppConstants.fontSizeLargeResponsive(
+                              context,
+                            ),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(
+                          width: AppConstants.paddingLarge(context) * 30,
+                        ),
+                        Builder(
+                          builder: (context) {
+                            final groupItems = [
+                              DropdownMenuItem<int?>(
+                                value: -1,
+                                child: Text(
+                                  "Public",
+                                  style: TextStyle(
+                                    color: AppConstants.textColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              DropdownMenuItem<int?>(
+                                value: 0,
+                                child: Text(
+                                  "All Friends",
+                                  style: TextStyle(
+                                    color: AppConstants.textColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              ...DataManager.getGroups()
+                                  .where((g) => g.id != 0)
+                                  .map((group) {
+                                    return DropdownMenuItem<int?>(
+                                      value: group.id,
+                                      child: Text(
+                                        group.name,
+                                        style: TextStyle(
+                                          color: AppConstants.textColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    );
+                                  })
+                                  .toList(),
+                            ];
+                            final validValues = groupItems
+                                .map((item) => item.value)
+                                .toSet();
+                            final dropdownValue =
+                                validValues.contains(selectedGroupId)
+                                ? selectedGroupId
+                                : -1;
+                            if (selectedGroupId != dropdownValue) {
+                              // Optionally update state if value is invalid
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted)
+                                  setState(() {
+                                    selectedGroupId = dropdownValue;
+                                  });
+                              });
+                            }
+                            return DropdownButton<int?>(
+                              value: dropdownValue,
+                              isExpanded: false,
+                              underline: SizedBox(),
+                              dropdownColor: AppConstants.secondaryColor,
+                              style: TextStyle(
+                                color: AppConstants.textColor,
+                                fontSize: AppConstants.fontSizeMediumResponsive(
+                                  context,
+                                ),
+                              ),
+                              icon: Icon(
+                                Icons.arrow_drop_down,
+                                color: AppConstants.textColor,
+                              ),
+                              items: groupItems,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedGroupId = value;
+                                });
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
+                  Container(
+                    height: AppConstants.mainContainerHeight(context) * 0.2,
+                    width: AppConstants.mainContainerWidth(context) * 0.4,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        newEvent.title = _titleController.text;
+                        newEvent.description = _descriptionController.text;
+                        // Combine selected day with selected time
+                        newEvent.date = DateTime(
+                          _selectedDay!.year,
+                          _selectedDay!.month,
+                          _selectedDay!.day,
+                          _selectedTime.hour,
+                          _selectedTime.minute,
+                        );
+                        newEvent.maxPlayers =
+                            int.tryParse(_maxPlayersController.text) ?? 1;
+                        newEvent.maxSpectators =
+                            int.tryParse(_maxSpectatorsController.text) ?? 0;
+                        newEvent.games = [_gameController.text];
+                        newEvent.links = [_linkController.text];
+                        newEvent.players = widget.event?.players ?? [];
+                        newEvent.spectators = widget.event?.spectators ?? [];
+                        if (selectedGroupId == -1) {
+                          newEvent.groupId = 0;
+                          newEvent.onlyFriends = false;
+                        } else {
+                          newEvent.groupId = selectedGroupId ?? 0;
+                          newEvent.onlyFriends = true;
+                        }
+                        bool titleEmpty = newEvent.title.isEmpty;
+                        bool descriptionEmpty = newEvent.description.isEmpty;
+                        bool dateInvalid = !newEvent.date.isAfter(
+                          DateTime.now(),
+                        );
+                        bool maxPlayersUnder0 = newEvent.maxPlayers <= 0;
+                        bool maxSpectatorsUnder0 = newEvent.maxSpectators < 0;
+                        bool maxPlayersLessThanCurrent =
+                            newEvent.maxPlayers < newEvent.currentPlayers;
+                        bool maxSpectatorsLessThanCurrent =
+                            newEvent.maxSpectators < newEvent.currentSpectators;
+                        bool hasErrors =
+                            titleEmpty ||
+                            descriptionEmpty ||
+                            dateInvalid ||
+                            maxPlayersUnder0 ||
+                            maxSpectatorsUnder0 ||
+                            maxPlayersLessThanCurrent ||
+                            maxSpectatorsLessThanCurrent;
+                        if (!hasErrors) {
+                          if (!_isRecurrent) {
+                            newEvent = await DataManager.editAndGetEvent(
+                              newEvent,
+                            );
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  backgroundColor: AppConstants.secondaryColor,
+                                  title: Text(
+                                    'Event Saved',
+                                    style: TextStyle(
+                                      color: AppConstants.textColor,
+                                    ),
+                                  ),
+                                  content: Text(
+                                    'The event has been successfully saved.',
+                                    style: TextStyle(
+                                      color: AppConstants.textColor,
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        NexusAppState.instance!.updateState(
+                                          'Event',
+                                          params: [newEvent],
+                                        );
+                                      },
+                                      child: Text(
+                                        'OK',
+                                        style: TextStyle(
+                                          color: AppConstants.textColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          } else {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  backgroundColor: AppConstants.secondaryColor,
+                                  title: Text(
+                                    'Recurrent Event',
+                                    style: TextStyle(
+                                      color: AppConstants.textColor,
+                                    ),
+                                  ),
+                                  content: Text(
+                                    'This operation will create multiple events based on the selected periodicity and duration. Each event will be created separately. Do you want to proceed?',
+                                    style: TextStyle(
+                                      color: AppConstants.textColor,
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () async {
+                                        List<Event> events =
+                                            await DataManager.createRecurrentEvents(
+                                              newEvent,
+                                              _periodicity,
+                                              _recurrenceTime,
+                                            );
+                                        newEvent = events.first;
+                                        Navigator.of(context).pop();
+                                        NexusAppState
+                                            .instance!
+                                            .returnScreenParams
+                                            .removeLast();
+                                        NexusAppState.instance!.returnScreenPath
+                                            .removeLast();
+                                        NexusAppState.instance!.updateState(
+                                          'Event',
+                                          params: [newEvent],
+                                        );
+                                      },
+                                      child: Text(
+                                        'OK',
+                                        style: TextStyle(
+                                          color: AppConstants.textColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                        } else {
+                          String errorMessage =
+                              'Please fix the following errors:\n';
+                          if (titleEmpty)
+                            errorMessage += '- Title cannot be empty\n';
+                          if (descriptionEmpty)
+                            errorMessage += '- Description cannot be empty\n';
+                          if (dateInvalid)
+                            errorMessage += '- Date must be in the future\n';
+                          if (maxPlayersUnder0)
+                            errorMessage +=
+                                '- Max players must be greater than 0\n';
+                          if (maxSpectatorsUnder0)
+                            errorMessage +=
+                                '- Max spectators cannot be negative\n';
+                          if (maxPlayersLessThanCurrent)
+                            errorMessage +=
+                                '- Max players cannot be less than current players (${newEvent.currentPlayers})\n';
+                          if (maxSpectatorsLessThanCurrent)
+                            errorMessage +=
+                                '- Max spectators cannot be less than current spectators (${newEvent.currentSpectators})\n';
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                backgroundColor: AppConstants.secondaryColor,
+                                title: Text(
+                                  'Error',
+                                  style: TextStyle(
+                                    color: AppConstants.textColor,
+                                  ),
+                                ),
+                                content: Text(
+                                  errorMessage,
+                                  style: TextStyle(
+                                    color: AppConstants.textColor,
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text(
+                                      'OK',
+                                      style: TextStyle(
+                                        color: AppConstants.textColor,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppConstants.paddingLarge(context),
+                          vertical: AppConstants.paddingMedium(context),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.borderRadiusSmall(context),
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        'SAVE EVENT',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: AppConstants.fontSizeLargeResponsive(
+                            context,
+                          ),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
+                ],
+              ),
+            ),
+    );
+  
+    }
+    else{
+      return BaseScreenContainer(
       child: _isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -3756,4 +4954,5 @@ class EditEventScreenState extends State<EditEventScreen> {
             ),
     );
   }
+    }
 }
