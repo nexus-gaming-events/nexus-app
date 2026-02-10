@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nexus_app/classes/application_object.dart';
+import 'package:nexus_app/screens/search_user_screen.dart';
 import 'package:nexus_app/services/secure_storage_service.dart';
 import 'widgets/custom_navbar.dart';
 import 'widgets/galaxy_background.dart';
@@ -160,6 +161,8 @@ class NexusAppState extends State<NexusApp> {
         return EditEventScreen(event: params.isNotEmpty? params[0] as Event : null,);
       case 'Settings':
         return SettingsScreen();
+      case 'SearchUsers':
+        return SearchUserScreen();
       default:
         return Center(child: Text('Screen not found: $currentScreenTitle'));
     }

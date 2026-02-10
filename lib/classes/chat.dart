@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:nexus_app/classes/application_object.dart';
@@ -33,6 +34,8 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
   Event? event;
   bool isLoading = true;
   Map<int, Color> userColors = {};
+  StreamSubscription? _chatSubscription;
+  TextEditingController _messageController = TextEditingController();
 
   @override
   void initState() {
@@ -52,12 +55,22 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
       NexusAppState.instance!.updateState('Chats');
       event = null;
     }
+    ChatWebSocketManager.addChatCallback(widget.chat.eventId, onNewMessage);
     if (mounted) {
       setState(() {
         isLoading = false;
       });
       assignUserColors();
     }
+  }
+
+  void onNewMessage(int eventId) { () async {
+    final chat = await DataManager.getChatByEventId(eventId);
+    if (!mounted) return;
+    setState(() {
+      widget.chat.messages = chat?.messages ?? [];
+    });
+    };
   }
 
   void assignUserColors() {
@@ -221,6 +234,7 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
                 children: [
                   Expanded(
                     child: TextField(
+                      controller: _messageController,
                       style: TextStyle(
                         color: AppConstants.textColor,
                         fontSize: AppConstants.fontSizeMediumResponsive(
@@ -250,7 +264,11 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
                   SizedBox(width: AppConstants.paddingSmall(context)),
                   IconButton(
                     onPressed: () {
-                      // TODO: Implement send message logic
+                      ChatWebSocketManager.sendMessage(
+                        widget.chat.eventId,
+                        _messageController.text,
+                      );
+                      _messageController.clear();
                     },
                     icon: Icon(
                       Icons.send,

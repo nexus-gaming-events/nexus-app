@@ -1315,10 +1315,12 @@ class EditEventScreenState extends State<EditEventScreen> {
   int? selectedGroupId;
   bool _onlyFriends = false;
   int _groupId = -1;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _updateGroups();
     _titleController = TextEditingController(
       text: widget.event != null ? widget.event!.title : '',
     );
@@ -1346,13 +1348,13 @@ class EditEventScreenState extends State<EditEventScreen> {
       title: "",
       author: DataManager.getSelfUser()!,
       description: "",
-      date: DateTime.now(),
+      date: widget.event != null ? widget.event!.date : DateTime.now(),
       maxPlayers: 0,
       maxSpectators: 0,
       groupId: -1,
       onlyFriends: false,
     );
-    _selectedDay = _focusedDay;
+    _selectedDay = newEvent.date;
     if (widget.event != null) {
       _selectedTime = TimeOfDay(
         hour: widget.event!.date.hour,
@@ -1373,6 +1375,15 @@ class EditEventScreenState extends State<EditEventScreen> {
     _recurrenceTime = "1 week";
   }
 
+   void _updateGroups() async {
+    await DataManager.loadGroups();
+    if (mounted) {
+     setState(() {
+      _isLoading = false;
+    });
+   }
+   }
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -1387,12 +1398,14 @@ class EditEventScreenState extends State<EditEventScreen> {
   @override
   Widget build(BuildContext context) {
     return BaseScreenContainer(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            HeaderContainer(
+      child: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  HeaderContainer(
               child: Row(
                   children: [
                     BackButtonWidget(),
@@ -1482,7 +1495,7 @@ class EditEventScreenState extends State<EditEventScreen> {
                 },
                 firstDay: DateTime.utc(2010, 10, 16),
                 lastDay: DateTime.utc(2030, 3, 14),
-                focusedDay: DateTime.now(),
+                focusedDay: newEvent.date,
                 calendarStyle: CalendarStyle(
                   todayDecoration: BoxDecoration(
                     color: AppConstants.todayColor,
@@ -2199,59 +2212,72 @@ class EditEventScreenState extends State<EditEventScreen> {
                       ),
                     ),
                     SizedBox(width: AppConstants.paddingLarge(context) * 12),
-                    DropdownButton<int?>(
-                      value: selectedGroupId,
-                      isExpanded: false,
-                      underline: SizedBox(),
-                      dropdownColor: AppConstants.secondaryColor,
-                      style: TextStyle(
-                        color: AppConstants.textColor,
-                        fontSize: AppConstants.fontSizeMediumResponsive(
-                          context,
-                        ),
-                      ),
-                      icon: Icon(
-                        Icons.arrow_drop_down,
-                        color: AppConstants.textColor,
-                      ),
-                      items: [
-                        DropdownMenuItem<int?>(
-                          value: -1,
-                          child: Text(
-                            "Public",
-                            style: TextStyle(
-                              color: AppConstants.textColor,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        DropdownMenuItem<int?>(
-                          value: 0,
-                          child: Text(
-                            "All Friends",
-                            style: TextStyle(
-                              color: AppConstants.textColor,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        ...DataManager.getGroups().where((g) => g.id != 0).map((group) {
-                          return DropdownMenuItem<int?>(
-                            value: group.id,
+                    Builder(
+                      builder: (context) {
+                        final groupItems = [
+                          DropdownMenuItem<int?>(
+                            value: -1,
                             child: Text(
-                              group.name,
+                              "Public",
                               style: TextStyle(
                                 color: AppConstants.textColor,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                          );
-                        }).toList(),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          selectedGroupId = value;
-                        });
+                          ),
+                          DropdownMenuItem<int?>(
+                            value: 0,
+                            child: Text(
+                              "All Friends",
+                              style: TextStyle(
+                                color: AppConstants.textColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          ...DataManager.getGroups().where((g) => g.id != 0).map((group) {
+                            return DropdownMenuItem<int?>(
+                              value: group.id,
+                              child: Text(
+                                group.name,
+                                style: TextStyle(
+                                  color: AppConstants.textColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ];
+                        final validValues = groupItems.map((item) => item.value).toSet();
+                        final dropdownValue = validValues.contains(selectedGroupId) ? selectedGroupId : -1;
+                        if (selectedGroupId != dropdownValue) {
+                          // Optionally update state if value is invalid
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) setState(() { selectedGroupId = dropdownValue; });
+                          });
+                        }
+                        return DropdownButton<int?>(
+                          value: dropdownValue,
+                          isExpanded: false,
+                          underline: SizedBox(),
+                          dropdownColor: AppConstants.secondaryColor,
+                          style: TextStyle(
+                            color: AppConstants.textColor,
+                            fontSize: AppConstants.fontSizeMediumResponsive(
+                              context,
+                            ),
+                          ),
+                          icon: Icon(
+                            Icons.arrow_drop_down,
+                            color: AppConstants.textColor,
+                          ),
+                          items: groupItems,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedGroupId = value;
+                            });
+                          },
+                        );
                       },
                     ),
                   ],
@@ -2325,10 +2351,6 @@ class EditEventScreenState extends State<EditEventScreen> {
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop();
-                                  NexusAppState.instance!.returnScreenParams
-                                      .removeLast();
-                                  NexusAppState.instance!.returnScreenPath
-                                      .removeLast();
                                   NexusAppState.instance!.updateState(
                                     'Event',
                                     params: [newEvent],

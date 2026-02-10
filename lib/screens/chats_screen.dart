@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:nexus_app/data_manager.dart';
 import '../constants.dart';
@@ -29,12 +31,28 @@ class _ChatsScreenState extends State<ChatsScreen> {
     await DataManager.ensureChatsLoaded();
     final chats = DataManager.getChats();
 
+    for (var chat in chats) {
+      ChatWebSocketManager.addChatCallback(chat.eventId, onNewMessage);
+    }
+
     if (mounted) {
     setState(() {
       _chats = chats;
       _isLoading = false;
     });
   }
+  }
+
+  void onNewMessage(int eventId) { () async {
+    final index = _chats.indexWhere((chat) => chat.eventId == eventId);
+    if (index != -1) {
+      final updatedChat = await DataManager.getChatByEventId(eventId);
+      if (!mounted) return;
+      setState(() {
+        _chats[index] = updatedChat;
+      });
+    }
+    };
   }
 
   @override

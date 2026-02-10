@@ -213,21 +213,25 @@ class WebInterfaceService {
 
     static Future<void> patchEvent(Event event) async {
     final request = await createRequest('events/${event.id}', 'PATCH');
-    final body = jsonEncode({
+
+    final Map<String, dynamic> body = {
       'title': event.title,
       'description': event.description,
       'startTime': event.date.toUtc().toIso8601String(),
       'maxPlayers': event.maxPlayers,
       'maxSpectators': event.maxSpectators,
       'game': event.games!.isNotEmpty ? event.games![0] : '',
-      'discordVoiceLink': event.links!.isNotEmpty ? event.links![0] : '',
       'groupId': event.groupId,
       'onlyFriends': event.onlyFriends,
+      };
+
+      final link = event.links![0];
+      if (link.startsWith('http://') || link.startsWith('https://')) {
+        body['discordVoiceLink'] = link;
       }
-      );
       debugPrint("=== PATCH Event Request ===");
-      debugPrint(body);
-    await sendRequest(request, body);
+      final bodyJson = jsonEncode(body);
+    await sendRequest(request, bodyJson);
     }
 
   static Future<void> deleteEvent(int id) async {

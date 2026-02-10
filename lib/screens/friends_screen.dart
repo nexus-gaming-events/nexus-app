@@ -220,7 +220,11 @@ class _FriendsScreenState extends State<FriendsScreen>
                         alignment: Alignment.bottomRight,
                         child: IconButton(
                           onPressed: () {
-                            //Add friend action
+                            NexusAppState.instance!.returnScreenParams.add([]);
+                            NexusAppState.instance!.updateState('SearchUsers');
+                            NexusAppState.instance!.returnScreenPath.add(
+                              'SearchUsers',
+                            );
                           },
 
                           icon: Icon(

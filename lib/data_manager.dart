@@ -1,4 +1,7 @@
+
+import 'dart:convert';
 import 'dart:math';
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +12,11 @@ import 'package:nexus_app/classes/user.dart';
 import 'package:nexus_app/classes/chat.dart';
 import 'package:nexus_app/classes/group.dart';
 import 'package:nexus_app/main.dart';
+import 'package:nexus_app/screens/chats_screen.dart';
 import 'package:nexus_app/services/secure_storage_service.dart';
+import 'package:web_socket_channel/io.dart';
 import 'services/web_interface_service.dart';
+import 'screens/chats_screen.dart';
 
 class DataManager {
   static User? _selfUser;
@@ -276,12 +282,13 @@ class DataManager {
   }
 
   static Future<void> ensureChatsLoaded() async {
-    if (isOfflineMode || _chats != null) {
-      return;
-    }
-    for (var event in _events ?? []) {
-      await loadChat(event.id);
-    }
+      if (isOfflineMode || _chats != null) {
+        return;
+      }
+      for (var event in _events ?? []) {
+        await loadChat(event.id);
+        await ChatWebSocketManager.openChatConnection(event.id);
+      }
   }
 
   static List<Chat> getChats() {
@@ -729,4 +736,135 @@ class DataManager {
     await loadFriendRequests();
   }
 
+}
+
+/// Manages WebSocket connections for event chats
+class ChatWebSocketManager {
+  static Map<int, IOWebSocketChannel> _chatSockets = {};
+  static Map<int, StreamSubscription> _chatSubscriptions = {};
+  static Map<int, List<void Function(int eventId)>> _chatCallbacks = {};
+  static final String _webSocketUrlTemplate = 'ws://nexus.orciuolo.it/chat?token={token}&eventId={eventId}';
+
+  /// Opens a WebSocket connection for the given eventId and registers a callback
+  static Future<IOWebSocketChannel?> openChatConnection(int eventId, [void Function(int eventId)? onNewMessage]) async {
+    if (!DataManager.isLogged()) {
+      debugPrint('User not logged in, cannot open chat connection');
+      return null;
+    }
+    // Register callback
+    if (onNewMessage != null) {
+      _chatCallbacks.putIfAbsent(eventId, () => []);
+      _chatCallbacks[eventId]!.add(onNewMessage);
+    }
+    if (_chatSockets.containsKey(eventId)) {
+      debugPrint('WebSocket connection for event $eventId already exists');
+      return _chatSockets[eventId];
+    }
+    final String websocketUrl = _webSocketUrlTemplate
+        .replaceFirst('{token}', await SecureStorageService().getNexusToken() ?? '')
+        .replaceFirst('{eventId}', eventId.toString());
+    try {
+      _chatSockets[eventId] = IOWebSocketChannel.connect(Uri.parse(websocketUrl));
+    } catch (e) {
+      debugPrint('Error connecting to WebSocket for event $eventId: $e');
+      return null;
+    }
+    try {
+      _chatSubscriptions[eventId] = _chatSockets[eventId]!.stream.listen(
+        (message) {
+          debugPrint('Received message on WebSocket for event $eventId: $message');
+          Map<String, dynamic> messageData;
+          try {
+            messageData = Map<String, dynamic>.from(jsonDecode(message));
+          } catch (e) {
+            debugPrint('Error parsing WebSocket message for event $eventId: $e');
+            return;
+          }
+          Message newMessage = Message(
+            messageData['userid'],
+            eventId,
+            messageData['content'],
+            DateTime.parse(messageData['createdAt']),
+            Colors.blue, // Default color, can be enhanced to include color info in the message data
+          );
+          DataManager.insertMessagesIntoChat(eventId, [newMessage]);
+          if (_chatCallbacks.containsKey(eventId)) {
+            for (var callback in _chatCallbacks[eventId]!) {
+              callback(eventId);
+            }
+          }
+        },
+        onError: (error) {
+          debugPrint('WebSocket error for event $eventId: $error');
+          _chatSockets.remove(eventId);
+        },
+        onDone: () {
+          debugPrint('WebSocket connection for event $eventId closed');
+          _chatSockets.remove(eventId);
+        },
+      );
+    } catch (e) {
+      debugPrint('Error setting up WebSocket listeners for event $eventId: $e');
+      _chatSockets.remove(eventId);
+      return null;
+    }
+    return _chatSockets[eventId];
+  }
+
+  /// Closes the WebSocket connection for the given eventId and removes callbacks
+  static Future<void> closeChatConnection(int eventId) async {
+    if (!DataManager.isLogged()) {
+      debugPrint('User not logged in, cannot close chat connection');
+      return;
+    }
+    if (!_chatSockets.containsKey(eventId)) {
+      debugPrint('No WebSocket connection found for event $eventId');
+      return;
+    }
+    try {
+      await _chatSubscriptions[eventId]?.cancel();
+    } catch (e) {
+      debugPrint('Error cancelling WebSocket subscription for event $eventId: $e');
+    }
+    try {
+      await _chatSockets[eventId]?.sink.close();
+    } catch (e) {
+      debugPrint('Error closing WebSocket sink for event $eventId: $e');
+    }
+    _chatSubscriptions.remove(eventId);
+    _chatSockets.remove(eventId);
+    _chatCallbacks.remove(eventId);
+  }
+
+  /// Sends a message to the chat for the given eventId
+  static void sendMessage(int eventId, String message) {
+    if (!DataManager.isLogged()) {
+      debugPrint('User not logged in, cannot send message');
+      return;
+    }
+    if (!_chatSockets.containsKey(eventId)) {
+      debugPrint('No WebSocket connection found for event $eventId, cannot send message');
+      return;
+    }
+    try {
+      _chatSockets[eventId]!.sink.add(message);
+      debugPrint('Sent message on WebSocket for event $eventId: $message');
+    } catch (e) {
+      debugPrint('Error sending message on WebSocket for event $eventId: $e');
+    }
+  }
+
+  static IOWebSocketChannel? getChatSocket(int eventId) {
+    return _chatSockets[eventId];
+  }
+
+  static StreamSubscription? getChatSubscription(int eventId) {
+    return _chatSubscriptions[eventId];
+  }
+
+    /// Registers a callback for the given eventId without opening a new connection
+  static void addChatCallback(int eventId, void Function(int eventId) callback) {
+    _chatCallbacks.putIfAbsent(eventId, () => []);
+    _chatCallbacks[eventId]!.add(callback);
+  }
 }
