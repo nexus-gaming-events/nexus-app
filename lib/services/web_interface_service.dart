@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:nexus_app/classes/group.dart';
 import 'package:nexus_app/classes/friend_request.dart';
 import 'package:nexus_app/classes/login.dart';
+import 'package:nexus_app/services/secure_storage_service.dart';
 import '../classes/event.dart';
 import '../classes/user.dart';
 import '../classes/message.dart';
@@ -490,5 +491,30 @@ class WebInterfaceService {
     }
     return friendRequests;
   }
+
+  static Future<void> addEventToGoogleCalendar(int eventId) async {
+    final request = await createRequest('events/$eventId/calendar', 'POST');
+    final String? googleAccessToken = await SecureStorageService().getGoogleAccessToken();
+    if (googleAccessToken == null) {
+      throw Exception('Google access token not found');
+    }
+    final body = jsonEncode({
+      'googleAccessToken': googleAccessToken,
+    });
+    await sendRequest(request, body);
+  }
+
+  static Future<List<dynamic>> searchSteamGame(String query) async {
+    final request = await createRequest('steam/games?q=${Uri.encodeComponent(query)}', 'GET');
+    HttpClientResponse response = await sendRequest(request);
+    final responseBody = await response.transform(utf8.decoder).join();
+    final data = jsonDecode(responseBody) as List<dynamic>;
+    List<dynamic> games = [];
+    for (var gameData in data) {
+      games.add({'name': gameData['name'] ?? '', 'imageUrl': gameData['imageUrl'] ?? ''});
+    }
+    return games;
+  }
+
 
 }

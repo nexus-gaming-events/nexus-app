@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nexus_app/classes/chat.dart';
@@ -2492,6 +2494,10 @@ class EditEventScreenState extends State<EditEventScreen> {
   late TextEditingController _maxPlayersController;
   late TextEditingController _maxSpectatorsController;
   late TextEditingController _gameController;
+  // Steam game search popup state
+  Timer? _gameSearchDebounce;
+  List<dynamic> _steamGameResults = [];
+  bool _showGamePopup = false;
   late TextEditingController _linkController;
   bool _isRecurrent = false;
   late String _periodicity;
@@ -2576,6 +2582,7 @@ class EditEventScreenState extends State<EditEventScreen> {
     _maxSpectatorsController.dispose();
     _gameController.dispose();
     _linkController.dispose();
+    _gameSearchDebounce?.cancel();
     super.dispose();
   }
 
@@ -3319,34 +3326,119 @@ class EditEventScreenState extends State<EditEventScreen> {
                             top: AppConstants.paddingSmall(context),
                             bottom: AppConstants.paddingSmall(context),
                           ),
-                          child: TextField(
-                            controller: _gameController,
-                            maxLength: 60,
-                            maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                            maxLines: null,
-                            minLines: 2,
-                            keyboardType: TextInputType.multiline,
-                            scrollPhysics: NeverScrollableScrollPhysics(),
-                            textAlign: TextAlign.start,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              counterStyle: TextStyle(
-                                color: AppConstants.semitransparentTextColor,
-                                fontSize: AppConstants.fontSizeSmallResponsive(
-                                  context,
+                          child: Stack(
+                            children: [
+                              FocusScope(
+                                child: Focus(
+                                  onFocusChange: (hasFocus) {
+                                    if (!hasFocus) {
+                                      setState(() {
+                                        _showGamePopup = false;
+                                      });
+                                    }
+                                  },
+                                  child: TextField(
+                                    controller: _gameController,
+                                    maxLength: 60,
+                                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                                    maxLines: null,
+                                    minLines: 2,
+                                    keyboardType: TextInputType.multiline,
+                                    scrollPhysics: NeverScrollableScrollPhysics(),
+                                    textAlign: TextAlign.start,
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      counterStyle: TextStyle(
+                                        color: AppConstants.semitransparentTextColor,
+                                        fontSize: AppConstants.fontSizeSmallResponsive(
+                                          context,
+                                        ),
+                                      ),
+                                      hintText: 'Enter game title...',
+                                      hintStyle: TextStyle(
+                                        color: AppConstants.semitransparentTextColor,
+                                      ),
+                                    ),
+                                    style: TextStyle(
+                                      color: AppConstants.textColor,
+                                      fontSize: AppConstants.fontSizeSmallResponsive(
+                                        context,
+                                      ),
+                                    ),
+                                    onChanged: (value) {
+                                      if (_gameSearchDebounce?.isActive ?? false) _gameSearchDebounce!.cancel();
+                                      if (value.isEmpty || value.length < 3) {
+                                        setState(() {
+                                          _steamGameResults = [];
+                                          _showGamePopup = false;
+                                        });
+                                        return;
+                                      }
+                                      _gameSearchDebounce = Timer(const Duration(milliseconds: 500), () async {
+                                        final results = await DataManager.searchSteamGame(value);
+                                        setState(() {
+                                          _steamGameResults = results;
+                                          _showGamePopup = results.isNotEmpty;
+                                        });
+                                      });
+                                    },
+                                  ),
                                 ),
                               ),
-                              hintText: 'Enter game title...',
-                              hintStyle: TextStyle(
-                                color: AppConstants.semitransparentTextColor,
-                              ),
-                            ),
-                            style: TextStyle(
-                              color: AppConstants.textColor,
-                              fontSize: AppConstants.fontSizeSmallResponsive(
-                                context,
-                              ),
-                            ),
+                              if (_showGamePopup && _steamGameResults.isNotEmpty)
+                                Positioned(
+                                  left: 0,
+                                  right: 0,
+                                  top: 60,
+                                  child: Material(
+                                    elevation: 4,
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: AppConstants.gamesSecondaryColor,
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(8),
+                                      onTap: () {
+                                        setState(() {
+                                          _gameController.text = _steamGameResults[0]['name'] ?? '';
+                                          _showGamePopup = false;
+                                        });
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                        constraints: BoxConstraints(minHeight: 48, maxHeight: 56),
+                                        child: Row(
+                                          children: [
+                                            _steamGameResults[0]['imageUrl'] != null && _steamGameResults[0]['imageUrl'].toString().isNotEmpty
+                                              ? ClipRRect(
+                                                  borderRadius: BorderRadius.circular(6),
+                                                  child: Image.network(
+                                                    _steamGameResults[0]['imageUrl'],
+                                                    width: 32,
+                                                    height: 32,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (context, error, stackTrace) => Icon(Icons.videogame_asset, size: 32, color: AppConstants.semitransparentTextColor),
+                                                  ),
+                                                )
+                                              : Icon(Icons.videogame_asset, size: 32, color: AppConstants.semitransparentTextColor),
+                                            SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text(
+                                                _steamGameResults[0]['name'] ?? '',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  color: AppConstants.textColor,
+                                                  fontSize: AppConstants.fontSizeSmallResponsive(context),
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       ],
@@ -4495,34 +4587,119 @@ class EditEventScreenState extends State<EditEventScreen> {
                             top: AppConstants.paddingSmall(context),
                             bottom: AppConstants.paddingSmall(context),
                           ),
-                          child: TextField(
-                            controller: _gameController,
-                            maxLength: 60,
-                            maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                            maxLines: null,
-                            minLines: 2,
-                            keyboardType: TextInputType.multiline,
-                            scrollPhysics: NeverScrollableScrollPhysics(),
-                            textAlign: TextAlign.start,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              counterStyle: TextStyle(
-                                color: AppConstants.semitransparentTextColor,
-                                fontSize: AppConstants.fontSizeSmallResponsive(
-                                  context,
+                          child: Stack(
+                            children: [
+                              FocusScope(
+                                child: Focus(
+                                  onFocusChange: (hasFocus) {
+                                    if (!hasFocus) {
+                                      setState(() {
+                                        _showGamePopup = false;
+                                      });
+                                    }
+                                  },
+                                  child: TextField(
+                                    controller: _gameController,
+                                    maxLength: 60,
+                                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                                    maxLines: null,
+                                    minLines: 2,
+                                    keyboardType: TextInputType.multiline,
+                                    scrollPhysics: NeverScrollableScrollPhysics(),
+                                    textAlign: TextAlign.start,
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      counterStyle: TextStyle(
+                                        color: AppConstants.semitransparentTextColor,
+                                        fontSize: AppConstants.fontSizeSmallResponsive(
+                                          context,
+                                        ),
+                                      ),
+                                      hintText: 'Enter game title...',
+                                      hintStyle: TextStyle(
+                                        color: AppConstants.semitransparentTextColor,
+                                      ),
+                                    ),
+                                    style: TextStyle(
+                                      color: AppConstants.textColor,
+                                      fontSize: AppConstants.fontSizeSmallResponsive(
+                                        context,
+                                      ),
+                                    ),
+                                    onChanged: (value) {
+                                      if (_gameSearchDebounce?.isActive ?? false) _gameSearchDebounce!.cancel();
+                                      if (value.isEmpty || value.length < 3) {
+                                        setState(() {
+                                          _steamGameResults = [];
+                                          _showGamePopup = false;
+                                        });
+                                        return;
+                                      }
+                                      _gameSearchDebounce = Timer(const Duration(milliseconds: 500), () async {
+                                        final results = await DataManager.searchSteamGame(value);
+                                        setState(() {
+                                          _steamGameResults = results;
+                                          _showGamePopup = results.isNotEmpty;
+                                        });
+                                      });
+                                    },
+                                  ),
                                 ),
                               ),
-                              hintText: 'Enter game title...',
-                              hintStyle: TextStyle(
-                                color: AppConstants.semitransparentTextColor,
-                              ),
-                            ),
-                            style: TextStyle(
-                              color: AppConstants.textColor,
-                              fontSize: AppConstants.fontSizeSmallResponsive(
-                                context,
-                              ),
-                            ),
+                              if (_showGamePopup && _steamGameResults.isNotEmpty)
+                                Positioned(
+                                  left: 0,
+                                  right: 0,
+                                  top: 60,
+                                  child: Material(
+                                    elevation: 4,
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: AppConstants.gamesSecondaryColor,
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(8),
+                                      onTap: () {
+                                        setState(() {
+                                          _gameController.text = _steamGameResults[0][0];
+                                          _showGamePopup = false;
+                                        });
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                        constraints: BoxConstraints(minHeight: 48, maxHeight: 56),
+                                        child: Row(
+                                          children: [
+                                            _steamGameResults[0][1] != null && _steamGameResults[0][1].toString().isNotEmpty
+                                              ? ClipRRect(
+                                                  borderRadius: BorderRadius.circular(6),
+                                                  child: Image.network(
+                                                    _steamGameResults[0][1],
+                                                    width: 32,
+                                                    height: 32,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (context, error, stackTrace) => Icon(Icons.videogame_asset, size: 32, color: AppConstants.semitransparentTextColor),
+                                                  ),
+                                                )
+                                              : Icon(Icons.videogame_asset, size: 32, color: AppConstants.semitransparentTextColor),
+                                            SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text(
+                                                _steamGameResults[0][0],
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  color: AppConstants.textColor,
+                                                  fontSize: AppConstants.fontSizeSmallResponsive(context),
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       ],

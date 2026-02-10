@@ -327,6 +327,11 @@ class DataManager {
       return;
     }
     await WebInterfaceService.joinEvent(eventId, role);
+    try{
+      await WebInterfaceService.addEventToGoogleCalendar(eventId);
+    } catch (e) {
+      debugPrint('Failed to add event to Google Calendar: $e');
+    }
     // Optionally refresh events list
     loadEvents();
   }
@@ -345,6 +350,11 @@ class DataManager {
       return;
     }
     await WebInterfaceService.patchEvent(event);
+    try{
+      await WebInterfaceService.addEventToGoogleCalendar(event.id);
+    } catch (e) {
+      debugPrint('Failed to add event to Google Calendar: $e');
+    }
     // Optionally refresh events list
     loadEvents();
   }
@@ -364,6 +374,11 @@ class DataManager {
       return 10;
     }
     int newEventId = await WebInterfaceService.postEvent(event);
+    try{
+      await WebInterfaceService.addEventToGoogleCalendar(newEventId);
+    } catch (e) {
+      debugPrint('Failed to add event to Google Calendar: $e');
+    }
     // Optionally refresh events list
     loadEvents();
     return newEventId;
@@ -746,6 +761,13 @@ class DataManager {
       return [];
     }
     return await WebInterfaceService.searchUsers(query);
+  }
+
+  static Future<List<dynamic>> searchSteamGame(String query) async {
+    if (isOfflineMode){
+      return [];
+    }
+    return await WebInterfaceService.searchSteamGame(query);
   }
 
 }
