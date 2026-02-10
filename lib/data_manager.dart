@@ -94,7 +94,7 @@ class DataManager {
     NexusAppState.instance!.updateState('Login');
     return;
   }
-    
+
     await loadFriends();
     await loadFriendRequests();
     await loadEvents();
@@ -432,7 +432,7 @@ class DataManager {
   }
 
   static bool hasSentFriendRequest(int id) { // If I sent them a request
-    return _myFriendRequests.contains(id);    
+    return _myFriendRequests.contains(id);
   }
 
   static Future<bool> isAuthor(int userId, int eventId) async {
@@ -793,7 +793,7 @@ class ChatWebSocketManager {
             return;
           }
           Message newMessage = Message(
-            messageData['userid'],
+            messageData['userId'],
             eventId,
             messageData['content'],
             DateTime.parse(messageData['createdAt']),

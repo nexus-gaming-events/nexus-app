@@ -155,11 +155,11 @@ class WebInterfaceService {
 
     static Future<int> postEvent(Event event) async {
     final request = await createRequest('events', 'POST');
-    
+
     // Convert date to UTC and format
     final utcDate = event.date.toUtc();
     final formattedDate = utcDate.toIso8601String();
-    
+
     // Build the body with required fields
     final Map<String, dynamic> bodyMap = {
       'title': event.title,
@@ -168,12 +168,12 @@ class WebInterfaceService {
       'groupId': event.groupId > 0 ? event.groupId : null,
       'onlyFriends': event.onlyFriends,
     };
-    
+
     // Add optional fields only if they have valid values
     if (event.description != null && event.description!.isNotEmpty) {
       bodyMap['description'] = event.description;
     }
-    
+
     // Only include discordVoiceLink if it looks like a valid URL
     if (event.links != null && event.links!.isNotEmpty && event.links![0].isNotEmpty) {
       final link = event.links![0];
@@ -181,17 +181,17 @@ class WebInterfaceService {
         bodyMap['discordVoiceLink'] = link;
       }
     }
-    
+
     if (event.maxPlayers != null) {
       bodyMap['maxPlayers'] = event.maxPlayers;
     }
-    
+
     if (event.maxSpectators != null) {
       bodyMap['maxSpectators'] = event.maxSpectators;
     }
-    
+
     final body = jsonEncode(bodyMap);
-    
+
     // Log the request details
     print('=== POST Event Request ===');
     print('URL: ${webInterfaceUrl}events');
@@ -204,7 +204,7 @@ class WebInterfaceService {
       print('  $key: $value (${value.runtimeType})');
     });
     print('========================');
-    
+
     HttpClientResponse response = await sendRequest(request, body);
     final responseBody = await response.transform(utf8.decoder).join();
     final data = jsonDecode(responseBody);
@@ -410,7 +410,7 @@ class WebInterfaceService {
     List<Message> messages = [];
     for (var messageData in data) {
       messages.add(Message(
-        messageData['userid'],
+        messageData['userId'],
         eventId,
         messageData['content'],
         DateTime.parse(messageData['createdAt']),
