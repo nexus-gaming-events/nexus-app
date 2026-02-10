@@ -755,7 +755,7 @@ class ChatWebSocketManager {
   static Map<int, IOWebSocketChannel> _chatSockets = {};
   static Map<int, StreamSubscription> _chatSubscriptions = {};
   static Map<int, List<void Function(int eventId)>> _chatCallbacks = {};
-  static final String _webSocketUrlTemplate = 'ws://nexus.orciuolo.it/chat?token={token}&eventId={eventId}';
+  static final String _webSocketUrlTemplate = 'wss://nexus.orciuolo.it/chat?token={token}&eventId={eventId}';
 
   /// Opens a WebSocket connection for the given eventId and registers a callback
   static Future<IOWebSocketChannel?> openChatConnection(int eventId, [void Function(int eventId)? onNewMessage]) async {
