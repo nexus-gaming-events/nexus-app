@@ -1207,7 +1207,50 @@ class VisualizeUserPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double iconSize = inPlayers || inSpectators ? AppConstants.iconSizeSmall(context) : AppConstants.iconSizeLarge(context);
+    if (AppConstants.isTablet(context)) {
+      double iconSize = inPlayers || inSpectators ? AppConstants.iconSizeSmall(context)*0.5 : AppConstants.iconSizeLarge(context)*0.5;
+    return Card(
+      color: user.id == DataManager.getSelfUser()?.id ? (inPlayers ? AppConstants.playerUserColor : inSpectators ? AppConstants.spectatorUserColor : AppConstants.secondaryColor) : AppConstants.secondaryColor,
+      margin: EdgeInsets.symmetric(
+        vertical: AppConstants.paddingSmall(context),
+        horizontal: (AppConstants.paddingSmall(context) > 3
+            ? AppConstants.paddingSmall(context) - 3
+            : 0),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(AppConstants.paddingSmall(context)),
+        child: Row(
+          children: [
+            user.avatarUrl.isEmpty
+                ? Image.asset(
+                    'assets/icons/Neil.png',
+                    width: iconSize,
+                    height: iconSize,
+                  )
+                : Image.network(
+                    user.avatarUrl,
+                    width: iconSize,
+                    height: iconSize,
+                  ),
+            SizedBox(width: AppConstants.paddingMedium(context)),
+            Expanded(
+              child: Text(
+                user.username,
+                style: TextStyle(
+                  fontWeight: user.id == DataManager.getSelfUser()?.id ? FontWeight.bold : FontWeight.normal,
+                  fontSize: AppConstants.fontSizeSmallResponsive(context),
+                  color: user.id == DataManager.getSelfUser()?.id ? (inPlayers ? AppConstants.playerUserTextColor : inSpectators ? AppConstants.spectatorUserTextColor : AppConstants.textColor) : AppConstants.textColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  
+    }
+    else {
+      double iconSize = inPlayers || inSpectators ? AppConstants.iconSizeSmall(context) : AppConstants.iconSizeLarge(context);
     return Card(
 
       color: user.id == DataManager.getSelfUser()?.id ? (inPlayers ? AppConstants.playerUserColor : inSpectators ? AppConstants.spectatorUserColor : AppConstants.secondaryColor) : AppConstants.secondaryColor,
@@ -1247,5 +1290,7 @@ class VisualizeUserPreview extends StatelessWidget {
         ),
       ),
     );
-  }
+  
+    }
+    }
 }

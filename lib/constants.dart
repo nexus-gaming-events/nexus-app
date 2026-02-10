@@ -32,13 +32,13 @@ class AppConstants {
   static double descriptionWidthTablet(BuildContext context) =>
       mainContainerWidthTablet(context) * 0.95;
   static double descriptionHeightTablet(BuildContext context) =>
-      screenHeight(context, 0.2).clamp(180.0, 300.0);
+      screenHeight(context, 0.15).clamp(90.0, 300.0);
 
   /// Players/Spectators box dimensions (Tablet)
   static double playerBoxWidthTablet(BuildContext context) =>
       (mainContainerWidthTablet(context) * 0.95 - 40) / 2;
   static double playerBoxHeightTablet(BuildContext context) =>
-      screenHeight(context, 0.30).clamp(180.0, 350.0);
+      screenHeight(context, 0.3).clamp(90.0, 350.0);
 
   /// Section header height (Tablet)
   static double sectionHeaderHeightTablet(BuildContext context) =>
@@ -298,7 +298,7 @@ class AppConstants {
   /// Players/Spectators box dimensions
   static double playerBoxWidth(BuildContext context) =>
       isTablet(context)
-          ? (mainContainerWidthTablet(context) * 0.95 - 40) / 2
+          ? (mainContainerWidthTablet(context) * 0.47 - 20) / 2
           : (mainContainerWidth(context) * 0.95 - 20) / 2;
   static double playerBoxHeight(BuildContext context) =>
       isTablet(context)
