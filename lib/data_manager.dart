@@ -736,6 +736,13 @@ class DataManager {
     await loadFriendRequests();
   }
 
+  static Future<List<User>> searchUsers(String query) async {
+    if (isOfflineMode){
+      return [];
+    }
+    return await WebInterfaceService.searchUsers(query);
+  }
+
 }
 
 /// Manages WebSocket connections for event chats
@@ -799,8 +806,6 @@ class ChatWebSocketManager {
           _chatSockets.remove(eventId);
         },
         onDone: () {
-          debugPrint('WebSocket connection for event $eventId closed');
-          _chatSockets.remove(eventId);
         },
       );
     } catch (e) {
@@ -837,7 +842,7 @@ class ChatWebSocketManager {
   }
 
   /// Sends a message to the chat for the given eventId
-  static void sendMessage(int eventId, String message) {
+  static Future<void> sendMessage(int eventId, String message) async {
     if (!DataManager.isLogged()) {
       debugPrint('User not logged in, cannot send message');
       return;

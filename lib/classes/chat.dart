@@ -34,7 +34,6 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
   Event? event;
   bool isLoading = true;
   Map<int, Color> userColors = {};
-  StreamSubscription? _chatSubscription;
   TextEditingController _messageController = TextEditingController();
 
   @override
@@ -263,8 +262,8 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
                   ),
                   SizedBox(width: AppConstants.paddingSmall(context)),
                   IconButton(
-                    onPressed: () {
-                      ChatWebSocketManager.sendMessage(
+                    onPressed: () async{
+                      await ChatWebSocketManager.sendMessage(
                         widget.chat.eventId,
                         _messageController.text,
                       );

@@ -460,4 +460,23 @@ class WebInterfaceService {
     await sendRequest(request);
   }
 
+  static Future<List<User>> searchUsers(String query) async {
+    final request = await createRequest('users/search?q=${Uri.encodeComponent(query)}', 'GET');
+    /*final body = jsonEncode({
+      'query': query,
+    });*/
+    HttpClientResponse response = await sendRequest(request/*, body*/);
+    final responseBody = await response.transform(utf8.decoder).join();
+    final data = jsonDecode(responseBody) as List;
+    List<User> users = [];
+    for (var userData in data) {
+      users.add(User(
+        id: userData['id'],
+        username: userData['username'],
+        avatarUrl: userData['avatarUrl'] ?? '',
+        ));
+    }
+    return users;
+  }
+
 }
