@@ -140,7 +140,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                         NexusAppState.instance!.returnScreenParams.add([]);
                         NexusAppState.instance!.returnScreenPath.add('SearchUser');
                         NexusAppState.instance!.updateState(
-                          'UserProfile',
+                          'User',
                           params: [await DataManager.getUserById(user.id) ?? user],
                         );
                       },
