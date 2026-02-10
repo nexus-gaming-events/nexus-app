@@ -16,6 +16,7 @@ class ExpeditionsScreenState extends State<ExpeditionsScreen> {
   static DateTime _focusedDay = DateTime.now();
   static DateTime? _selectedDay;
   static List<Event> _focusedEvents = [];
+  static bool _isLoading = false;
 
   static List<Event> _getEventsForDay(DateTime day) {
     try {
@@ -33,6 +34,22 @@ class ExpeditionsScreenState extends State<ExpeditionsScreen> {
     super.initState();
     _selectedDay = _focusedDay;
     _focusedEvents = _getEventsForDay(_selectedDay!);
+    _loadEvents();
+  }
+
+  void _loadEvents() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      await DataManager.loadEvents();
+    } catch (e) {
+      // Handle error, e.g. show a snackbar
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
