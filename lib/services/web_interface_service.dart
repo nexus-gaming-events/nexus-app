@@ -165,7 +165,7 @@ class WebInterfaceService {
       'title': event.title,
       'game': event.games != null && event.games!.isNotEmpty ? event.games![0] : '',
       'startTime': formattedDate,
-      'groupId': event.groupId,
+      'groupId': event.groupId >= 0 ? event.groupId : null,
       'onlyFriends': event.onlyFriends,
     };
     
@@ -221,7 +221,7 @@ class WebInterfaceService {
       'maxPlayers': event.maxPlayers,
       'maxSpectators': event.maxSpectators,
       'game': event.games!.isNotEmpty ? event.games![0] : '',
-      'groupId': event.groupId,
+      'groupId': event.groupId >= 0 ? event.groupId : null,
       'onlyFriends': event.onlyFriends,
       };
 
