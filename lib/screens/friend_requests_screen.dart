@@ -29,9 +29,9 @@ class FriendRequestsScreen extends StatelessWidget {
                         child: Text(
                           'Friend Requests',
                           style: TextStyle(
-                            fontSize: AppConstants.fontSizeXLargeResponsive(
-                              context,
-                            ),
+                            fontSize: AppConstants.isTablet(context)
+                                ? AppConstants.fontSizeMediumResponsive(context)
+                                : AppConstants.fontSizeLargeResponsive(context),
                             fontWeight: FontWeight.bold,
                             color: AppConstants.textColor,
                           ),

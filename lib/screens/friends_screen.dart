@@ -219,8 +219,9 @@ class _FriendsScreenState extends State<FriendsScreen>
                       AddCircleIconButton(
                         onPressed: () {
                           NexusAppState.instance!.returnScreenParams.add([]);
+                          NexusAppState.instance!.returnScreenPath.add('Friends');
                           NexusAppState.instance!.updateState('SearchUsers');
-                          NexusAppState.instance!.returnScreenPath.add('SearchUsers');
+                          
                         },
                       ),
                     ],

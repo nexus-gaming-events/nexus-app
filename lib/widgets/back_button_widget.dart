@@ -18,7 +18,7 @@ class BackButtonWidget extends StatelessWidget {
       icon: Icon(
         Icons.arrow_back,
         color: AppConstants.textColor,
-        size: AppConstants.iconSizeMedium(context),
+        size: AppConstants.isTablet(context) ? AppConstants.iconSizeSmall(context) : AppConstants.iconSizeMedium(context),
       ),
       onPressed: onPressed ?? () {
         NexusAppState.instance!.updateState(NexusAppState.instance!.returnScreenPath.removeLast(),params: NexusAppState.instance!.returnScreenParams.removeLast());

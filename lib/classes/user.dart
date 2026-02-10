@@ -450,7 +450,7 @@ class VisualizeUserScreen {
                           color: AppConstants.textColor,
                           size: AppConstants.iconSizeSmall(context),
                         ),
-                        SizedBox(width: AppConstants.paddingLarge(context)*3),
+                        SizedBox(width: AppConstants.paddingLarge(context)),
                         Text(
                           "Accept Friend Request",
                           style: TextStyle(
