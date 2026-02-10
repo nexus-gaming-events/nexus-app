@@ -105,7 +105,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
           Container(
             alignment: Alignment.topCenter,
             width: AppConstants.mainContainerWidth(context) * 0.9,
-            height: AppConstants.mainContainerHeight(context) * 0.821,
+            height: AppConstants.mainContainerHeight(context) * (AppConstants.isTablet(context) ? 0.73 : 0.821),
             child: _isLoading
                 ? Center(
                     child: CircularProgressIndicator(

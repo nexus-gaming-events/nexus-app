@@ -55,7 +55,596 @@ class VisualizeUserScreen {
   static Widget buildFullDetails(
     BuildContext context,
   ) {
-    return FutureBuilder(
+    if (AppConstants.isTablet(context)){
+      return FutureBuilder(
+      future: Future.wait([
+        DataManager.loadSelfUser(),
+        DataManager.loadFriends(),
+        DataManager.loadFriendRequests(),
+        DataManager.loadMyFriendRequests(),
+      ]),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return BaseScreenContainer(
+            child: Center(
+              child: CircularProgressIndicator(
+                color: AppConstants.textColor,
+              ),
+            ),
+          );
+        }
+        
+        if (snapshot.hasError) {
+          return BaseScreenContainer(
+            child: Center(
+              child: Text(
+                'Error loading user data',
+                style: TextStyle(color: AppConstants.errorColor),
+              ),
+            ),
+          );
+        }
+        
+        bool isSelf = user.id == DataManager.getSelfUser()!.id;
+        bool isFriend = DataManager.isFriend(user.id);
+        bool hasSentRequest = DataManager.hasSentFriendRequest(user.id);
+        bool hasPendingFriendRequest = DataManager.hasPendingFriendRequest(user.id);
+        
+        return BaseScreenContainer(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          //crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+              Stack(
+                alignment: Alignment.topCenter,
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: AppConstants.mainContainerWidth(context),
+                    height: AppConstants.mainContainerHeight(context) * 0.3,
+                    decoration: BoxDecoration(
+                      gradient: DataManager.getGradientFromJson(user.bannerGradient) ??
+                          LinearGradient(
+                            colors: [Colors.blue, Colors.purple],
+                            begin: Alignment(-1, 0.0),
+                            end: Alignment(1, 0.0),
+                          ),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(
+                          AppConstants.borderRadiusMedium(context),
+                        ),
+                        topRight: Radius.circular(
+                          AppConstants.borderRadiusMedium(context),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top:
+                        AppConstants.mainContainerHeight(context) * 0.4 -
+                        AppConstants.iconSizeLarge(context),
+                    left: AppConstants.paddingLarge(context),
+                    child: Container(
+                      margin: EdgeInsets.symmetric(
+                        horizontal: AppConstants.paddingLarge(context),
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.borderRadiusMax,
+                        ),
+                        color: AppConstants.textColor,
+                      ),
+                      child: ClipRRect(
+                        clipBehavior: Clip.hardEdge,
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.borderRadiusMax,
+                        ),
+                        child: 
+                        user.avatarUrl.isEmpty
+                            ? Image.asset(
+                                'assets/icons/Neil.png',
+                                width: AppConstants.iconSizeLarge(context),
+                                height: AppConstants.iconSizeLarge(context),
+                                fit: BoxFit.contain,
+                              )
+                            :
+                        Image.network(
+                          user.avatarUrl,
+                          width: AppConstants.iconSizeLarge(context),
+                          height: AppConstants.iconSizeLarge(context),
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      BackButtonWidget(),
+                      SizedBox(
+                        width: AppConstants.mainContainerWidth(context) -
+                            AppConstants.iconSizeMedium(context)* 2 -
+                            AppConstants.paddingLarge(context)* 3,
+                      ),
+                      user.id == DataManager.getSelfUser()?.id ?
+                      PopupMenuButton(
+                          padding: EdgeInsets.all(
+                            AppConstants.paddingSmall(context) * 0.5,
+                          ),
+                          icon: Icon(
+                            Icons.settings,
+                            size: AppConstants.iconSizeMedium(context),
+                            color: Colors.white,
+                          ),
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'edit',
+                              child: Text('Edit Banner'),
+                            ),
+                            PopupMenuItem(
+                              value: 'logout',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.logout,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: AppConstants.paddingSmall(context)),
+                                  Text('Log Out', style: TextStyle(color: AppConstants.errorColor),),
+                                ],
+                              ),
+                            ),
+                          ],
+                          onSelected: (value) {
+                            if (value == 'edit') {
+                              // Navigate to edit screen
+                              NexusAppState.instance!.returnScreenParams.add([
+                                user,
+                              ]);
+                              NexusAppState.instance!.returnScreenPath.add(
+                                'User',
+                              );
+                              NexusAppState.instance!.updateState(
+                                'Settings',
+                              );
+                            } else if (value == 'logout') {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    backgroundColor:
+                                        AppConstants.secondaryColor,
+                                    title: Text(
+                                      'Log Out',
+                                      style: TextStyle(
+                                        color: AppConstants.textColor,
+                                      ),
+                                    ),
+                                    content: Text(
+                                      'Are you sure you want to log out?',
+                                      style: TextStyle(
+                                        color: AppConstants.textColor,
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text(
+                                          'Cancel',
+                                          style: TextStyle(
+                                            color: AppConstants.textColor,
+                                          ),
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          DataManager.logout();
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                backgroundColor:
+                                                    AppConstants.secondaryColor,
+                                                title: Text(
+                                                  'Goodbye!',
+                                                  style: TextStyle(
+                                                    color:
+                                                        AppConstants.textColor,
+                                                  ),
+                                                ),
+                                                content: Text(
+                                                  'You have been successfully logged out.',
+                                                  style: TextStyle(
+                                                    color:
+                                                        AppConstants.textColor,
+                                                  ),
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.of(
+                                                        context,
+                                                      ).pop();
+
+                                                      if (NexusAppState
+                                                              .instance!
+                                                              .returnScreenPath
+                                                              .isNotEmpty &&
+                                                          NexusAppState
+                                                              .instance!
+                                                              .returnScreenParams
+                                                              .isNotEmpty) {
+                                                        NexusAppState.instance!
+                                                            .updateState(
+                                                              NexusAppState
+                                                                  .instance!
+                                                                  .returnScreenPath
+                                                                  .removeLast(),
+                                                              params: NexusAppState
+                                                                  .instance!
+                                                                  .returnScreenParams
+                                                                  .removeLast(),
+                                                            );
+                                                      }
+                                                    },
+                                                    child: Text(
+                                                      'OK',
+                                                      style: TextStyle(
+                                                        color: AppConstants
+                                                            .textColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                        ),
+                                        child: Text(
+                                          'Confirm',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+                          },
+                        )
+
+                      : Container(),
+                    ],
+                  ),
+
+                ],
+              ),
+              SizedBox(
+                height:
+                    AppConstants.paddingSmall(context),
+              ),
+              Row(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: AppConstants.paddingLarge(context)*7,
+                    ),
+                    child: SizedBox(
+                      width: AppConstants.mainContainerWidth(context) * 0.25,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          user.username,
+                          style: TextStyle(
+                            fontSize: AppConstants.fontSizeXLargeResponsive(context),
+                            fontWeight: FontWeight.bold,
+                            color: AppConstants.textColor,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: AppConstants.mainContainerWidth(context) * 0.13),
+                  isSelf ?
+                  InkWell(
+                    onTap: () {
+                      NexusAppState.instance!.returnScreenParams.add([VisualizeUserScreen.user]);
+                      NexusAppState.instance!.returnScreenPath.add('User');
+                      NexusAppState.instance!.updateState(
+                        'FriendRequests',
+                      );
+                    },
+                    child: Container(
+                    width: AppConstants.mainContainerWidth(context)*0.4,
+                    height: AppConstants.headerHeight(context)*0.55,
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(
+                      left: AppConstants.paddingLarge(context)*3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppConstants.secondaryColor,
+                      borderRadius: BorderRadius.all(Radius.circular(AppConstants.borderRadiusMedium(context))),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.email,
+                          color: AppConstants.textColor,
+                          size: AppConstants.iconSizeSmall(context),
+                        ),
+                        SizedBox(width: AppConstants.paddingMedium(context)),
+                        Text(
+                          "Friend Requests",
+                          style: TextStyle(
+                            fontSize: AppConstants.fontSizeLargeResponsive(context),
+                            color: AppConstants.textColor,
+                          ),
+                        ),
+                      ],),
+                                  ),
+                  ):
+                  isFriend ?
+                  InkWell(
+                    onTap: () async {
+                     await DataManager.deleteFriend(user.id);
+                     NexusAppState.instance!.reloadCurrentScreen();
+                    },
+                    child: Container(
+                    width: AppConstants.mainContainerWidth(context)*0.4,
+                    height: AppConstants.headerHeight(context)*0.55,
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(
+                      left: AppConstants.paddingMedium(context),
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppConstants.errorColor,
+                      borderRadius: BorderRadius.all(Radius.circular(AppConstants.borderRadiusMedium(context))),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.person_remove,
+                          color: AppConstants.textColor,
+                          size: AppConstants.iconSizeSmall(context),
+                        ),
+                        SizedBox(width: AppConstants.paddingLarge(context)*3),
+                        Text(
+                          "Remove Friend",
+                          style: TextStyle(
+                            fontSize: AppConstants.fontSizeLargeResponsive(context),
+                            color: AppConstants.textColor,
+                          ),
+                        ),
+                      ],),
+                                  ),
+                  )
+                  :
+                  hasPendingFriendRequest ?
+                  InkWell(
+                    onTap: () async {
+                     await DataManager.acceptFriendRequest(user.id);
+                     NexusAppState.instance!.reloadCurrentScreen();
+                    },
+                    child: Container(
+                    width: AppConstants.mainContainerWidth(context)*0.4,
+                    height: AppConstants.headerHeight(context)*0.55,
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(
+                      left: AppConstants.paddingLarge(context)*3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppConstants.successColor,
+                      borderRadius: BorderRadius.all(Radius.circular(AppConstants.borderRadiusMedium(context))),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.person_add,
+                          color: AppConstants.textColor,
+                          size: AppConstants.iconSizeSmall(context),
+                        ),
+                        SizedBox(width: AppConstants.paddingLarge(context)*3),
+                        Text(
+                          "Accept Friend Request",
+                          style: TextStyle(
+                            fontSize: AppConstants.fontSizeLargeResponsive(context),
+                            color: AppConstants.textColor,
+                          ),
+                        ),
+                      ],),
+                                  ),
+                  )
+                  :
+                  hasSentRequest ?
+                  InkWell(
+                    child: Container(
+                    width: AppConstants.mainContainerWidth(context)*0.4,
+                    height: AppConstants.headerHeight(context)*0.55,
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(
+                      left: AppConstants.paddingLarge(context)*3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppConstants.warningColor,
+                      borderRadius: BorderRadius.all(Radius.circular(AppConstants.borderRadiusMedium(context))),
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(width: AppConstants.paddingLarge(context)*3),
+                        Text(
+                          "You already sent a Friend Request to ${user.username}",
+                          style: TextStyle(
+                            fontSize: AppConstants.fontSizeLargeResponsive(context),
+                            color: AppConstants.textColor,
+                          ),
+                        ),
+                      ],),
+                                  ),
+                  )
+                  :
+                  InkWell(
+                    onTap: () async {
+                     await DataManager.sendFriendRequest(user.id);
+                    NexusAppState.instance!.reloadCurrentScreen();
+                    },
+                    child: Container(
+                    width: AppConstants.mainContainerWidth(context)*0.4,
+                    height: AppConstants.headerHeight(context)*0.5,
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(
+                      left: AppConstants.paddingMedium(context),
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppConstants.successColor,
+                      borderRadius: BorderRadius.all(Radius.circular(AppConstants.borderRadiusMedium(context))),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.person_add,
+                          color: AppConstants.textColor,
+                          size: AppConstants.iconSizeSmall(context),
+                        ),
+                        SizedBox(width: AppConstants.paddingLarge(context)*3),
+                        Text(
+                          "Add Friend",
+                          style: TextStyle(
+                            fontSize: AppConstants.fontSizeLargeResponsive(context),
+                            color: AppConstants.textColor,
+                          ),
+                        ),
+                      ],),
+                                  ),
+                  ),
+                ],
+              ),
+              SizedBox(height: AppConstants.paddingMedium(context),),
+              Row(
+                children: [
+                  SizedBox(width: AppConstants.mainContainerWidth(context)*0.02),
+                  Container(
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.only(
+                            left: AppConstants.paddingSmall(context),
+                          ),
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Recent Expeditions',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              color: AppConstants.textColor,
+                              fontSize: AppConstants.fontSizeLargeResponsive(context),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: AppConstants.mainContainerWidth(context)*0.45,
+                          height: AppConstants.mainContainerHeight(context) * 0.45,
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(
+                                color: AppConstants.semitransparentTextColor,
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.vertical,
+                            child: Column(
+                              children: DataManager.getEventsInvolved()!
+                                  .map(
+                                    (item) => InkWell(
+                                      onTap: () {
+                                        NexusAppState.instance!.returnScreenParams.add([VisualizeUserScreen.user]);
+                                        NexusAppState.instance!.returnScreenPath.add('User');
+                                        NexusAppState.instance!.updateState(
+                                          'Event',
+                                          params: [item],
+                                        );
+                                      },
+                                      child: VisualizeEventPreview(event: item),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: AppConstants.mainContainerWidth(context)*0.02),
+                  Container(
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.only(
+                            left: AppConstants.paddingSmall(context),
+                          ),
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'My Expeditions',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              color: AppConstants.textColor,
+                              fontSize: AppConstants.fontSizeLargeResponsive(context),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: AppConstants.mainContainerWidth(context)*0.45,
+                          height: AppConstants.mainContainerHeight(context) * 0.45,
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(
+                                color: AppConstants.semitransparentTextColor,
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.vertical,
+                            child: Column(
+                              children: DataManager.getEventsAuthored(user.id)!.map(
+                                    (item) => InkWell(
+                                      onTap: () {
+                                        NexusAppState.instance!.returnScreenParams.add([VisualizeUserScreen.user]);
+                                        NexusAppState.instance!.returnScreenPath.add('User');
+                                        NexusAppState.instance!.updateState(
+                                          'Event',
+                                          params: [item],
+                                        );
+                                      },
+                                      child: VisualizeEventPreview(event: item),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: AppConstants.mainContainerWidth(context)*0.02),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  
+    }
+    else{
+      return FutureBuilder(
       future: Future.wait([
         DataManager.loadSelfUser(),
         DataManager.loadFriends(),
@@ -604,6 +1193,8 @@ class VisualizeUserScreen {
         );
       },
     );
+  
+    }
   }
 }
 
