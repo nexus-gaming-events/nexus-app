@@ -72,11 +72,12 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
 
     _channel = IOWebSocketChannel.connect(Uri.parse(websocketUrl));
     _channel?.stream.listen((message) {
+      debugPrint(message);
       Map<String, dynamic> messageData;
       try {
         messageData = Map<String, dynamic>.from(jsonDecode(message));
       } catch (e) {
-        debugPrint('Error parsing WebSocket message for event ${eventId}: $e');
+        debugPrint('Error parsing WebSocket message for event $eventId: $e');
         return;
       }
       Message newMessage = Message(
@@ -303,6 +304,7 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
                       await ChatWebSocketManager.sendMessage(
                         widget.chat.eventId,
                         _messageController.text,
+                        _channel!
                       );
                       _messageController.clear();
                     },

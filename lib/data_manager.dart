@@ -871,17 +871,13 @@ class ChatWebSocketManager {
   }
 
   /// Sends a message to the chat for the given eventId
-  static Future<void> sendMessage(int eventId, String message) async {
+  static Future<void> sendMessage(int eventId, String message, IOWebSocketChannel channel) async {
     if (!DataManager.isLogged()) {
       debugPrint('User not logged in, cannot send message');
       return;
     }
-    if (!_chatSockets.containsKey(eventId)) {
-      debugPrint('No WebSocket connection found for event $eventId, cannot send message');
-      return;
-    }
     try {
-      _chatSockets[eventId]!.sink.add(message);
+      channel.sink.add(message);
       debugPrint('Sent message on WebSocket for event $eventId: $message');
     } catch (e) {
       debugPrint('Error sending message on WebSocket for event $eventId: $e');
