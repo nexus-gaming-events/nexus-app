@@ -124,24 +124,18 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // App Logo/Title
-              Text(
-                'Nexus',
-                style: TextStyle(
-                  fontSize: AppConstants.screenHeight(
-                    context,
-                    0.06,
-                  ).clamp(40.0, 48.0),
-                  fontWeight: FontWeight.bold,
-                  color: AppConstants.textColor,
+              Image.asset(
+                'assets/icons/Nexus_logo.png',
+                height: AppConstants.iconSizeLarge(context)*3,
                 ),
-              ),
-              SizedBox(height: AppConstants.paddingLarge(context)),
+              //SizedBox(height: AppConstants.paddingMedium(context)),
               Text(
                 'Explore a galaxy of connections',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: AppConstants.fontSizeLargeResponsive(context)*1.2,
                   color: AppConstants.textColor.withOpacity(0.7),
                 ),
+                textAlign: TextAlign.center,
               ),
               SizedBox(
                 height: AppConstants.screenHeight(
@@ -157,10 +151,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         ElevatedButton.icon(
                           onPressed: _handleDiscordLogin,
-                          icon: const Icon(Icons.login, size: 24),
-                          label: const Text(
+                          icon: Icon(Icons.login, size: AppConstants.iconSizeSmall(context)),
+                          label: Text(
                             'Login with Discord',
-                            style: TextStyle(fontSize: 16),
+                            style: TextStyle(fontSize: AppConstants.fontSizeMediumResponsive(context)),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(
@@ -182,7 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         SizedBox(height: AppConstants.paddingLarge(context)),
                         ElevatedButton.icon(
                           onPressed: _handleGoogleLogin,
-                          icon: const Icon(Icons.login, size: 24),
+                          icon: Icon(Icons.login, size: AppConstants.iconSizeSmall(context)),
                           label: Text(
                             'Login with Google',
                             style: TextStyle(

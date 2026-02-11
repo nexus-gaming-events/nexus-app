@@ -46,6 +46,7 @@ class ExpeditionsScreenState extends State<ExpeditionsScreen> {
     } catch (e) {
       // Handle error, e.g. show a snackbar
     } finally {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
