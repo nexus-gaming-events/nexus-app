@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:nexus_app/classes/application_object.dart';
@@ -6,6 +7,8 @@ import 'package:nexus_app/classes/user.dart';
 import 'package:nexus_app/data_manager.dart';
 import 'package:nexus_app/main.dart';
 import 'package:nexus_app/widgets/user_stack.dart';
+import 'package:web_socket_channel/io.dart';
+import '../services/secure_storage_service.dart';
 import 'message.dart';
 import 'package:flutter/material.dart';
 import '../constants.dart';
@@ -36,6 +39,9 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
   Map<int, Color> userColors = {};
   TextEditingController _messageController = TextEditingController();
 
+  final String _webSocketUrlTemplate = 'wss://nexus.orciuolo.it/chat?token={token}&eventId={eventId}';
+  IOWebSocketChannel? _channel;
+
   @override
   void initState() {
     super.initState();
@@ -53,8 +59,38 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
       NexusAppState.instance!.returnScreenParams.clear();
       NexusAppState.instance!.updateState('Chats');
       event = null;
+      return;
     }
+
     ChatWebSocketManager.addChatCallback(widget.chat.eventId, onNewMessage);
+
+    final String websocketUrl = _webSocketUrlTemplate
+        .replaceFirst('{token}', await SecureStorageService().getNexusToken() ?? '')
+        .replaceFirst('{eventId}', event!.id.toString());
+
+    var eventId = event!.id;
+
+    _channel = IOWebSocketChannel.connect(Uri.parse(websocketUrl));
+    _channel?.stream.listen((message) {
+      Map<String, dynamic> messageData;
+      try {
+        messageData = Map<String, dynamic>.from(jsonDecode(message));
+      } catch (e) {
+        debugPrint('Error parsing WebSocket message for event ${eventId}: $e');
+        return;
+      }
+      Message newMessage = Message(
+        messageData['userId'],
+        eventId,
+        messageData['content'],
+        DateTime.parse(messageData['createdAt']),
+        Colors.blue,
+      );
+      setState(() {
+        widget.chat.messages.add(newMessage);
+      });
+    });
+
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -65,6 +101,7 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
 
   void onNewMessage(int eventId) { () async {
     final chat = await DataManager.getChatByEventId(eventId);
+    debugPrint("Received new message for event $eventId, total messages: ${chat?.messages.length}");
     if (!mounted) return;
     setState(() {
       widget.chat.messages = chat?.messages ?? [];

@@ -804,7 +804,7 @@ class ChatWebSocketManager {
       return null;
     }
     try {
-      _chatSubscriptions[eventId] = _chatSockets[eventId]!.stream.listen(
+      /*_chatSubscriptions[eventId] = _chatSockets[eventId]!.stream.listen(
         (message) {
           debugPrint('Received message on WebSocket for event $eventId: $message');
           Map<String, dynamic> messageData;
@@ -821,8 +821,10 @@ class ChatWebSocketManager {
             DateTime.parse(messageData['createdAt']),
             Colors.blue, // Default color, can be enhanced to include color info in the message data
           );
+          debugPrint('Inserting message into chat: ${newMessage.content}');
           DataManager.insertMessagesIntoChat(eventId, [newMessage]);
           if (_chatCallbacks.containsKey(eventId)) {
+            debugPrint('Invoking callbacks for event $eventId, total callbacks: ${_chatCallbacks[eventId]!.length}');
             for (var callback in _chatCallbacks[eventId]!) {
               callback(eventId);
             }
@@ -834,7 +836,7 @@ class ChatWebSocketManager {
         },
         onDone: () {
         },
-      );
+      );*/
     } catch (e) {
       debugPrint('Error setting up WebSocket listeners for event $eventId: $e');
       _chatSockets.remove(eventId);
@@ -896,6 +898,7 @@ class ChatWebSocketManager {
 
     /// Registers a callback for the given eventId without opening a new connection
   static void addChatCallback(int eventId, void Function(int eventId) callback) {
+    debugPrint('Adding chat callback for event $eventId, callback: $callback');
     _chatCallbacks.putIfAbsent(eventId, () => []);
     _chatCallbacks[eventId]!.add(callback);
   }
