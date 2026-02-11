@@ -13,6 +13,7 @@ import '../widgets/base_screen_container.dart';
 import '../widgets/header_container.dart';
 import '../widgets/number_selector.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Event extends ApplicationObject {
   int id;
@@ -109,7 +110,7 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
     });
   }
 
-  void openLink(){
+  Future<void> openLink() async{
     if (!isUserInPlayers && !isUserInSpectators && !isUserAuthor) {
       debugPrint('Links box tapped: User is not a participant, ignoring tap');
       return;
@@ -117,7 +118,24 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
     debugPrint('Links box tapped: User is a participant, opening links');
     if (widget.event == null || widget.event!.links == null || widget.event!.links!.isEmpty) return;
     final link = widget.event!.links!.first;
-    // Open the link using your preferred method, e.g., url_launcher package
+    if (link == null || link.isEmpty) {
+      debugPrint('No links available for this event');
+      return;
+    }
+    if (link.startsWith('http://') || link.startsWith('https://')) {
+            try {
+              final Uri uri = Uri.parse(link);
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri, mode: LaunchMode.inAppWebView);
+              } else {
+                debugPrint('Could not launch link: $link');
+              }
+            } catch (e) {
+              debugPrint('Error launching link: $e');
+            }
+    } else {
+      debugPrint('Invalid link format: $link');
+    }
   }
 
   @override
@@ -1185,8 +1203,48 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                           ),
                           // Links box
                           InkWell(
-                            onTap: () {
-                             debugPrint('Links box tapped');
+                            onTap: () async {
+                              debugPrint('Links box tapped');
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    backgroundColor: AppConstants.secondaryColor,
+                                    title: Text(
+                                      'Leaving the App',
+                                      style: TextStyle(color: AppConstants.textColor),
+                                    ),
+                                    content: Text(
+                                      'You are about to open a link and leave the app. Be sure to trust the author of the event. Do you want to continue?',
+                                      style: TextStyle(color: AppConstants.textColor),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text(
+                                          'Cancel',
+                                          style: TextStyle(color: AppConstants.textColor),
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () async {
+                                          Navigator.of(context).pop();
+                                          await openLink();
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppConstants.linksPrimaryColor,
+                                        ),
+                                        child: Text(
+                                          'Continue',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
                             },
                             child: Container(
                               width: AppConstants.descriptionWidth(context) * 0.5,
@@ -2322,8 +2380,48 @@ class _VisualizeEventScreenState extends State<VisualizeEventScreen> {
                   SizedBox(height: AppConstants.paddingLarge(context) * 1.2),
                   // Links box
                   InkWell(
-                    onTap: () {
-                             debugPrint('Links box tapped');
+                            onTap: () async {
+                              debugPrint('Links box tapped');
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    backgroundColor: AppConstants.secondaryColor,
+                                    title: Text(
+                                      'Leaving the App',
+                                      style: TextStyle(color: AppConstants.textColor),
+                                    ),
+                                    content: Text(
+                                      'You are about to open a link and leave the app. Be sure to trust the author of the event. Do you want to continue?',
+                                      style: TextStyle(color: AppConstants.textColor),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text(
+                                          'Cancel',
+                                          style: TextStyle(color: AppConstants.textColor),
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () async {
+                                          Navigator.of(context).pop();
+                                          await openLink();
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppConstants.linksPrimaryColor,
+                                        ),
+                                        child: Text(
+                                          'Continue',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
                             },
                     child: Container(
                       width: AppConstants.descriptionWidth(context),
