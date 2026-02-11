@@ -22,42 +22,9 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleDiscordLogin() async {
     setState(() => _isLoading = true);
 
-    final result = await DiscordAuthService.loginWithDiscord();
+    await DiscordAuthService.loginWithDiscord();
 
     if (!mounted) return;
-
-    if (result != null && result.accessToken != null) {
-      SecureStorageService().saveDiscordToken(result.accessToken!);
-
-      final loginResponse = await WebInterfaceService.loginWithProvider(result.accessToken!, 'discord');
-      SecureStorageService().saveNexusToken(loginResponse.token);
-      await DataManager.initialize();
-      
-      final me = await WebInterfaceService.fetchMe();
-
-      debugPrint('Logged in as: ${me.username}');
-      debugPrint('Email: ${me.email}');
-      debugPrint('Photo URL: ${me.avatarUrl}');
-      debugPrint('Discord Access Token: ${result.accessToken}');
-      debugPrint('Nexus Access Token: ${loginResponse.token}');
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Welcome, ${me.username}!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      // Navigate to home screen after successful login
-      NexusAppState.instance!.updateState('Home');
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Login failed'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
 
     setState(() => _isLoading = false);
   }
@@ -92,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Welcome, ${user['name']}!'),
+          content: Text('Welcome, ${me.username}!'),
           backgroundColor: Colors.green,
         ),
       );

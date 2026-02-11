@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nexus_app/classes/application_object.dart';
 import 'package:nexus_app/screens/search_user_screen.dart';
+import 'package:nexus_app/services/deep_link_service.dart';
 import 'package:nexus_app/services/secure_storage_service.dart';
 import 'widgets/custom_navbar.dart';
 import 'widgets/galaxy_background.dart';
@@ -20,7 +21,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await UserSettings.loadFromJson();
-  
+
   // Load token from secure storage if it exists
   final secureStorage = SecureStorageService();
   if (await secureStorage.hasNexusToken()) {
@@ -28,7 +29,7 @@ void main() async {
     WebInterfaceService.token = token;
     await DataManager.initialize();
   }
-  
+
   runApp(NexusApp());
 }
 
@@ -67,6 +68,14 @@ class NexusAppState extends State<NexusApp> {
     } else {
       updateState(_currentScreenTitle);
     }
+
+    DeepLinkService().init(context);
+  }
+
+  @override
+  void dispose() {
+    DeepLinkService().dispose();
+    super.dispose();
   }
 
   @override
