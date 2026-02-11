@@ -7,6 +7,8 @@ import 'user.dart';
 
 class Message {
   int senderId;
+  String username;
+  String avatarUrl;
   int eventId;
   String content;
   DateTime timestamp;
@@ -14,6 +16,8 @@ class Message {
 
   Message(
     this.senderId,
+    this.username,
+    this.avatarUrl,
     this.eventId,
     this.content,
     this.timestamp,
@@ -83,7 +87,7 @@ class _VisualizeMessagePreviewState extends State<VisualizeMessagePreview> {
                 ),
                 child: InkWell(
                   child: Image.network(
-                    sender!.avatarUrl,
+                    widget.message.avatarUrl,
                     width: AppConstants.iconSizeMedium(context),
                     height: AppConstants.iconSizeMedium(context),
                     fit: BoxFit.cover,
@@ -114,7 +118,7 @@ class _VisualizeMessagePreviewState extends State<VisualizeMessagePreview> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      sender!.username,
+                      widget.message.username,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: AppConstants.fontSizeSmallResponsive(context),
@@ -154,7 +158,7 @@ class _VisualizeMessagePreviewState extends State<VisualizeMessagePreview> {
                 ),
                 child: InkWell(
                   child: Image.network(
-                    sender!.avatarUrl,
+                    widget.message.avatarUrl,
                     width: AppConstants.iconSizeMedium(context),
                     height: AppConstants.iconSizeMedium(context),
                     fit: BoxFit.cover,

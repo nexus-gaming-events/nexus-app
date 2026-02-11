@@ -82,6 +82,8 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
       }
       Message newMessage = Message(
         messageData['userId'],
+        messageData['username'],
+        messageData['avatarUrl'],
         eventId,
         messageData['content'],
         DateTime.parse(messageData['createdAt']),

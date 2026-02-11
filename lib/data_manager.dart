@@ -75,8 +75,8 @@ class DataManager {
           ];
           _chats = [
             Chat(eventId: 0, messages: [
-              Message( 0, 0, 'Hello, this is a message in my event chat.', DateTime.now().subtract(Duration(days: 1)), Colors.blue),
-              Message( 1, 1, 'Hi! This is a reply from Friend1.', DateTime.now().subtract(Duration(hours: 20)), Colors.green),
+              Message( 0, "", "", 0, 'Hello, this is a message in my event chat.', DateTime.now().subtract(Duration(days: 1)), Colors.blue),
+              Message( 1, "", "", 1, 'Hi! This is a reply from Friend1.', DateTime.now().subtract(Duration(hours: 20)), Colors.green),
             ]),
           ];
       return;

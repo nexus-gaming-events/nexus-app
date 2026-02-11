@@ -412,6 +412,8 @@ class WebInterfaceService {
     for (var messageData in data) {
       messages.add(Message(
         messageData['userId'],
+        messageData['username'],
+        messageData['avatarUrl'],
         eventId,
         messageData['content'],
         DateTime.parse(messageData['createdAt']),
