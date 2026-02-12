@@ -486,10 +486,10 @@ class WebInterfaceService {
     final data = jsonDecode(responseBody) as List<dynamic>;
     List<FriendRequest> friendRequests = [];
     for (var requestData in data) {
-      debugPrint('Processing friend request: ${requestData['username'] ?? 'Unknown'} (ID: ${requestData['requesterId']})');
+      debugPrint('Processing friend request: ${requestData['username'] ?? 'Unknown'} (ID: ${requestData['targetId']})');
       debugPrint('  Avatar URL: ${requestData['avatarUrl'] ?? ''}');
       debugPrint('  Sent at: ${requestData['sentAt'] ?? ''}');
-      friendRequests.add(FriendRequest(id: requestData['requesterId'] , username: requestData['username'] ?? 'Unknown', imageUrl: requestData['avatarUrl'] ?? '', date: DateTime.parse(requestData['sentAt'] ?? DateTime.now().toIso8601String())));
+      friendRequests.add(FriendRequest(id: requestData['targetId'] , username: requestData['username'] ?? 'Unknown', imageUrl: requestData['avatarUrl'] ?? '', date: DateTime.parse(requestData['sentAt'] ?? DateTime.now().toIso8601String())));
     }
     return friendRequests;
   }

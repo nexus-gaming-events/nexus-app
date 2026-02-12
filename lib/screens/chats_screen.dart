@@ -29,18 +29,27 @@ class _ChatsScreenState extends State<ChatsScreen> {
   Future<void> _loadData() async {
     // Load chats
     await DataManager.ensureChatsLoaded();
-    final chats = DataManager.getChats();
+
+    final allChats = DataManager.getChats();
+    final List<Chat> chats = [];
+    final selfUser = DataManager.getSelfUser();
+    for (var chat in allChats) {
+      final event = await DataManager.getEventById(chat.eventId);
+      if (event != null && selfUser != null && event.participants.any((participant) => participant.id == selfUser.id)) {
+        chats.add(chat);
+      }
+    }
 
     for (var chat in chats) {
       ChatWebSocketManager.addChatCallback(chat.eventId, onNewMessage);
     }
 
     if (mounted) {
-    setState(() {
-      _chats = chats;
-      _isLoading = false;
-    });
-  }
+      setState(() {
+        _chats = chats;
+        _isLoading = false;
+      });
+    }
   }
 
   void onNewMessage(int eventId) { () async {

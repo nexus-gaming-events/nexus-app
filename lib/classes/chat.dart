@@ -240,13 +240,13 @@ class _VisualizeChatScreenState extends State<VisualizeChatScreen> {
             //print all messages from bottom to top
             Expanded(
               child: ListView.builder(
-                reverse: true,
+                reverse: false,
                 padding: EdgeInsets.all(AppConstants.paddingMedium(context)),
                 itemCount: widget.chat.messages.length,
                 itemBuilder: (context, index) {
                   final message = widget
                       .chat
-                      .messages[widget.chat.messages.length - 1 - index];
+                      .messages[index];
                   return Padding(
                     padding: EdgeInsets.only(
                       bottom: AppConstants.paddingSmall(context),

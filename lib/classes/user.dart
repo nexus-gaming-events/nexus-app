@@ -75,10 +75,11 @@ class VisualizeUserScreen {
         }
         
         if (snapshot.hasError) {
+          debugPrint(snapshot.error.toString());
           return BaseScreenContainer(
             child: Center(
               child: Text(
-                'Error loading user data',
+                snapshot.error.toString(),
                 style: TextStyle(color: AppConstants.errorColor),
               ),
             ),
@@ -479,7 +480,7 @@ class VisualizeUserScreen {
                       children: [
                         SizedBox(width: AppConstants.paddingLarge(context)*3),
                         Text(
-                          "You already sent a Friend Request to ${user.username}",
+                          "Friend request sent. Awaiting response.",
                           style: TextStyle(
                             fontSize: AppConstants.fontSizeLargeResponsive(context),
                             color: AppConstants.textColor,
@@ -663,10 +664,11 @@ class VisualizeUserScreen {
         }
         
         if (snapshot.hasError) {
+          debugPrint(snapshot.error.toString());
           return BaseScreenContainer(
             child: Center(
               child: Text(
-                'Error loading user data',
+                snapshot.error.toString(),
                 style: TextStyle(color: AppConstants.errorColor),
               ),
             ),
@@ -1052,7 +1054,7 @@ class VisualizeUserScreen {
                   children: [
                     SizedBox(width: AppConstants.paddingMedium(context)),
                     Text(
-                      "You already sent a Friend Request to ${user.username}",
+                      "Friend request sent. Awaiting response.",
                       style: TextStyle(
                         fontSize: AppConstants.fontSizeLargeResponsive(context),
                         color: AppConstants.textColor,
