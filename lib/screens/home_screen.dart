@@ -21,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
+    debugPrint('HomeScreen initState called');
     super.initState();
     _loadData();
   }

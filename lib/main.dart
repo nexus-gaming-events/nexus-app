@@ -41,6 +41,8 @@ class NexusApp extends StatefulWidget {
 }
 
 class NexusAppState extends State<NexusApp> {
+    // Key generator for screens
+    Key homeScreenKey = UniqueKey();
   static NexusAppState? instance;
   String _currentScreenTitle = 'Home';
   int _selectedIndex = 2;
@@ -120,6 +122,9 @@ class NexusAppState extends State<NexusApp> {
 
   void reloadCurrentScreen() {
     setState(() {
+      if (_currentScreenTitle == 'Home') {
+        homeScreenKey = UniqueKey();
+      }
       updateState(_currentScreenTitle, params: currentParams);
     });
   }
@@ -155,7 +160,7 @@ class NexusAppState extends State<NexusApp> {
       case 'Chat':
         return VisualizeChatScreen(chat: params.isNotEmpty ? params[0] as Chat : DataManager.getChats().first); //Placeholder for ChatScreen
       case 'Home':
-        return HomeScreen();
+        return HomeScreen(key: homeScreenKey);
       case 'Friends':
         return FriendsScreen();
       case 'FriendRequests':
